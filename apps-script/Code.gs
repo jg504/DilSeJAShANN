@@ -75,11 +75,34 @@ function setup() {
   return 'setup complete';
 }
 
-/** Health check — open the Web App URL in a browser to confirm it is live. */
-function doGet() {
-  return ContentService.createTextOutput(
-    JSON.stringify({ ok: true, service: 'dilsejashann rsvp' })
-  ).setMimeType(ContentService.MimeType.JSON);
+/**
+ * Health check, and read-back verification.
+ *
+ *   ?check=<submission_id>  ->  { ok: true, found: true|false }
+ *
+ * The form calls this after every POST. A write is only treated as successful
+ * once the row can actually be read back, so a submission can never be lost
+ * silently. It is also what makes a retry safe: if the first attempt landed but
+ * the response was lost, the retry finds the row instead of writing a duplicate.
+ */
+function doGet(e) {
+  const id = e && e.parameter && e.parameter.check;
+  if (!id) return reply({ ok: true, service: 'dilsejashann rsvp' });
+
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  for (let t = 0; t < TABS.length; t++) {
+    const sheet = ss.getSheetByName(TABS[t]);
+    if (!sheet) continue;
+    const last = sheet.getLastRow();
+    if (last < 2) continue;
+    const ids = sheet.getRange(2, COL.submission_id, last - 1, 1).getValues();
+    for (let i = 0; i < ids.length; i++) {
+      if (String(ids[i][0]) === String(id)) {
+        return reply({ ok: true, found: true, tab: TABS[t], row: i + 2 });
+      }
+    }
+  }
+  return reply({ ok: true, found: false });
 }
 
 function doPost(e) {

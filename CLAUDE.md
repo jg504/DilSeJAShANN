@@ -500,10 +500,15 @@ spreadsheet column he will never open.
   and mark the previous one superseded rather than replacing in place — the history
   costs nothing and a wrong number is recoverable.
 - Deploy as Web App, execute as owner, access anyone.
-- **CORS:** Apps Script returns no CORS headers on POST. Submit with `mode: 'no-cors'`
-  and a `text/plain` content type carrying a JSON body, treating a completed request as
-  success. Alternative: hidden iframe form post. Pick one and **confirm a row actually
-  lands in the sheet before building any form UI** — this is where the time goes.
+- **CORS: Apps Script DOES send CORS headers, on GET and on POST.** Verified against the
+  live deployment on 2026-08-21 from a browser on another origin: a `mode: 'cors'` POST
+  returns a readable `{"ok":true,"row":N}`. The earlier instruction here — use
+  `mode: 'no-cors'` and treat a completed request as success — was wrong, and would have
+  made every failure silent. Use `mode: 'cors'` with a `text/plain` content type, which
+  stays a simple request and avoids a preflight, and **read the response**.
+- **A response is not proof.** Every write is confirmed by reading the row back via
+  `?check=<submission_id>` before the guest sees a confirmation. Retries check first, so
+  they can never duplicate a row. See `docs/APPS-SCRIPT.md`.
 - The endpoint is public and the URL is visible in client JS. Accepted; no shared
   secret. Worst case is junk rows.
 

@@ -31,8 +31,8 @@ them.** If something here looks wrong, raise it — do not quietly reverse it.
 ## Slugs — settled 2026-08-21
 
 - **Seven slugs generated and frozen**, in `src/data/invites.json`. Generated with
-  Python's `secrets`, not `crypto.randomUUID()` — no Node at the time. CLAUDE.md named
-  that API to rule out hand-picked strings; a CSPRNG meets the intent.
+  Python's `secrets` — CLAUDE.md named `crypto.randomUUID()` to rule out hand-picked
+  strings, and a CSPRNG meets that intent.
 - **The index→tier mapping is fixed once links go out. Never reassign.**
 
 ## Build — settled 2026-08-21
@@ -44,6 +44,19 @@ them.** If something here looks wrong, raise it — do not quietly reverse it.
 - **Astro scaffolded by hand, not `npm create astro`** — the template ships a demo page
   and components that would have to be deleted, and collides with `src/`.
 - **Node v24.19.0, npm 11.17.0, Astro v7.2.4**, via the official macOS ARM64 `.pkg`.
+- **Cloudflare is a Worker with Static Assets, not classic Pages.** Deploy runs
+  `npx wrangler deploy` against `wrangler.jsonc`; there is no output-directory setting.
+
+## RSVP delivery — settled 2026-08-21, overrides CLAUDE.md
+
+- **Apps Script does send CORS headers on POST.** CLAUDE.md said it does not and told us
+  to use `mode: 'no-cors'` and assume success. Verified false against the live
+  deployment from another origin — a `cors` POST returns a readable `{"ok":true}`.
+- **A response is not proof of a write.** Every submission is confirmed by reading the
+  row back via `?check=<submission_id>` before the guest sees a confirmation.
+- **Retries check before re-posting**, so they cannot duplicate a row, and the payload
+  is held in `localStorage` until confirmed. Losing an RSVP silently is the one failure
+  this site cannot afford.
 
 ## Schema — frozen
 

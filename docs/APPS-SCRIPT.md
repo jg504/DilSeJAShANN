@@ -78,12 +78,29 @@ strands the site on the old one.
 **The endpoint is public and its URL is visible in client JS.** Accepted; there is no
 shared secret. Worst case is junk rows, which is cheaper than a login for guests.
 
-**CORS.** Apps Script returns no CORS headers on POST. The site posts with
-`mode: 'no-cors'` and a `text/plain` content type carrying a JSON body, and treats a
-completed request as success. The response is opaque, so **the form cannot read a
-failure** — if the write fails, the guest sees success. This is why step 5.6 is checked
-against the sheet and not against the response, and why the form needs the WhatsApp
-fallback link from build step 3.8.
+**CORS — corrected 2026-08-21.** Apps Script **does** send CORS headers, on GET and on
+POST. Verified from a browser on another origin against the live deployment: a
+`mode: 'cors'` POST returns a readable `{"ok":true,"row":N}`. The original plan of
+`mode: 'no-cors'` plus "assume success" was based on outdated behaviour and would have
+made every failure invisible.
+
+The form uses `mode: 'cors'` with a `text/plain` content type — text/plain keeps it a
+simple request, so there is no preflight for Apps Script to mishandle.
+
+**No submission can be lost silently.** The order is:
+
+1. POST, and require `ok: true` in the parsed response
+2. **Read the row back** with `?check=<submission_id>` — a response alone is not proof
+3. On any failure, check whether the row landed anyway, then retry (3 attempts,
+   backing off). Checking first means a retry can never write a duplicate
+4. The payload is written to `localStorage` before the first attempt and cleared only
+   once the row is confirmed. A killed tab or a dead connection does not destroy it;
+   the next visit finishes the submission in the background
+5. Only after all of that fails does the guest see the WhatsApp fallback — and that
+   link is pre-filled with every answer they gave, including accommodation, so the
+   data survives even when the sheet write does not
+
+The confirmation screen is shown **only** after the row reads back.
 
 **`LockService`** wraps every write with a 30-second timeout. Everyone submits in the
 first 72 hours; without it, concurrent appends drop rows silently.
