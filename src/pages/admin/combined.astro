@@ -1,0 +1,14 @@
+---
+// Both sides attend the Wedding and the Reception, so those totals only make
+// sense summed across the two tabs. Cloudflare Access.
+import Admin from '../../layouts/Admin.astro';
+import Report from '../../components/Report.astro';
+---
+
+<Admin title="RSVPs — both sides combined">
+  <p class="muted">
+    Both tabs summed. Use this for the Wedding and Reception totals; the per-side pages
+    are the ones to use for contacting people.
+  </p>
+  <Report which="both" />
+</Admin>

@@ -86,7 +86,25 @@ function setup() {
  * the response was lost, the retry finds the row instead of writing a duplicate.
  */
 function doGet(e) {
-  const id = e && e.parameter && e.parameter.check;
+  const p = (e && e.parameter) || {};
+
+  // Read-back of the whole sheet, for the admin dashboards.
+  //
+  // GUARDED BY A TOKEN. The write path is deliberately unauthenticated —
+  // worst case there is a junk row. Reading is a different matter: without a
+  // token this URL would hand anyone every guest's name and phone number, and
+  // the URL itself is visible in client JS on every RSVP page.
+  //
+  // The token lives in Script Properties, never in this file. Set it with
+  // File → Project properties → Script properties, key ADMIN_KEY.
+  if (p.report) {
+    const key = PropertiesService.getScriptProperties().getProperty('ADMIN_KEY');
+    if (!key) return reply({ ok: false, error: 'ADMIN_KEY not set' });
+    if (p.key !== key) return reply({ ok: false, error: 'unauthorised' });
+    return reply({ ok: true, tabs: readTabs(p.report) });
+  }
+
+  const id = p.check;
   if (!id) return reply({ ok: true, service: 'dilsejashann rsvp' });
 
   const ss = SpreadsheetApp.openById(SHEET_ID);
@@ -173,6 +191,41 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+/**
+ * Rows as objects keyed by header, for one tab or both.
+ *
+ * Returns raw rows only. Headcounts, bed-nights, duplicates and the kitchen
+ * list are all derived in the admin view and never stored — see docs/schema.md.
+ */
+function readTabs(which) {
+  const want = which === 'both' ? TABS : TABS.filter(function (t) { return t === which; });
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const out = {};
+
+  want.forEach(function (name) {
+    const sheet = ss.getSheetByName(name);
+    if (!sheet) {
+      out[name] = [];
+      return;
+    }
+    const last = sheet.getLastRow();
+    if (last < 2) {
+      out[name] = [];
+      return;
+    }
+    const values = sheet.getRange(2, 1, last - 1, HEADERS.length).getValues();
+    out[name] = values.map(function (row) {
+      const o = {};
+      HEADERS.forEach(function (h, i) {
+        o[h] = row[i] === null || row[i] === undefined ? '' : String(row[i]);
+      });
+      return o;
+    });
+  });
+
+  return out;
 }
 
 /** Mark every current row with this phone number as superseded. */

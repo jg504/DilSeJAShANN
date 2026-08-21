@@ -98,10 +98,10 @@ Do this before any form UI. It is the least predictable part of the build.
 
 - [ ] **6.1** Cloudflare Access on `/admin/*` and `/share`, two email groups
 - [ ] **6.2** Session duration set to maximum
-- [ ] **6.3** `/admin/groom` and `/admin/bride` — headcounts, bed-nights, kitchen list,
+- [x] **6.3** `/admin/groom` and `/admin/bride` — headcounts, bed-nights, kitchen list,
       buried accommodation requests, duplicate flags
-- [ ] **6.4** `/admin/combined` — f2 and f3 across both tabs
-- [ ] **6.5** `/share` — seven links, tiers in words, copy and WhatsApp buttons,
+- [x] **6.4** `/admin/combined` — f2 and f3 across both tabs
+- [x] **6.5** `/share` — seven links, tiers in words, copy and WhatsApp buttons,
       sending instructions, paste-ready message text
 
 **Done when:** both families can read their own numbers without asking you.

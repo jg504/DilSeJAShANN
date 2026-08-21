@@ -1,0 +1,169 @@
+---
+// Admin and distribution pages.
+//
+// NOT a wedding page. CLAUDE.md says to let these be plain, so this layout
+// deliberately does not load the display serif, the arch, or the palette
+// tokens — it is a data tool and legibility beats atmosphere.
+//
+// Every route using this layout is behind Cloudflare Access and must never be
+// linked from a guest page.
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="bar">
+      <strong>{title}</strong>
+      <span class="warn">Private — do not share this page or its link.</span>
+    </header>
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  /* deliberate override — this is a data tool, not a wedding page, so the
+     tokens in src/styles/tokens.css do not apply here. See CLAUDE.md. */
+  :root {
+    --a-bg: #ffffff;
+    --a-ink: #111827;
+    --a-muted: #6b7280;
+    --a-line: #d1d5db;
+    --a-soft: #f9fafb;
+    --a-flag: #b45309;
+    --a-bad: #b91c1c;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: var(--a-bg);
+    color: var(--a-ink);
+    font:
+      15px/1.5 ui-sans-serif,
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      sans-serif;
+  }
+  main {
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: 1.25rem;
+  }
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: baseline;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid var(--a-line);
+    background: var(--a-soft);
+  }
+  .warn {
+    color: var(--a-bad);
+    font-size: 0.85rem;
+  }
+
+  h2 {
+    font-size: 1.05rem;
+    margin: 1.75rem 0 0.5rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+  th,
+  td {
+    text-align: left;
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid var(--a-line);
+    vertical-align: top;
+  }
+  th {
+    background: var(--a-soft);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--a-muted);
+  }
+  td.num,
+  th.num {
+    text-align: right;
+  }
+  .scroll {
+    overflow-x: auto;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.75rem;
+    margin: 0.5rem 0;
+  }
+  .card {
+    border: 1px solid var(--a-line);
+    border-radius: 6px;
+    padding: 0.75rem;
+  }
+  .card b {
+    display: block;
+    font-size: 1.7rem;
+    line-height: 1.1;
+  }
+  .card span {
+    color: var(--a-muted);
+    font-size: 0.8rem;
+  }
+
+  .flag {
+    color: var(--a-flag);
+    font-weight: 600;
+  }
+  .muted {
+    color: var(--a-muted);
+  }
+  .empty {
+    color: var(--a-muted);
+    font-style: italic;
+  }
+  .err {
+    border: 1px solid var(--a-bad);
+    background: #fef2f2;
+    color: var(--a-bad);
+    padding: 0.75rem;
+    border-radius: 6px;
+  }
+  button {
+    font: inherit;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--a-line);
+    border-radius: 5px;
+    background: #fff;
+    cursor: pointer;
+  }
+  a {
+    color: #1d4ed8;
+  }
+  code {
+    background: var(--a-soft);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.9em;
+    word-break: break-all;
+  }
+</style>

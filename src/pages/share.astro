@@ -1,0 +1,202 @@
+---
+// Family distribution page. Cloudflare Access. NEVER linked from a guest page.
+//
+// This is the one page that holds all seven links and the tier mapping in one
+// place. It is written for parents and grandparents to use on a phone, so it is
+// plain, the tiers are spelled out in words, and the sending instructions come
+// before anything else.
+import Admin from '../layouts/Admin.astro';
+import invites from '../data/invites.json';
+
+// This page is the single worst thing on the site to leak: it lists all seven
+// links and spells out the tier behind each one. Cloudflare Access is the real
+// protection, but Access is configured in a dashboard and cannot be verified
+// from a build, so the links are withheld until ADMIN_KEY exists. That makes
+// "I set the site up properly" the condition for publishing them, rather than
+// "I pushed a commit".
+const enabled = Boolean(import.meta.env.ADMIN_KEY);
+
+const SITE = 'https://dilsejashann.com';
+
+// Spelled out in words. A row reading "index 3" tells a grandparent nothing,
+// and picking the wrong link sends someone to the wrong set of functions.
+const label: Record<number, string> = {
+  1: 'Groom side — Cocktails, Wedding and Reception, with a place to stay',
+  2: 'Groom side — Wedding and Reception',
+  3: 'Groom side — Wedding only',
+  4: 'Groom side — Reception only',
+  5: 'Bride side — Wedding and Reception, with a place to stay',
+  6: 'Bride side — Wedding only',
+  7: 'Bride side — Reception only',
+};
+
+const rows = invites.invites
+  .slice()
+  .sort((a, b) => a.index - b.index)
+  .map((i) => ({ ...i, url: `${SITE}/i/${i.slug}`, label: label[i.index] }));
+
+// Paste-ready. Without this, family members write "here's the invite" and
+// nobody realises they are being asked to do something.
+const message = `Please open this and let us know if you can join us — it only takes a minute.`;
+---
+
+<Admin title="Sending the invitations">
+  {
+    !enabled && (
+      <div class="err">
+        <p>
+          <strong>The links are hidden because this site is not fully set up yet.</strong>
+        </p>
+        <p>
+          This page lists every invitation link and says which functions each one is for.
+          Before it will show them, two things must be true:
+        </p>
+        <ol>
+          <li>Cloudflare Access is protecting <code>/share</code> and <code>/admin/*</code></li>
+          <li>
+            <code>ADMIN_KEY</code> is set as a Cloudflare build variable
+          </li>
+        </ol>
+        <p>Then redeploy and the table below will appear.</p>
+      </div>
+    )
+  }
+
+  {enabled && (
+  <>
+  <section class="how">
+    <h2>How to send</h2>
+    <ol>
+      <li>
+        <strong>Send the picture card first.</strong> On its own, as one message.
+      </li>
+      <li>
+        <strong>Then send the link as a separate message.</strong> Do not put the link in
+        the caption under the picture.
+      </li>
+    </ol>
+    <p class="why">
+      A caption containing a link stops WhatsApp showing the preview card, and the
+      preview is what makes people tap. Two messages, in that order, every time.
+    </p>
+  </section>
+
+  <h2>The seven links</h2>
+  <p class="muted">
+    Each link shows a different set of functions. Check the description before you send.
+    Once a link has gone out, it never changes hands — do not reuse it for someone else.
+  </p>
+
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th class="num">#</th>
+          <th>Who this is for</th>
+          <th>Link</th>
+          <th>Send</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          rows.map((r) => (
+            <tr>
+              <td class="num">{r.index}</td>
+              <td>{r.label}</td>
+              <td><code>{r.url}</code></td>
+              <td class="send">
+                <button type="button" class="copy" data-url={r.url}>Copy link</button>
+                <a
+                  class="whats"
+                  href={`https://wa.me/?text=${encodeURIComponent(`${message}\n${r.url}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  WhatsApp
+                </a>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <h2>What to write</h2>
+  <p class="muted">Copy this, then paste the link underneath as its own message.</p>
+  <blockquote id="msg">{message}</blockquote>
+  <button type="button" class="copy" data-url={message}>Copy this message</button>
+  </>
+  )}
+</Admin>
+
+<script is:inline>
+  document.querySelectorAll('.copy').forEach((b) => {
+    b.addEventListener('click', async () => {
+      const text = b.getAttribute('data-url');
+      const was = b.textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        b.textContent = 'Copied';
+      } catch (e) {
+        // Older phone browsers reject the async clipboard API.
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          b.textContent = 'Copied';
+        } catch (e2) {
+          b.textContent = 'Copy failed';
+        }
+        ta.remove();
+      }
+      setTimeout(() => {
+        b.textContent = was;
+      }, 1600);
+    });
+  });
+</script>
+
+<style>
+  .how {
+    border: 2px solid #111827;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .how h2 {
+    margin-top: 0;
+  }
+  .how ol {
+    margin: 0;
+    padding-left: 1.2rem;
+    /* Large on purpose — this is read on a phone by people who will otherwise
+       paste the link into the caption. */
+    font-size: 1.2rem;
+    line-height: 1.7;
+  }
+  .why {
+    margin: 0.75rem 0 0;
+    color: #6b7280;
+  }
+  .send {
+    white-space: nowrap;
+  }
+  .whats {
+    display: inline-block;
+    margin-left: 0.4rem;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    text-decoration: none;
+  }
+  blockquote {
+    margin: 0 0 0.75rem;
+    padding: 0.75rem 1rem;
+    border-left: 3px solid #d1d5db;
+    background: #f9fafb;
+    font-size: 1.05rem;
+  }
+</style>

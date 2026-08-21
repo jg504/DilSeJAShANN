@@ -1,0 +1,235 @@
+---
+// Read-only RSVP dashboard. No writes, ever.
+//
+// Every figure here is derived in the browser from the raw rows — headcounts,
+// bed-nights, duplicates and the kitchen list are never stored. See
+// docs/schema.md.
+import invites from '../data/invites.json';
+
+interface Props {
+  which: 'groom' | 'bride' | 'both';
+}
+const { which } = Astro.props;
+
+// Injected at build time from the Cloudflare build environment. Never
+// committed. Without it the page refuses to render anything.
+const adminKey = import.meta.env.ADMIN_KEY ?? '';
+
+const endpoint =
+  'https://script.google.com/macros/s/AKfycbzEqwax5hSzUdZhpo5e8Az7ZWeLC4CBkyKQZo4WBOL31ZABz5bOwVNiuCVAkv8mH2g/exec';
+
+// Which links offer accommodation. Rows from any other link that ask for a bed
+// in their notes are the ones that get buried, so they are flagged separately.
+const accomSlugs = invites.invites.filter((i) => i.accom).map((i) => i.slug);
+const fnNames = {
+  f1: invites.functions.f1.name,
+  f2: invites.functions.f2.name,
+  f3: invites.functions.f3.name,
+};
+---
+
+{
+  !adminKey ? (
+    <div class="err">
+      <p>
+        <strong>ADMIN_KEY is not set, so this dashboard is disabled.</strong>
+      </p>
+      <p>
+        This is intentional. Until the key exists the page ships with no token in it,
+        so it cannot leak guest phone numbers if Cloudflare Access is not yet switched
+        on. Set it in both places, then redeploy:
+      </p>
+      <ol>
+        <li>
+          Apps Script → Project Settings → Script Properties → add <code>ADMIN_KEY</code>
+        </li>
+        <li>
+          Cloudflare → Worker → Settings → Variables → add <code>ADMIN_KEY</code> with the
+          same value
+        </li>
+      </ol>
+    </div>
+  ) : (
+    <div id="report">
+      <p class="muted" id="status">Loading…</p>
+    </div>
+  )
+}
+
+{
+  adminKey && (
+    <script
+      define:vars={{ endpoint, adminKey, which, accomSlugs, fnNames }}
+      is:inline
+    >
+      const $ = (s) => document.querySelector(s);
+      const esc = (s) =>
+        String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+      const n = (v) => {
+        const x = parseInt(v, 10);
+        return isNaN(x) ? 0 : x;
+      };
+
+      function tableOf(headers, rows, empty) {
+        if (!rows.length) return `<p class="empty">${empty}</p>`;
+        return (
+          '<div class="scroll"><table><thead><tr>' +
+          headers.map((h) => `<th${h.num ? ' class="num"' : ''}>${esc(h.label)}</th>`).join('') +
+          '</tr></thead><tbody>' +
+          rows
+            .map(
+              (r) =>
+                '<tr>' +
+                r.map((c, i) => `<td${headers[i].num ? ' class="num"' : ''}>${c}</td>`).join('') +
+                '</tr>'
+            )
+            .join('') +
+          '</tbody></table></div>'
+        );
+      }
+
+      function wa(phone) {
+        const digits = String(phone).replace(/[^0-9]/g, '');
+        return digits ? `<a href="https://wa.me/${digits}" target="_blank" rel="noopener">${esc(phone)}</a>` : esc(phone);
+      }
+
+      function render(tabs) {
+        // Superseded rows are collapsed — the admin view shows current rows only.
+        const all = [];
+        Object.keys(tabs).forEach((tab) => tabs[tab].forEach((r) => all.push(Object.assign({ _tab: tab }, r))));
+        const current = all.filter((r) => r.superseded !== 'yes');
+
+        const attending = current.filter((r) => n(r.count_f1) + n(r.count_f2) + n(r.count_f3) > 0);
+        const declined = current.filter((r) => n(r.count_f1) + n(r.count_f2) + n(r.count_f3) === 0);
+
+        let html = '';
+
+        // --- headcount per function
+        const heads = ['f1', 'f2', 'f3'].map((f) => ({
+          id: f,
+          name: fnNames[f],
+          total: current.reduce((a, r) => a + n(r['count_' + f]), 0),
+        }));
+        html += '<h2>Headcount</h2><div class="cards">';
+        heads.forEach((h) => {
+          html += `<div class="card"><b>${h.total}</b><span>${esc(h.name)}</span></div>`;
+        });
+        html += `<div class="card"><b>${current.length}</b><span>responses</span></div>`;
+        html += `<div class="card"><b>${declined.length}</b><span>not coming</span></div>`;
+        html += '</div>';
+
+        // --- bed-nights. Room count comes from manual pairing, not this sheet.
+        const nights = ['26', '27', '28'].map((d) => ({
+          d,
+          people: current
+            .filter((r) => r.accommodation === 'yes' && String(r.nights).split('|').indexOf(d) !== -1)
+            .reduce((a, r) => a + n(r.travellers), 0),
+        }));
+        html += '<h2>Bed-nights</h2><div class="cards">';
+        nights.forEach((x) => {
+          html += `<div class="card"><b>${x.people}</b><span>night of ${x.d} Dec</span></div>`;
+        });
+        html += '</div><p class="muted">People needing a bed. Rooms are paired manually by phone — this is not a room count.</p>';
+
+        // --- kitchen list, printed per function and handed over on paper
+        const kitchen = current.filter((r) => String(r.dietary).trim());
+        html += '<h2>Kitchen list</h2>';
+        html += tableOf(
+          [{ label: 'Name' }, { label: 'Requirement' }],
+          kitchen.map((r) => [esc(r.name), esc(r.dietary)]),
+          'No dietary requirements submitted.'
+        );
+
+        // --- accommodation asked for by links that were never offered it
+        const buried = current.filter(
+          (r) =>
+            accomSlugs.indexOf(r.slug) === -1 &&
+            /\b(stay|room|hotel|night|accommodat|bed|lodg)/i.test(String(r.notes))
+        );
+        html += '<h2>Possible accommodation requests <span class="flag">needs a look</span></h2>';
+        html += tableOf(
+          [{ label: 'Name' }, { label: 'Phone' }, { label: 'Note' }],
+          buried.map((r) => [esc(r.name), wa(r.phone_e164), esc(r.notes)]),
+          'None.'
+        );
+
+        // --- duplicates
+        const byPhone = {};
+        all.forEach((r) => {
+          (byPhone[r.phone_e164] = byPhone[r.phone_e164] || []).push(r);
+        });
+        const dupes = Object.keys(byPhone).filter((p) => byPhone[p].filter((r) => r.superseded !== 'yes').length > 1);
+        const resubmitted = Object.keys(byPhone).filter(
+          (p) => byPhone[p].length > 1 && dupes.indexOf(p) === -1
+        );
+        html += '<h2>Duplicates</h2>';
+        html += tableOf(
+          [{ label: 'Phone' }, { label: 'Names' }, { label: 'Current rows', num: true }],
+          dupes.map((p) => [wa(p), esc(byPhone[p].map((r) => r.name).join(', ')), byPhone[p].filter((r) => r.superseded !== 'yes').length]),
+          'None — every number has exactly one current row.'
+        );
+        html += `<p class="muted">${resubmitted.length} number(s) resubmitted and superseded correctly.</p>`;
+
+        // --- everything, for reading
+        html += '<h2>All current responses</h2>';
+        const cols = [
+          { label: 'Name' },
+          { label: 'Phone' },
+          { label: 'With' },
+          { label: fnNames.f1, num: true },
+          { label: fnNames.f2, num: true },
+          { label: fnNames.f3, num: true },
+          { label: 'Stay' },
+          { label: 'Notes' },
+        ];
+        html += tableOf(
+          cols,
+          current.map((r) => [
+            esc(r.name),
+            wa(r.phone_e164),
+            esc(r.additional_guests),
+            n(r.count_f1),
+            n(r.count_f2),
+            n(r.count_f3),
+            r.accommodation === 'yes' ? esc(`${r.travellers} · ${String(r.nights).split('|').join(', ')}`) : '<span class="muted">—</span>',
+            esc(r.notes),
+          ]),
+          'No responses yet.'
+        );
+
+        $('#report').innerHTML = html;
+      }
+
+      async function load() {
+        try {
+          const res = await fetch(
+            `${endpoint}?report=${encodeURIComponent(which)}&key=${encodeURIComponent(adminKey)}`,
+            { mode: 'cors' }
+          );
+          const data = await res.json();
+          if (!data.ok) throw new Error(data.error || 'request rejected');
+          // An out-of-date deployment ignores ?report= and answers with the
+          // health response, which is ok:true but carries no rows. Without
+          // this check that surfaces as an unreadable TypeError.
+          if (!data.tabs) {
+            throw new Error(
+              'The deployed Apps Script does not have the report endpoint yet. ' +
+                'Paste the current apps-script/Code.gs, then Deploy → Manage deployments → ' +
+                'Edit → New version.'
+            );
+          }
+          render(data.tabs);
+        } catch (err) {
+          const msg = String(err && err.message ? err.message : err);
+          $('#report').innerHTML =
+            `<div class="err"><strong>Could not load the sheet.</strong><br>${esc(msg)}` +
+            `<br><br>"unauthorised" means ADMIN_KEY differs between Apps Script and Cloudflare. ` +
+            `"ADMIN_KEY not set" means it is missing from Apps Script → Project Settings → ` +
+            `Script Properties.</div>`;
+        }
+      }
+
+      load();
+    </script>
+  )
+}
