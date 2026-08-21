@@ -12,6 +12,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const FILE = fileURLToPath(new URL('../src/data/invites.json', import.meta.url));
+const CEREMONIES = fileURLToPath(new URL('../src/data/ceremonies.json', import.meta.url));
+const STORY = fileURLToPath(new URL('../src/data/story.json', import.meta.url));
 
 // The tier table from CLAUDE.md. Fixed once the links are distributed.
 const TIERS = {
@@ -140,12 +142,87 @@ for (const inv of invites) {
   }
 }
 
+// --- ceremonies.json ---------------------------------------------------------
+// Treated exactly like invites.json: the printed cards and this file carry the
+// same words, and the cards cannot be recalled once printed.
+const cer = JSON.parse(readFileSync(CEREMONIES, 'utf8'));
+scanFill(cer, 'ceremonies.json');
+
+if (typeof cer.intro !== 'string') fail('ceremonies.json: intro must be a string');
+
+if (!Array.isArray(cer.ceremonies) || cer.ceremonies.length !== 2) {
+  fail('ceremonies.json: expected exactly 2 ceremonies');
+} else {
+  for (const c of cer.ceremonies) {
+    const at = `ceremonies.json ${c.id ?? '?'}`;
+    require(c, ['id', 'name', 'gloss', 'about', 'etiquette', 'sequence', 'meaning'], at);
+
+    for (const [key, min] of [['about', 1], ['etiquette', 1], ['sequence', 1]]) {
+      if (!Array.isArray(c[key]) || c[key].length < min) {
+        fail(`${at}: ${key} must have at least ${min} entry`);
+      }
+    }
+    (c.etiquette ?? []).forEach((e, i) => require(e, ['title', 'note'], `${at}.etiquette[${i}]`));
+    (c.sequence ?? []).forEach((s, i) => require(s, ['name', 'note'], `${at}.sequence[${i}]`));
+
+    require(c.meaning ?? {}, ['title', 'items'], `${at}.meaning`);
+    if (!Array.isArray(c.meaning?.items) || c.meaning.items.length === 0) {
+      fail(`${at}.meaning.items must not be empty`);
+    } else {
+      c.meaning.items.forEach((s, i) => require(s, ['name', 'note'], `${at}.meaning.items[${i}]`));
+    }
+
+    // There are four Laavan. If this file ever says otherwise it is a mistake,
+    // not a decision.
+    if (c.id === 'anand-karaj' && c.meaning?.items?.length !== 4) {
+      fail(`${at}: the Anand Karaj has four Laavan, found ${c.meaning?.items?.length}`);
+    }
+  }
+}
+
+// --- story.json --------------------------------------------------------------
+// Reachable from all seven links, so it must stay function-neutral: no function
+// name, no date, no side. Two of the seven end a day before everyone else.
+const story = JSON.parse(readFileSync(STORY, 'utf8'));
+scanFill(story, 'story.json');
+require(story, ['title', 'intro', 'chapters', 'closing'], 'story.json');
+
+if (!Array.isArray(story.chapters) || story.chapters.length === 0) {
+  fail('story.json: chapters must not be empty');
+} else {
+  story.chapters.forEach((c, i) => {
+    require(c, ['heading', 'body'], `story.json.chapters[${i}]`);
+    if (!Array.isArray(c.body) || c.body.length === 0) {
+      fail(`story.json.chapters[${i}].body must not be empty`);
+    }
+  });
+}
+
+const FUNCTION_WORDS = [
+  data.functions.f1.name,
+  data.functions.f2.name,
+  data.functions.f3.name,
+  'groom',
+  'bride',
+];
+const storyText = JSON.stringify(story);
+for (const w of FUNCTION_WORDS) {
+  if (new RegExp(`\\b${w}\\b`, 'i').test(storyText)) {
+    fail(`story.json mentions "${w}" — it is shared by all seven links and must be function-neutral`);
+  }
+}
+if (/\b2[5678]\s*(December|Dec)\b/i.test(storyText)) {
+  fail('story.json names a wedding date — it is shared by all seven links');
+}
+
 // --- report ------------------------------------------------------------------
 if (errors.length > 0) {
-  console.error(`\ninvites.json is not ready to ship — ${errors.length} problem(s):\n`);
+  console.error(`\nContent is not ready to ship — ${errors.length} problem(s):\n`);
   for (const e of errors) console.error(`  • ${e}`);
   console.error('\nRun `npm run build:draft` to build anyway while content is pending.\n');
   process.exit(1);
 }
 
-console.log(`invites.json OK — ${invites.length} records, all fields present.`);
+console.log(
+  `Content OK — ${invites.length} invitations and ${cer.ceremonies.length} ceremonies, all fields present.`
+);

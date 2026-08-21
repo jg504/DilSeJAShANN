@@ -122,12 +122,12 @@ Do this before any form UI. It is the least predictable part of the build.
 ## Phase 8 — story, ceremonies and polish
 
 - [ ] **8.0** Ceremony copy confirmed by family elders, cards printed, site copy matched
-- [ ] **8.0b** `/ceremonies` built, linked only from invites containing `f2`
+- [x] **8.0b** `/ceremonies` built, linked only from invites containing `f2`
 - [ ] **8.1** Photos selected, processed through the Astro image pipeline
 - [ ] **8.2** Story page written — one voice, function-neutral
-- [ ] **8.3** Motion pass across the site
+- [x] **8.3** Motion pass across the site
 - [ ] **8.4** Performance pass — Slow 4G, 4× CPU throttle
-- [ ] **8.5** `prefers-reduced-motion` verified
+- [x] **8.5** `prefers-reduced-motion` verified
 - [ ] **8.6** Old Android Chrome and iOS Safari
 
 ---

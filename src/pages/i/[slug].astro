@@ -214,6 +214,17 @@ const swatches = (raw: unknown[]): Swatch[] =>
         </ul>
       </section>
 
+      {/* Shared by all seven links and function-neutral, so it is safe to link
+          from every invitation without a gate. */}
+      <section class="fn reveal">
+        <h2>Our story</h2>
+        <p class="lead">A little about how the two of them got here.</p>
+        <div class="actions">
+          <a class="btn quiet" href="/story">Read our story</a>
+          <a class="btn quiet" href="/photos">Photographs</a>
+        </div>
+      </section>
+
       {/* No arch here — it is hero-only, deliberately. Everything else stays
           quiet. See docs/DECISIONS.md. */}
       <section class="closing reveal">
@@ -390,6 +401,18 @@ const swatches = (raw: unknown[]): Swatch[] =>
     to {
       opacity: 1;
       transform: none;
+    }
+  }
+
+  /* Collapse to the instant state. The arch carries its own guard, and the
+     scroll reveals never hide anything unless the head script has already
+     confirmed reduced motion is off — this is the remaining case. */
+  @media (prefers-reduced-motion: reduce) {
+    .settle .couple,
+    .settle .hero-dates,
+    .settle .greeting,
+    .settle > .cta {
+      animation: none;
     }
   }
 

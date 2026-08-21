@@ -449,7 +449,7 @@ const TOTAL_STEPS = 3;
     // Never omitted, never null — a ragged row breaks the sheet.
     const stay = accom && attending && state.accom === 'yes';
     return {
-      submission_id: crypto.randomUUID(),
+      submission_id: uuid(),
       slug,
       index,
       side,
@@ -479,6 +479,28 @@ const TOTAL_STEPS = 3;
 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const PENDING = 'dilsejashann-pending-rsvp';
+
+  // crypto.randomUUID() needs Chrome 92 / Safari 15.4. On an older phone it
+  // throws, and since this is called on every submission it would break the
+  // RSVP outright for exactly the guests least likely to try again. Falls back
+  // to a v4 UUID built from getRandomValues, then to Math.random.
+  function uuid() {
+    try {
+      if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+      }
+    } catch (e) {}
+    const b = new Uint8Array(16);
+    try {
+      crypto.getRandomValues(b);
+    } catch (e) {
+      for (let i = 0; i < 16; i++) b[i] = Math.floor(Math.random() * 256);
+    }
+    b[6] = (b[6] & 0x0f) | 0x40;
+    b[8] = (b[8] & 0x3f) | 0x80;
+    const h = Array.prototype.map.call(b, (x) => ('0' + x.toString(16)).slice(-2)).join('');
+    return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+  }
 
   async function postOnce(body) {
     const res = await fetch(endpoint, {
@@ -521,7 +543,7 @@ const TOTAL_STEPS = 3;
   }
 
   // Everything the guest entered, so nothing is lost even when the sheet is not
-  // reachable. Only this link's functions are named, so no other tier leaks.
+  // reachable. Only this link's own functions are named here.
   function summary(b) {
     const lines = [
       'RSVP — the website form could not save this.',

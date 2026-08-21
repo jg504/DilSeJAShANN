@@ -7,9 +7,11 @@
     "dev": "astro dev",
     "validate": "node scripts/validate-invites.mjs",
     "prebuild": "node scripts/validate-invites.mjs",
-    "build": "astro build",
-    "build:draft": "astro build",
-    "preview": "astro preview"
+    "build": "npm run clean && astro build",
+    "build:draft": "npm run clean && astro build",
+    "preview": "astro preview",
+    "verify": "node scripts/verify-build.mjs",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "dependencies": {
     "astro": "^7.2.4"

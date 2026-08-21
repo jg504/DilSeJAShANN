@@ -1,0 +1,297 @@
+---
+// Ceremony explainers for the Wedding day.
+//
+// TIER GATE: this page describes f2 only. It is linked ONLY from invitations
+// whose functions array contains f2 — the conditional lives in
+// src/pages/i/[slug].astro and is driven off functions.includes('f2'), never
+// off tier or side. Reception-only guests are not invited to the Wedding and
+// must not meet this content.
+//
+// The page itself is unlisted rather than access-controlled: a Reception-only
+// guest who is sent the URL directly could open it. That is accepted — nothing
+// here names a tier, a side, or any other function, so it reads as general
+// background about the day rather than as evidence of a tier they are missing.
+//
+// ONE SOURCE OF TRUTH: the printed A6 cards and this page carry the same words.
+// The cards print first and cannot be recalled, so the site matches the card.
+// If a correction is needed after printing, the card is re-issued rather than
+// this page quietly diverging.
+//
+// NOT YET CONFIRMED: the ritual sequences are awaiting family elders — in
+// particular the card title "Vivaah", whether it runs four pheras or seven, and
+// whether the gurdwara adds anything. Structure only until that lands.
+import Base from '../layouts/Base.astro';
+import data from '../data/ceremonies.json';
+
+const { intro, ceremonies } = data;
+---
+
+<Base title="The ceremonies — #DilSeJAShANN">
+  <div class="page">
+    <header>
+      <p class="wordmark">#DilSeJAShANN</p>
+      <h1>The ceremonies</h1>
+      <p class="intro">{intro}</p>
+    </header>
+
+    {
+      ceremonies.map((c) => (
+        <article class="ceremony">
+          <h2>{c.name}</h2>
+          <p class="gloss">{c.gloss}</p>
+
+          {c.about.map((p) => (
+            <p class="about">{p}</p>
+          ))}
+
+          <section class="block">
+            <h3>Before you come</h3>
+            <dl class="etiquette">
+              {c.etiquette.map((e) => (
+                <>
+                  <dt>{e.title}</dt>
+                  <dd>{e.note}</dd>
+                </>
+              ))}
+            </dl>
+          </section>
+
+          <section class="block">
+            <h3>What happens, in order</h3>
+            <ol class="steps">
+              {c.sequence.map((s) => (
+                <li class="step">
+                  <span class="step-name">{s.name}</span>
+                  <span class="step-note">{s.note}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <section class="block">
+            <h3>{c.meaning.title}</h3>
+            <ol class="steps meaning">
+              {c.meaning.items.map((s) => (
+                <li class="step">
+                  <span class="step-name">{s.name}</span>
+                  <span class="step-note">{s.note}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        </article>
+      ))
+    }
+  </div>
+</Base>
+
+<script>
+  // Reveal the sequence steps one after another as the guest moves down. The
+  // Laavan and the pheras are the natural place for the animation budget.
+  //
+  // Same hardening as the invitation page: content is visible unless the head
+  // script has confirmed we can reveal it again, every callback sweeps all
+  // pending elements rather than trusting entries, and a timeout catches
+  // anything the observer misses. Nobody may lose the ceremony order to a
+  // stalled animation.
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const steps = Array.from(document.querySelectorAll<HTMLElement>('.step'));
+
+  if (reduced || !('IntersectionObserver' in window)) {
+    steps.forEach((el) => el.classList.add('shown'));
+  } else {
+    const pending = new Set(steps);
+
+    const show = (el: HTMLElement, delay: number) => {
+      if (!pending.delete(el)) return;
+      el.style.transitionDelay = `${delay}ms`;
+      el.classList.add('shown');
+      el.addEventListener(
+        'transitionend',
+        () => {
+          el.style.transitionDelay = '';
+          el.style.willChange = '';
+        },
+        { once: true }
+      );
+      io.unobserve(el);
+    };
+
+    const sweep = () => {
+      let i = 0;
+      pending.forEach((el) => {
+        if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
+          // Stagger only what appears together, capped so a long list never
+          // leaves the last item waiting.
+          show(el, Math.min(i++, 5) * 70);
+        }
+      });
+    };
+
+    const io = new IntersectionObserver(sweep, { threshold: 0.05, rootMargin: '0px 0px -6% 0px' });
+    steps.forEach((el) => io.observe(el));
+    requestAnimationFrame(sweep);
+    window.addEventListener('pageshow', sweep);
+    setTimeout(() => {
+      pending.forEach((el) => {
+        el.classList.add('shown');
+        io.unobserve(el);
+      });
+      pending.clear();
+    }, 2500);
+  }
+</script>
+
+<style>
+  .page {
+    max-width: var(--measure);
+    margin: 0 auto;
+    padding: var(--gap-lg) var(--gap) var(--gap-xl);
+  }
+  .wordmark {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: var(--t-md);
+    color: var(--ink);
+    margin: 0 0 var(--gap-lg);
+    text-align: center;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: var(--t-xl);
+    color: var(--ink);
+    margin: 0;
+    text-align: center;
+  }
+  .intro {
+    font-family: var(--sans);
+    font-size: var(--t-base);
+    line-height: 1.65;
+    color: var(--body);
+    margin: var(--gap) auto 0;
+    text-align: center;
+    max-width: 30rem;
+  }
+
+  .ceremony {
+    margin-top: var(--gap-xl);
+    padding-top: var(--gap-lg);
+    border-top: 1px solid var(--line);
+  }
+  h2 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: var(--t-lg);
+    color: var(--ink);
+    margin: 0;
+  }
+  .gloss {
+    font-family: var(--sans);
+    font-size: var(--t-sm);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--body);
+    opacity: 0.7;
+    margin: var(--gap-xs) 0 var(--gap);
+  }
+  .about {
+    font-family: var(--sans);
+    font-size: var(--t-base);
+    line-height: 1.7;
+    color: var(--body);
+    margin: 0 0 var(--gap-sm);
+  }
+
+  .block {
+    margin-top: var(--gap-lg);
+  }
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: var(--t-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0 0 var(--gap-sm);
+  }
+
+  .etiquette {
+    margin: 0;
+  }
+  .etiquette dt {
+    font-family: var(--display);
+    font-size: var(--t-base);
+    color: var(--ink);
+    margin-top: var(--gap-sm);
+  }
+  .etiquette dd {
+    font-family: var(--sans);
+    font-size: var(--t-base);
+    line-height: 1.6;
+    color: var(--body);
+    margin: 0.15rem 0 0;
+  }
+
+  .steps {
+    list-style: none;
+    counter-reset: step;
+    margin: 0;
+    padding: 0;
+  }
+  .step {
+    counter-increment: step;
+    position: relative;
+    padding: 0 0 var(--gap) 2.5rem;
+    border-left: 1px solid var(--line);
+    margin-left: 0.6rem;
+  }
+  .step:last-child {
+    border-left-color: transparent;
+    padding-bottom: 0;
+  }
+  .step::before {
+    content: counter(step);
+    position: absolute;
+    left: -0.75rem;
+    top: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: var(--t-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step-name {
+    display: block;
+    font-family: var(--display);
+    font-size: var(--t-base);
+    color: var(--ink);
+  }
+  .step-note {
+    display: block;
+    font-family: var(--sans);
+    font-size: var(--t-base);
+    line-height: 1.6;
+    color: var(--body);
+    margin-top: 0.15rem;
+  }
+
+  /* Hidden only once the head script confirms the reveal can happen. */
+  :global(html.js-anim) .step {
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 460ms cubic-bezier(0.22, 0.61, 0.36, 1),
+      transform 460ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  :global(html.js-anim) .step.shown {
+    opacity: 1;
+    transform: none;
+  }
+</style>

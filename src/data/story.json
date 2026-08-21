@@ -1,0 +1,12 @@
+{
+  "title": "<<FILL>>",
+  "intro": "<<FILL>>",
+
+  "chapters": [
+    { "heading": "<<FILL>>", "body": ["<<FILL>>", "<<FILL>>"] },
+    { "heading": "<<FILL>>", "body": ["<<FILL>>", "<<FILL>>"] },
+    { "heading": "<<FILL>>", "body": ["<<FILL>>"] }
+  ],
+
+  "closing": "<<FILL>>"
+}

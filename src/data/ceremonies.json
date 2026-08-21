@@ -1,0 +1,61 @@
+{
+  "intro": "<<FILL>>",
+
+  "ceremonies": [
+    {
+      "id": "anand-karaj",
+      "name": "Anand Karaj",
+      "gloss": "<<FILL>>",
+      "about": ["<<FILL>>", "<<FILL>>"],
+      "etiquette": [
+        { "title": "Covering your head", "note": "<<FILL>>" },
+        { "title": "Shoes", "note": "<<FILL>>" },
+        { "title": "Seating", "note": "<<FILL>>" },
+        { "title": "At the venue", "note": "<<FILL>>" }
+      ],
+      "sequence": [
+        { "name": "<<FILL>>", "note": "<<FILL>>" },
+        { "name": "<<FILL>>", "note": "<<FILL>>" },
+        { "name": "<<FILL>>", "note": "<<FILL>>" },
+        { "name": "<<FILL>>", "note": "<<FILL>>" }
+      ],
+      "meaning": {
+        "title": "The four Laavan",
+        "items": [
+          { "name": "<<FILL>>", "note": "<<FILL>>" },
+          { "name": "<<FILL>>", "note": "<<FILL>>" },
+          { "name": "<<FILL>>", "note": "<<FILL>>" },
+          { "name": "<<FILL>>", "note": "<<FILL>>" }
+        ]
+      }
+    },
+    {
+      "id": "vivaah",
+      "name": "Vivaah",
+      "gloss": "<<FILL>>",
+      "about": ["<<FILL>>", "<<FILL>>"],
+      "etiquette": [
+        { "title": "Seating", "note": "<<FILL>>" },
+        { "title": "At the venue", "note": "<<FILL>>" }
+      ],
+      "sequence": [
+        { "name": "<<FILL>>", "note": "<<FILL>>" },
+        { "name": "<<FILL>>", "note": "<<FILL>>" },
+        { "name": "<<FILL>>", "note": "<<FILL>>" },
+        { "name": "<<FILL>>", "note": "<<FILL>>" }
+      ],
+      "meaning": {
+        "title": "<<FILL>>",
+        "items": [
+          { "name": "<<FILL>>", "note": "<<FILL>>" },
+          { "name": "<<FILL>>", "note": "<<FILL>>" },
+          { "name": "<<FILL>>", "note": "<<FILL>>" },
+          { "name": "<<FILL>>", "note": "<<FILL>>" },
+          { "name": "<<FILL>>", "note": "<<FILL>>" },
+          { "name": "<<FILL>>", "note": "<<FILL>>" },
+          { "name": "<<FILL>>", "note": "<<FILL>>" }
+        ]
+      }
+    }
+  ]
+}

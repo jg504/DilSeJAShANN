@@ -1,0 +1,148 @@
+---
+// The shared story. Reachable from all seven invitations.
+//
+// FUNCTION-NEUTRAL THROUGHOUT. Because every link reaches this page, nothing
+// here may name a function, a date, or a side. No caption referencing an event
+// only some guests are invited to, and no closing line about the 28th — two of
+// the seven invitations end a day before everyone else.
+//
+// The copy lives in src/data/story.json and is validated like the rest, so a
+// half-written story cannot ship.
+//
+// Class B: no meaningful weight cap once photographs arrive. They belong in
+// src/assets/ so Astro processes them, never in public/.
+import Base from '../layouts/Base.astro';
+import story from '../data/story.json';
+---
+
+<Base title="Our story — #DilSeJAShANN">
+  <div class="page">
+    <header>
+      <p class="wordmark">#DilSeJAShANN</p>
+      <h1>{story.title}</h1>
+      <p class="intro">{story.intro}</p>
+    </header>
+
+    {
+      story.chapters.map((c) => (
+        <section class="chapter reveal">
+          <h2>{c.heading}</h2>
+          {c.body.map((p) => (
+            <p>{p}</p>
+          ))}
+        </section>
+      ))
+    }
+
+    <p class="closing reveal">{story.closing}</p>
+  </div>
+</Base>
+
+<script>
+  // Same hardening as elsewhere: content is visible unless the head script has
+  // confirmed the reveal can run, every callback sweeps all pending elements,
+  // and a timeout catches anything the observer misses.
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
+
+  if (reduced || !('IntersectionObserver' in window)) {
+    items.forEach((el) => el.classList.add('shown'));
+  } else {
+    const pending = new Set(items);
+    const show = (el: HTMLElement) => {
+      if (!pending.delete(el)) return;
+      el.classList.add('shown');
+      io.unobserve(el);
+    };
+    const sweep = () => {
+      pending.forEach((el) => {
+        if (el.getBoundingClientRect().top < window.innerHeight * 0.92) show(el);
+      });
+    };
+    const io = new IntersectionObserver(sweep, { threshold: 0.05, rootMargin: '0px 0px -8% 0px' });
+    items.forEach((el) => io.observe(el));
+    requestAnimationFrame(sweep);
+    window.addEventListener('pageshow', sweep);
+    setTimeout(() => {
+      pending.forEach((el) => {
+        el.classList.add('shown');
+        io.unobserve(el);
+      });
+      pending.clear();
+    }, 2500);
+  }
+</script>
+
+<style>
+  .page {
+    max-width: var(--measure);
+    margin: 0 auto;
+    padding: var(--gap-lg) var(--gap) var(--gap-xl);
+  }
+  .wordmark {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: var(--t-md);
+    color: var(--ink);
+    margin: 0 0 var(--gap-lg);
+    text-align: center;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: var(--t-xl);
+    color: var(--ink);
+    margin: 0;
+    text-align: center;
+    line-height: 1.1;
+  }
+  .intro {
+    font-family: var(--sans);
+    font-size: var(--t-md);
+    line-height: 1.6;
+    color: var(--body);
+    margin: var(--gap) auto 0;
+    text-align: center;
+    max-width: 30rem;
+  }
+  .chapter {
+    margin-top: var(--gap-xl);
+    padding-top: var(--gap-lg);
+    border-top: 1px solid var(--line);
+  }
+  h2 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: var(--t-lg);
+    color: var(--ink);
+    margin: 0 0 var(--gap-sm);
+  }
+  .chapter p {
+    font-family: var(--sans);
+    font-size: var(--t-base);
+    line-height: 1.75;
+    color: var(--body);
+    margin: 0 0 var(--gap-sm);
+  }
+  .closing {
+    font-family: var(--display);
+    font-size: var(--t-md);
+    line-height: 1.5;
+    color: var(--ink);
+    text-align: center;
+    margin: var(--gap-xl) auto 0;
+    max-width: 28rem;
+  }
+
+  :global(html.js-anim) .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 520ms cubic-bezier(0.22, 0.61, 0.36, 1),
+      transform 520ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  :global(html.js-anim) .reveal.shown {
+    opacity: 1;
+    transform: none;
+  }
+</style>
