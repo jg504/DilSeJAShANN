@@ -61,7 +61,7 @@ Do this before any form UI. It is the least predictable part of the build.
 - [x] **3.5** Step 3 — accommodation block, rendered only when `accom: true`
 - [x] **3.6** Dietary and notes fields
 - [x] **3.7** Confirmation screen — phone echoed back, resubmission instructions, warmth
-- [ ] **3.8** Failure state with a WhatsApp fallback link
+- [x] **3.8** Failure state with a WhatsApp fallback link
 - [x] **3.9** Data preserved on validation failure
 
 **Done when:** every tier can submit, decline, and resubmit correctly.
