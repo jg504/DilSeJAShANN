@@ -2,6 +2,7 @@
 // Every page in the site goes through here, so noindex is set in exactly one
 // place. This site publishes venue addresses and a family schedule.
 import '../styles/tokens.css';
+import '../styles/type.css';
 import {
   OG_TITLE,
   OG_DESCRIPTION,
@@ -32,6 +33,21 @@ const ogImage = new URL(OG_IMAGE, Astro.site).href;
     <meta name="robots" content="noindex, nofollow" />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+
+    <script is:inline>
+      // Content is visible by default. Scroll-reveal styles apply only when
+      // this class is present, so a guest can never end up on a page whose
+      // text is stuck at opacity 0 — the animation is an enhancement, never a
+      // gate on reading the invitation. Runs before paint to avoid a flash.
+      try {
+        if (
+          'IntersectionObserver' in window &&
+          !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ) {
+          document.documentElement.classList.add('js-anim');
+        }
+      } catch (e) {}
+    </script>
 
     {
       /* Preview copy is identical on every link — see src/data/og.ts. Only

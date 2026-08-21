@@ -51,6 +51,13 @@ const require = (obj, keys, path) => {
   }
 };
 
+// One display string, e.g. "Ashna & Jaskaran". Written once and shown in the
+// hero of all seven invitations, so ordering and spelling are decided in one
+// place rather than per page.
+if (typeof data.couple !== 'string' || !data.couple.trim()) {
+  fail('couple must be a non-empty display string');
+}
+
 const FUNCTION_KEYS = ['name', 'date', 'venue', 'address', 'mapsUrl', 'dressCode', 'dressColors'];
 
 for (const [id, fn] of Object.entries(data.functions ?? {})) {

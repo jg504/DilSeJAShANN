@@ -81,14 +81,14 @@ Do this before any form UI. It is the least predictable part of the build.
 
 ## Phase 5 — the invitation page
 
-- [ ] **5.1** Type scale and both faces loaded, subsetted
-- [ ] **5.2** Hero with the arch
-- [ ] **5.3** Function blocks — both ceremony times on the Wedding
-- [ ] **5.4** Dress code with colour swatches and notes
-- [ ] **5.5** Maps buttons, tested on a phone per venue
-- [ ] **5.6** Hotel, travel, contacts from the side block
-- [ ] **5.7** `.ics` download per function
-- [ ] **5.8** RSVP call to action, top and bottom
+- [x] **5.1** Type scale and both faces loaded, subsetted
+- [x] **5.2** Hero with the arch
+- [x] **5.3** Function blocks — both ceremony times on the Wedding
+- [x] **5.4** Dress code with colour swatches and notes
+- [x] **5.5** Maps buttons, tested on a phone per venue
+- [x] **5.6** Hotel, travel, contacts from the side block
+- [x] **5.7** `.ics` download per function
+- [x] **5.8** RSVP call to action, top and bottom
 
 **Done when:** it looks like the card and a guest knows exactly what to do.
 

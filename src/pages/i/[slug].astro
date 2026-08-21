@@ -3,14 +3,11 @@
 //
 // TIER PRIVACY: getStaticPaths resolves each link's data at build time and
 // passes only that link's slice as props. The full invites.json never reaches
-// the browser, and this page ships no client JS. Nothing here may name a tier,
-// an index, a side, or another link's functions — including the date range in
-// the hero, which is derived from this link's own functions rather than the
-// full 26–28 span. See CLAUDE.md.
-//
-// Unstyled beyond the tokens. This is the skeleton from build step 1.4/1.5 —
-// correct content on seven routes. The visual build is step 5.
+// the browser. Nothing here may name a tier, an index, a side, or another
+// link's functions — including the date range in the hero, which is derived
+// from this link's own functions rather than the full 26–28 span.
 import Base from '../../layouts/Base.astro';
+import Arch from '../../components/Arch.astro';
 import data from '../../data/invites.json';
 
 export function getStaticPaths() {
@@ -23,6 +20,7 @@ export function getStaticPaths() {
     return {
       params: { slug: invite.slug },
       props: {
+        couple: data.couple,
         functions,
         side: data.sides[invite.side as keyof typeof data.sides],
         accom: invite.accom,
@@ -31,135 +29,589 @@ export function getStaticPaths() {
   });
 }
 
-const { functions, side, accom } = Astro.props;
+const { couple, functions, side, accom } = Astro.props;
 
-const fmt = (iso: string) =>
+const fmtFull = (iso: string) =>
+  new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+  });
+
+const fmtShort = (iso: string) =>
   new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'long',
-    year: 'numeric',
     timeZone: 'UTC',
   });
 
 // Derived from this link's functions only. A Wedding-only guest must not see
 // a range implying anything happens on the 26th or the 28th.
 const dates = [...new Set(functions.map((f) => f.date))].sort();
+const first = dates[0];
+const last = dates[dates.length - 1];
+const year = first?.slice(0, 4);
+const day = (iso: string) => String(Number(iso.slice(8, 10)));
+const month = (iso: string) =>
+  new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
+
+// "27 December 2026" for one day, "26 – 28 December 2026" within a month.
 const dateLine =
   dates.length === 1
-    ? fmt(dates[0])
-    : `${fmt(dates[0])} – ${fmt(dates[dates.length - 1])}`;
+    ? `${fmtShort(first)} ${year}`
+    : month(first) === month(last)
+      ? `${day(first)} – ${day(last)} ${month(last)} ${year}`
+      : `${fmtShort(first)} – ${fmtShort(last)} ${year}`;
 
 // Only invitations including the Wedding may link to the ceremony explainers.
 const showCeremonies = functions.some((f) => f.id === 'f2');
+
+// dressColors accepts "#RRGGBB" or { name, hex }. Both are rendered as a
+// swatch; a name is shown beside it when given.
+type Swatch = { hex: string; name?: string };
+const swatches = (raw: unknown[]): Swatch[] =>
+  raw.map((c) =>
+    typeof c === 'string' ? { hex: c } : (c as Swatch)
+  );
 ---
 
-{/* No meta description: the page is noindex, and the shareable preview copy
-    lives in src/data/og.ts so it stays identical across all seven links. */}
 <Base title="#DilSeJAShANN">
-  <main>
-    <p class="wordmark">#DilSeJAShANN</p>
-    <p class="dates">{dateLine}</p>
+  <div class="page">
+    <header class="hero" id="hero">
+      <p class="wordmark">#DilSeJAShANN</p>
 
-    <p>{side.greeting}</p>
+      <div class="hero-arch">
+        <Arch />
+        <div class="hero-inner">
+          <p class="couple">{couple}</p>
+          <p class="hero-dates">{dateLine}</p>
+        </div>
+      </div>
 
-    <p><a href="rsvp">RSVP</a></p>
+      <p class="greeting">{side.greeting}</p>
 
-    {
-      functions.map((f) => (
-        <section>
-          <h2>{f.name}</h2>
-          <p>{fmt(f.date)}</p>
+      <a class="cta" href="rsvp">RSVP</a>
+    </header>
 
-          {'ceremonies' in f && Array.isArray(f.ceremonies) ? (
-            <ul>
-              {f.ceremonies.map((c) => (
-                <li>
-                  {c.name} — {c.startTime}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>{(f as { startTime: string }).startTime}</p>
-          )}
+    <main>
+      {
+        functions.map((f) => (
+          <section class="fn reveal">
+            <h2>{f.name}</h2>
+            <p class="fn-date">{fmtFull(f.date)}</p>
 
-          <p>{f.venue}</p>
-          <p>{f.address}</p>
-          <p>
-            <a href={f.mapsUrl} target="_blank" rel="noopener noreferrer">
-              Get Directions
-            </a>
-          </p>
+            {'ceremonies' in f && Array.isArray(f.ceremonies) ? (
+              /* Two ceremonies in one function. A guest who reads only one
+                 start time arrives at the wrong hour. */
+              <ul class="times">
+                {f.ceremonies.map((c) => (
+                  <li>
+                    <span class="ceremony">{c.name}</span>
+                    <span class="time">{c.startTime}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="time solo">{(f as { startTime: string }).startTime}</p>
+            )}
 
-          <p>{f.dressCode}</p>
-          {f.dressColors.length > 0 && (
-            <ul>
-              {f.dressColors.map((c) => (
-                <li>{c}</li>
-              ))}
-            </ul>
-          )}
-          {f.dressNote && <p>{f.dressNote}</p>}
-        </section>
-      ))
-    }
+            <div class="venue">
+              <p class="venue-name">{f.venue}</p>
+              <p class="address">{f.address}</p>
+            </div>
 
-    {showCeremonies && (
-      <p><a href="/ceremonies">About the ceremonies</a></p>
-    )}
+            <div class="actions">
+              <a class="btn" href={f.mapsUrl} target="_blank" rel="noopener noreferrer">
+                Get Directions
+              </a>
+              <a class="btn quiet" href={`${f.id}.ics`} download>
+                Add to Calendar
+              </a>
+            </div>
 
-    {
-      accom && (
-        <section>
-          <h2>Staying with us</h2>
-          <p>{side.hotel.name}</p>
-          <p>{side.hotel.address}</p>
-          <p>
-            <a href={side.hotel.mapsUrl} target="_blank" rel="noopener noreferrer">
-              Get Directions
-            </a>
-          </p>
-          <p>{side.hotel.note}</p>
-        </section>
-      )
-    }
+            <div class="dress">
+              <p class="dress-code">{f.dressCode}</p>
+              {swatches(f.dressColors).length > 0 && (
+                <ul class="swatches">
+                  {swatches(f.dressColors).map((c) => (
+                    <li>
+                      <span class="chip" style={`background:${c.hex}`} />
+                      {c.name && <span class="chip-name">{c.name}</span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {f.dressNote && <p class="dress-note">{f.dressNote}</p>}
+            </div>
+          </section>
+        ))
+      }
 
-    <section>
-      <h2>Getting here</h2>
-      <p>{side.travel.airport}</p>
-      <p>{side.travel.station}</p>
-      <p>{side.travel.cabNote}</p>
-    </section>
+      {
+        showCeremonies && (
+          <section class="fn reveal">
+            <h2>The ceremonies</h2>
+            <p class="lead">
+              A short guide to what happens on the day, and what to expect.
+            </p>
+            <div class="actions">
+              <a class="btn" href="/ceremonies">
+                Read the guide
+              </a>
+            </div>
+          </section>
+        )
+      }
 
-    <section>
-      <h2>Any questions</h2>
-      <ul>
-        {
-          side.contacts.map((c) => (
-            <li>
-              {c.name} — <a href={`tel:${c.phone}`}>{c.phone}</a>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
+      {
+        accom && (
+          <section class="fn reveal">
+            <h2>Staying with us</h2>
+            <div class="venue">
+              <p class="venue-name">{side.hotel.name}</p>
+              <p class="address">{side.hotel.address}</p>
+            </div>
+            <div class="actions">
+              <a class="btn" href={side.hotel.mapsUrl} target="_blank" rel="noopener noreferrer">
+                Get Directions
+              </a>
+            </div>
+            <p class="note">{side.hotel.note}</p>
+          </section>
+        )
+      }
 
-    <p><a href="rsvp">RSVP</a></p>
-  </main>
+      <section class="fn reveal">
+        <h2>Getting here</h2>
+        <dl class="travel">
+          <dt>By air</dt>
+          <dd>{side.travel.airport}</dd>
+          <dt>By train</dt>
+          <dd>{side.travel.station}</dd>
+          <dt>Getting around</dt>
+          <dd>{side.travel.cabNote}</dd>
+        </dl>
+      </section>
+
+      <section class="fn reveal">
+        <h2>Any questions</h2>
+        <ul class="contacts">
+          {
+            side.contacts.map((c) => (
+              <li>
+                <span class="contact-name">{c.name}</span>
+                <a class="btn quiet" href={`tel:${c.phone}`}>
+                  {c.phone}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      {/* No arch here — it is hero-only, deliberately. Everything else stays
+          quiet. See docs/DECISIONS.md. */}
+      <section class="closing reveal">
+        <p class="closing-line">We would love to have you there.</p>
+        <a class="cta" href="rsvp">RSVP</a>
+      </section>
+    </main>
+  </div>
 </Base>
 
-<style>
-  main {
-    max-width: 34rem;
-    margin: 0 auto;
-    padding: 2rem 1.25rem 4rem;
+<script>
+  // The signature moment runs once per session. Internal navigation must not
+  // replay it, and neither should a guest re-opening the link from WhatsApp.
+  const hero = document.getElementById('hero');
+  const KEY = 'dilsejashann-arch-seen';
+  let seen = false;
+  try {
+    seen = sessionStorage.getItem(KEY) === '1';
+  } catch (e) {}
+
+  if (hero && !seen) {
+    hero.classList.add('arch-draw', 'settle');
+    try {
+      sessionStorage.setItem(KEY, '1');
+    } catch (e) {}
   }
-  .wordmark,
+
+  // Scroll reveals via IntersectionObserver — never a scroll listener, never
+  // an rAF loop reading scroll position.
+  //
+  // A fast or programmatic scroll can carry a section from below the viewport
+  // to above it inside one frame. Its intersection state never becomes true, so
+  // a naive per-entry handler leaves it at opacity 0 permanently — a guest can
+  // scroll past the contact numbers and never see them. Every callback
+  // therefore sweeps all pending elements rather than trusting the entries,
+  // and a sweep also runs on load and on restore from the back/forward cache.
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
+
+  if (reduced || !('IntersectionObserver' in window)) {
+    items.forEach((el) => el.classList.add('shown'));
+  } else {
+    const pending = new Set(items);
+
+    const show = (el: HTMLElement) => {
+      if (!pending.delete(el)) return;
+      el.classList.add('shown');
+      // will-change only on elements actively animating; removed after.
+      el.style.willChange = 'transform, opacity';
+      el.addEventListener(
+        'transitionend',
+        () => {
+          el.style.willChange = '';
+        },
+        { once: true }
+      );
+      io.unobserve(el);
+    };
+
+    const sweep = () => {
+      pending.forEach((el) => {
+        if (el.getBoundingClientRect().top < window.innerHeight * 0.92) show(el);
+      });
+    };
+
+    const io = new IntersectionObserver(sweep, {
+      rootMargin: '0px 0px -8% 0px',
+      threshold: 0.05,
+    });
+
+    items.forEach((el) => io.observe(el));
+    requestAnimationFrame(sweep);
+    window.addEventListener('pageshow', sweep);
+
+    // Hard failsafe. If the observer never fires — and in testing it can stay
+    // completely silent — everything still becomes visible shortly after load.
+    // Revealing an element that is still off-screen costs nothing visually,
+    // so this can never be seen by a guest reading normally.
+    setTimeout(() => {
+      pending.forEach((el) => {
+        el.classList.add('shown');
+        io.unobserve(el);
+      });
+      pending.clear();
+    }, 2500);
+  }
+</script>
+
+<style>
+  .page {
+    max-width: var(--measure);
+    margin: 0 auto;
+    padding: 0 var(--gap) var(--gap-xl);
+  }
+
+  /* ---------- hero ---------- */
+  .hero {
+    text-align: center;
+    padding-top: var(--gap-lg);
+  }
+  .wordmark {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: var(--t-md);
+    color: var(--ink);
+    margin: 0 0 var(--gap-lg);
+    letter-spacing: 0.01em;
+  }
+  .hero-arch {
+    position: relative;
+    max-width: 19rem;
+    margin: 0 auto;
+  }
+  .hero-inner {
+    position: absolute;
+    left: 50%;
+    top: 56%;
+    transform: translate(-50%, -50%);
+    /* Kept clear of the arch legs so a longer pair of names wraps rather than
+       colliding with the stroke. */
+    width: 74%;
+  }
+  .couple {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: var(--t-xl);
+    line-height: 1.08;
+    color: var(--ink);
+    margin: 0;
+  }
+  .hero-dates {
+    font-family: var(--sans);
+    font-size: var(--t-sm);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--body);
+    opacity: 0.75;
+    margin: var(--gap-sm) 0 0;
+  }
+  .greeting {
+    font-family: var(--sans);
+    font-size: var(--t-base);
+    line-height: 1.65;
+    color: var(--body);
+    margin: var(--gap-lg) auto var(--gap);
+    max-width: 30rem;
+  }
+
+  /* Content settles inside the arch after it strokes in. Transform and
+     opacity only. */
+  .settle .couple,
+  .settle .hero-dates,
+  .settle .greeting,
+  .settle > .cta {
+    animation: settle 620ms cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+  }
+  .settle .couple {
+    animation-delay: 620ms;
+  }
+  .settle .hero-dates {
+    animation-delay: 730ms;
+  }
+  .settle .greeting {
+    animation-delay: 830ms;
+  }
+  .settle > .cta {
+    animation-delay: 920ms;
+  }
+  @keyframes settle {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ---------- calls to action ---------- */
+  .cta {
+    display: inline-block;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: var(--t-base);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 0.95rem 3rem;
+    min-height: 48px;
+    /* Maroon fill, cream text. The brand gold fails AA as a fill — 2.49:1 on
+       cream. See docs/DECISIONS.md. */
+    background: var(--accent);
+    color: var(--panel);
+    border-radius: 999px;
+    margin-top: var(--gap-sm);
+  }
+
+  /* ---------- function cards ---------- */
+  .fn,
+  .closing {
+    margin-top: var(--gap-xl);
+    padding-top: var(--gap-lg);
+    border-top: 1px solid var(--line);
+  }
+  /* Hidden ONLY when the head script has confirmed we can reveal again.
+     Without js-anim these rules never apply and everything is simply visible. */
+  :global(html.js-anim) .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 520ms cubic-bezier(0.22, 0.61, 0.36, 1),
+      transform 520ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  :global(html.js-anim) .reveal.shown {
+    opacity: 1;
+    transform: none;
+  }
+
   h2 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: var(--t-lg);
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.15;
+  }
+  .fn-date {
+    font-family: var(--sans);
+    font-size: var(--t-sm);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--body);
+    opacity: 0.7;
+    margin: var(--gap-xs) 0 var(--gap);
+  }
+
+  .times {
+    list-style: none;
+    margin: 0 0 var(--gap);
+    padding: 0;
+  }
+  .times li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--gap);
+    padding: 0.5rem 0;
+    border-bottom: 1px dotted var(--line);
+  }
+  .ceremony {
+    font-family: var(--display);
+    font-size: var(--t-base);
     color: var(--ink);
   }
-  section {
-    border-top: 1px solid var(--line);
-    margin-top: 2rem;
-    padding-top: 1rem;
+  .time {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: var(--t-base);
+    color: var(--body);
+    font-variant-numeric: tabular-nums;
+  }
+  .time.solo {
+    margin: 0 0 var(--gap);
+  }
+
+  .venue-name {
+    font-family: var(--display);
+    font-size: var(--t-md);
+    color: var(--ink);
+    margin: 0 0 var(--gap-xs);
+  }
+  .address,
+  .note,
+  .lead {
+    font-family: var(--sans);
+    font-size: var(--t-base);
+    line-height: 1.6;
+    color: var(--body);
+    margin: 0;
+  }
+  .note,
+  .lead {
+    margin-top: var(--gap-sm);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-sm);
+    margin: var(--gap) 0;
+  }
+  .btn {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: var(--t-sm);
+    text-decoration: none;
+    padding: 0.7rem 1.1rem;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: var(--panel);
+  }
+  .btn.quiet {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+
+  .dress {
+    margin-top: var(--gap);
+  }
+  .dress-code {
+    font-family: var(--sans);
+    font-size: var(--t-base);
+    color: var(--body);
+    margin: 0;
+  }
+  .swatches {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap);
+    margin: var(--gap-sm) 0 0;
+    padding: 0;
+  }
+  .swatches li {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+  }
+  .chip {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    display: inline-block;
+  }
+  .chip-name {
+    font-family: var(--sans);
+    font-size: var(--t-xs);
+    color: var(--body);
+  }
+  .dress-note {
+    font-family: var(--sans);
+    font-size: var(--t-sm);
+    line-height: 1.6;
+    color: var(--body);
+    opacity: 0.85;
+    margin: var(--gap-sm) 0 0;
+  }
+
+  .travel {
+    margin: 0;
+  }
+  .travel dt {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: var(--t-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-top: var(--gap);
+  }
+  .travel dd {
+    font-family: var(--sans);
+    font-size: var(--t-base);
+    line-height: 1.6;
+    color: var(--body);
+    margin: var(--gap-xs) 0 0;
+  }
+
+  .contacts {
+    list-style: none;
+    margin: var(--gap) 0 0;
+    padding: 0;
+  }
+  .contacts li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--gap);
+    padding: var(--gap-sm) 0;
+    border-bottom: 1px dotted var(--line);
+  }
+  .contact-name {
+    font-family: var(--display);
+    font-size: var(--t-base);
+    color: var(--ink);
+  }
+
+  /* ---------- closing ---------- */
+  .closing {
+    text-align: center;
+    position: relative;
+  }
+  .closing-line {
+    font-family: var(--display);
+    font-size: var(--t-md);
+    color: var(--ink);
+    margin: 0 0 var(--gap);
   }
 </style>
