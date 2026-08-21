@@ -54,15 +54,15 @@ Do this before any form UI. It is the least predictable part of the build.
 
 ## Phase 3 — the RSVP form
 
-- [ ] **3.1** Step 1 — name, WhatsApp number with country dropdown, additional guests
-- [ ] **3.2** Phone normalisation to E.164, per-country length validation
-- [ ] **3.3** Step 2 — attending toggle, per-function steppers, only this link's functions
-- [ ] **3.4** Decline path skips to the closing step
-- [ ] **3.5** Step 3 — accommodation block, rendered only when `accom: true`
-- [ ] **3.6** Dietary and notes fields
-- [ ] **3.7** Confirmation screen — phone echoed back, resubmission instructions, warmth
+- [x] **3.1** Step 1 — name, WhatsApp number with country dropdown, additional guests
+- [x] **3.2** Phone normalisation to E.164, per-country length validation
+- [x] **3.3** Step 2 — attending toggle, per-function steppers, only this link's functions
+- [x] **3.4** Decline path skips to the closing step
+- [x] **3.5** Step 3 — accommodation block, rendered only when `accom: true`
+- [x] **3.6** Dietary and notes fields
+- [x] **3.7** Confirmation screen — phone echoed back, resubmission instructions, warmth
 - [ ] **3.8** Failure state with a WhatsApp fallback link
-- [ ] **3.9** Data preserved on validation failure
+- [x] **3.9** Data preserved on validation failure
 
 **Done when:** every tier can submit, decline, and resubmit correctly.
 

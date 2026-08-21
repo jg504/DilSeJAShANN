@@ -1,0 +1,657 @@
+---
+// The RSVP form. This is the point of the site.
+//
+// TIER PRIVACY NOTE: the payload needs `slug`, `index` and `side` because the
+// schema has those columns and the endpoint routes on `side`. They therefore
+// appear in this page's client JS. That is this link's own data, never another
+// link's, and none of it is rendered in the UI. The trailing digit of the URL
+// already exposes the index, which CLAUDE.md accepts as unavoidable.
+//
+// Set in the humanist sans throughout — never the display serif. A serif form
+// reads as decorative and gets less trust on a phone, and this page's only job
+// is getting a submission.
+import Base from '../../../layouts/Base.astro';
+import data from '../../../data/invites.json';
+import { PRIORITY, REST } from '../../../data/countries';
+import { RSVP_ENDPOINT, FALLBACK_WHATSAPP } from '../../../data/endpoint';
+
+export function getStaticPaths() {
+  return data.invites.map((invite) => ({
+    params: { slug: invite.slug },
+    props: {
+      slug: invite.slug,
+      index: invite.index,
+      side: invite.side,
+      accom: invite.accom,
+      functions: invite.functions.map((id) => ({
+        id,
+        name: data.functions[id as keyof typeof data.functions].name,
+      })),
+    },
+  }));
+}
+
+const { slug, index, side, accom, functions } = Astro.props;
+
+// Step 3 exists for everyone — it carries dietary and notes even when there is
+// no accommodation block.
+const TOTAL_STEPS = 3;
+---
+
+<Base title="RSVP — #DilSeJAShANN">
+  <main>
+    <p class="wordmark">#DilSeJAShANN</p>
+
+    <p class="progress" id="progress">Step 1 of {TOTAL_STEPS}</p>
+
+    <form id="form" novalidate>
+      <!-- Step 1 -->
+      <section class="panel" data-panel="1">
+        <label for="name">Your name</label>
+        <input id="name" name="name" type="text" autocomplete="name" />
+        <p class="err" data-err="name" hidden></p>
+
+        <label for="dial">WhatsApp number</label>
+        <p class="hint">
+          The number WhatsApp is on — not an Indian SIM you might pick up in December.
+        </p>
+        <div class="phone">
+          <select id="dial">
+            <option value="" selected disabled>Select</option>
+            {
+              PRIORITY.map((c, i) => (
+                <option
+                  value={i}
+                  data-dial={c.dial}
+                  data-min={c.min}
+                  data-max={c.max}
+                  data-group={(c.group ?? []).join(',')}
+                >
+                  {c.name} +{c.dial}
+                </option>
+              ))
+            }
+            <option value="" disabled>──────────</option>
+            {
+              REST.map((c, i) => (
+                <option
+                  value={PRIORITY.length + i}
+                  data-dial={c.dial}
+                  data-min={c.min}
+                  data-max={c.max}
+                  data-group={(c.group ?? []).join(',')}
+                >
+                  {c.name} +{c.dial}
+                </option>
+              ))
+            }
+          </select>
+          <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" />
+        </div>
+        <p class="err" data-err="phone" hidden></p>
+
+        <label for="guests">Anyone else coming with you?</label>
+        <input id="guests" name="guests" type="text" />
+
+        <button type="button" class="primary" data-next="2">Continue</button>
+      </section>
+
+      <!-- Step 2 -->
+      <section class="panel" data-panel="2" hidden>
+        <p class="q">Will you be joining us?</p>
+        <div class="toggle">
+          <button type="button" class="choice" data-attending="yes">Yes</button>
+          <button type="button" class="choice" data-attending="no">No</button>
+        </div>
+        <p class="err" data-err="attending" hidden></p>
+
+        <div id="counts" hidden>
+          <p class="hint">How many of you, for each? Zero is fine.</p>
+          {
+            functions.map((f) => (
+              <div class="stepper" data-fn={f.id}>
+                <span class="stepper-name">{f.name}</span>
+                <div class="stepper-controls">
+                  <button type="button" data-step="-1" aria-label={`One fewer for ${f.name}`}>
+                    −
+                  </button>
+                  <output data-count>0</output>
+                  <button type="button" data-step="1" aria-label={`One more for ${f.name}`}>
+                    +
+                  </button>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+
+        <div class="nav">
+          <button type="button" class="back" data-back="1">Back</button>
+          <button type="button" class="primary" data-next="3">Continue</button>
+        </div>
+      </section>
+
+      <!-- Step 3 -->
+      <section class="panel" data-panel="3" hidden>
+        {
+          accom && (
+            <div class="accom">
+              <p class="q">Do you need somewhere to stay?</p>
+              <div class="toggle">
+                <button type="button" class="choice" data-accom="yes">
+                  Yes
+                </button>
+                <button type="button" class="choice" data-accom="no">
+                  No
+                </button>
+              </div>
+              <p class="err" data-err="accom" hidden />
+
+              <div id="accom-detail" hidden>
+                <div class="stepper" data-travellers>
+                  <span class="stepper-name">How many of you are travelling?</span>
+                  <div class="stepper-controls">
+                    <button type="button" data-step="-1" aria-label="One fewer travelling">
+                      −
+                    </button>
+                    <output data-count>0</output>
+                    <button type="button" data-step="1" aria-label="One more travelling">
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <p class="q">Which nights?</p>
+                <div class="nights">
+                  <button type="button" class="night" data-night="26" aria-pressed="false">
+                    26 Dec
+                  </button>
+                  <button type="button" class="night" data-night="27" aria-pressed="false">
+                    27 Dec
+                  </button>
+                  <button type="button" class="night" data-night="28" aria-pressed="false">
+                    28 Dec
+                  </button>
+                </div>
+                <p class="err" data-err="nights" hidden />
+              </div>
+            </div>
+          )
+        }
+
+        <label for="dietary">Anything we should tell the kitchen?</label>
+        <p class="hint">Allergies, Jain, no onion or garlic, anything at all. Leave blank otherwise.</p>
+        <input id="dietary" name="dietary" type="text" />
+
+        <label for="notes">Anything else we should know?</label>
+        <input id="notes" name="notes" type="text" />
+
+        <div class="nav">
+          <button type="button" class="back" data-back="2">Back</button>
+          <button type="button" class="primary" id="submit">Send RSVP</button>
+        </div>
+      </section>
+
+      <!-- Decline closing step -->
+      <section class="panel" data-panel="decline" hidden>
+        <p class="q">Sorry you can't make it — anything you'd like to pass on?</p>
+        <input id="decline-note" name="decline-note" type="text" />
+        <div class="nav">
+          <button type="button" class="back" data-back="2">Back</button>
+          <button type="button" class="primary" id="submit-decline">Send</button>
+        </div>
+      </section>
+    </form>
+
+    <!-- Confirmation -->
+    <section class="panel done" data-panel="confirm" hidden>
+      <p class="tick">✓</p>
+      <h1 id="confirm-head">That's done</h1>
+      <p id="echo"></p>
+      <p class="hint">
+        Plans change? Open your invitation link and fill this in again — we'll use your
+        latest response.
+      </p>
+      <p><a href="../">Back to the invitation</a></p>
+    </section>
+
+    <!-- Failure -->
+    <section class="panel done" data-panel="error" hidden>
+      <h1>That didn't go through</h1>
+      <p>
+        Your response was not saved. Please send it to us on WhatsApp instead and we'll
+        add it by hand.
+      </p>
+      <p><a id="wa" href="#" target="_blank" rel="noopener noreferrer">Message us on WhatsApp</a></p>
+      <p><button type="button" class="primary" id="retry">Try again</button></p>
+    </section>
+  </main>
+</Base>
+
+<script
+  define:vars={{ slug, index, side, accom, endpoint: RSVP_ENDPOINT, fallback: FALLBACK_WHATSAPP, TOTAL_STEPS }}
+>
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  const panels = {};
+  $$('[data-panel]').forEach((el) => (panels[el.dataset.panel] = el));
+
+  const state = { attending: null, accom: null, nights: new Set() };
+
+  function show(key) {
+    Object.values(panels).forEach((p) => (p.hidden = true));
+    panels[key].hidden = false;
+    const prog = $('#progress');
+    if (key === '1' || key === '2' || key === '3') {
+      prog.hidden = false;
+      prog.textContent = `Step ${key} of ${TOTAL_STEPS}`;
+    } else if (key === 'decline') {
+      prog.hidden = false;
+      prog.textContent = 'Last step';
+    } else {
+      prog.hidden = true;
+    }
+    window.scrollTo({ top: 0 });
+  }
+
+  function err(name, msg) {
+    const el = $(`[data-err="${name}"]`);
+    if (!el) return;
+    el.textContent = msg || '';
+    el.hidden = !msg;
+  }
+
+  function clearErrors() {
+    $$('.err').forEach((e) => {
+      e.textContent = '';
+      e.hidden = true;
+    });
+  }
+
+  // --- steppers. Range 0-8, and zero is selectable on purpose: that is how a
+  // guest says they are coming to the Wedding but skipping the Cocktails.
+  $$('.stepper').forEach((row) => {
+    const out = $('[data-count]', row);
+    $$('button[data-step]', row).forEach((b) =>
+      b.addEventListener('click', () => {
+        const next = Math.min(8, Math.max(0, Number(out.textContent) + Number(b.dataset.step)));
+        out.textContent = String(next);
+      })
+    );
+  });
+
+  // --- attending toggle
+  $$('[data-attending]').forEach((b) =>
+    b.addEventListener('click', () => {
+      state.attending = b.dataset.attending;
+      $$('[data-attending]').forEach((o) => o.classList.toggle('on', o === b));
+      $('#counts').hidden = state.attending !== 'yes';
+      err('attending', '');
+    })
+  );
+
+  // --- accommodation toggle
+  $$('[data-accom]').forEach((b) =>
+    b.addEventListener('click', () => {
+      state.accom = b.dataset.accom;
+      $$('[data-accom]').forEach((o) => o.classList.toggle('on', o === b));
+      $('#accom-detail').hidden = state.accom !== 'yes';
+      err('accom', '');
+    })
+  );
+
+  // --- nights are three tap targets, never a date picker
+  $$('[data-night]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const n = b.dataset.night;
+      if (state.nights.has(n)) state.nights.delete(n);
+      else state.nights.add(n);
+      b.setAttribute('aria-pressed', state.nights.has(n) ? 'true' : 'false');
+      b.classList.toggle('on', state.nights.has(n));
+      err('nights', '');
+    })
+  );
+
+  // --- phone
+  function selected() {
+    const o = $('#dial').selectedOptions[0];
+    return o && o.dataset.dial ? o.dataset : null;
+  }
+
+  function national() {
+    const c = selected();
+    if (!c) return '';
+    let d = $('#phone').value.replace(/\D/g, '').replace(/^0+/, '');
+    // A duplicated country code typed into the national field.
+    if (d.startsWith(c.dial) && d.length > Number(c.max)) d = d.slice(c.dial.length);
+    return d;
+  }
+
+  function e164() {
+    const c = selected();
+    return c ? '+' + c.dial + national() : '';
+  }
+
+  function prettyPhone() {
+    const c = selected();
+    if (!c) return '';
+    const d = national();
+    const g = (c.group || '').split(',').filter(Boolean).map(Number);
+    if (!g.length || g.reduce((a, b) => a + b, 0) !== d.length) return '+' + c.dial + ' ' + d;
+    let i = 0;
+    return '+' + c.dial + ' ' + g.map((n) => d.slice(i, (i += n))).join(' ');
+  }
+
+  // --- validation. Never clears a field: losing a half-filled form on a phone
+  // ends the session permanently.
+  function validate1() {
+    clearErrors();
+    let ok = true;
+    if (!$('#name').value.trim()) {
+      err('name', 'Please tell us your name.');
+      ok = false;
+    }
+    const c = selected();
+    if (!c) {
+      err('phone', 'Please choose your country.');
+      ok = false;
+    } else {
+      const d = national();
+      if (!d) {
+        err('phone', 'Please enter your WhatsApp number.');
+        ok = false;
+      } else if (d.length < Number(c.min) || d.length > Number(c.max)) {
+        err('phone', `That looks like ${d.length} digits. Please check the number.`);
+        ok = false;
+      }
+    }
+    return ok;
+  }
+
+  function validate2() {
+    clearErrors();
+    if (!state.attending) {
+      err('attending', 'Please let us know either way.');
+      return false;
+    }
+    return true;
+  }
+
+  function validate3() {
+    clearErrors();
+    if (!accom) return true;
+    if (!state.accom) {
+      err('accom', 'Please choose yes or no.');
+      return false;
+    }
+    if (state.accom === 'yes') {
+      if (Number($('[data-travellers] [data-count]').textContent) < 1) {
+        err('accom', 'How many of you are travelling?');
+        return false;
+      }
+      if (state.nights.size === 0) {
+        err('nights', 'Please pick at least one night.');
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // --- navigation
+  $$('[data-next]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const from = b.closest('[data-panel]').dataset.panel;
+      if (from === '1' && !validate1()) return;
+      if (from === '2') {
+        if (!validate2()) return;
+        // "Not attending" skips to a short closing step.
+        if (state.attending === 'no') return show('decline');
+      }
+      show(b.dataset.next);
+    })
+  );
+
+  $$('[data-back]').forEach((b) =>
+    b.addEventListener('click', () => show(b.dataset.back))
+  );
+
+  // --- payload
+  function counts() {
+    const c = { count_f1: 0, count_f2: 0, count_f3: 0 };
+    if (state.attending !== 'yes') return c;
+    $$('.stepper[data-fn]').forEach((row) => {
+      c['count_' + row.dataset.fn] = Number($('[data-count]', row).textContent);
+    });
+    return c;
+  }
+
+  function payload(declineNote) {
+    const attending = state.attending === 'yes';
+    // Columns 12-14 are empty strings on non-accom links and on declines.
+    // Never omitted, never null — a ragged row breaks the sheet.
+    const stay = accom && attending && state.accom === 'yes';
+    return {
+      submission_id: crypto.randomUUID(),
+      slug,
+      index,
+      side,
+      name: $('#name').value.trim(),
+      phone_e164: e164(),
+      additional_guests: $('#guests').value.trim(),
+      ...counts(),
+      accommodation: accom && attending ? state.accom || 'no' : '',
+      travellers: stay ? $('[data-travellers] [data-count]').textContent : '',
+      nights: stay ? ['26', '27', '28'].filter((n) => state.nights.has(n)).join('|') : '',
+      dietary: attending ? $('#dietary').value.trim() : '',
+      notes: attending ? $('#notes').value.trim() : declineNote || '',
+    };
+  }
+
+  let sending = false;
+
+  async function send(body, declined) {
+    if (sending) return;
+    sending = true;
+    $$('.primary').forEach((b) => (b.disabled = true));
+
+    try {
+      // Apps Script sends no CORS headers on POST. text/plain keeps this a
+      // simple request so there is no preflight; no-cors makes the response
+      // opaque, so a completed request is all we can treat as success.
+      await fetch(endpoint, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(body),
+      });
+
+      $('#confirm-head').textContent = declined ? 'Thank you for letting us know' : "That's done";
+      $('#echo').textContent = declined
+        ? 'We’ve passed it on.'
+        : `We'll WhatsApp you on ${prettyPhone()}.`;
+      show('confirm');
+    } catch (e) {
+      $('#wa').href =
+        'https://wa.me/' +
+        fallback +
+        '?text=' +
+        encodeURIComponent(`RSVP for ${body.name} (${body.phone_e164}) — the website form failed.`);
+      show('error');
+    } finally {
+      sending = false;
+      $$('.primary').forEach((b) => (b.disabled = false));
+    }
+  }
+
+  $('#submit').addEventListener('click', () => {
+    if (!validate3()) return;
+    send(payload(), false);
+  });
+
+  $('#submit-decline').addEventListener('click', () => {
+    send(payload($('#decline-note').value.trim()), true);
+  });
+
+  $('#retry').addEventListener('click', () => show(state.attending === 'no' ? 'decline' : '3'));
+</script>
+
+<style>
+  /* Humanist sans throughout. Never the display serif — see CLAUDE.md. */
+  main {
+    max-width: 30rem;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 4rem;
+    font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  .wordmark {
+    color: var(--ink);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin: 0 0 1.5rem;
+  }
+  .progress {
+    color: var(--body);
+    opacity: 0.7;
+    font-size: 0.85rem;
+    margin: 0 0 1.5rem;
+  }
+  label,
+  .q {
+    display: block;
+    margin: 1.5rem 0 0.35rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .hint {
+    margin: 0 0 0.6rem;
+    font-size: 0.85rem;
+    opacity: 0.75;
+  }
+  input,
+  select {
+    width: 100%;
+    padding: 0.75rem;
+    font: inherit;
+    color: var(--body);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-sizing: border-box;
+  }
+  .phone {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .err {
+    margin: 0.4rem 0 0;
+    font-size: 0.85rem;
+    color: var(--ink);
+  }
+
+  /* Tap targets over dropdowns, everywhere it is a choice. */
+  .toggle,
+  .nights {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .choice,
+  .night {
+    flex: 1;
+    padding: 0.75rem;
+    font: inherit;
+    min-height: 44px;
+    color: var(--ink);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .choice.on,
+  .night.on {
+    background: var(--ink);
+    color: var(--panel);
+    border-color: var(--ink);
+  }
+
+  .stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .stepper-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .stepper-controls button {
+    width: 44px;
+    height: 44px;
+    font-size: 1.25rem;
+    line-height: 1;
+    color: var(--ink);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .stepper output {
+    min-width: 1.5rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nav {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+  .primary {
+    flex: 1;
+    padding: 0.9rem;
+    font: inherit;
+    font-weight: 600;
+    min-height: 48px;
+    /* Maroon fill, cream text. The brand gold fails AA as a button fill —
+       see docs/DECISIONS.md. */
+    background: var(--accent);
+    color: var(--panel);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .primary[disabled] {
+    opacity: 0.6;
+  }
+  .back {
+    padding: 0.9rem 1.1rem;
+    font: inherit;
+    min-height: 48px;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  section.panel > .primary {
+    margin-top: 2rem;
+    width: 100%;
+  }
+
+  .done .tick {
+    font-size: 2.5rem;
+    margin: 0;
+    color: var(--ink);
+  }
+  .done h1 {
+    color: var(--ink);
+    margin: 0.25rem 0 1rem;
+  }
+  a {
+    color: var(--ink);
+  }
+</style>
