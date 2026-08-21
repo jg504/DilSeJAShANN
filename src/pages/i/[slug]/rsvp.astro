@@ -80,15 +80,15 @@ const TOTAL_STEPS = 3;
       <!-- Step 1 -->
       <section class="panel" data-panel="1">
         <label for="name">Your name</label>
-        <input id="name" name="name" type="text" autocomplete="name" enterkeyhint="next" />
-        <p class="err" role="alert" data-err="name" hidden></p>
+        <input id="name" name="name" type="text" autocomplete="name" enterkeyhint="next" aria-describedby="err-name" />
+        <p class="err" role="alert" id="err-name" data-err="name" hidden></p>
 
         <label for="dial">WhatsApp number</label>
         <p class="hint">
           The number WhatsApp is on — not an Indian SIM you might pick up in December.
         </p>
         <div class="phone">
-          <select id="dial">
+          <select id="dial" aria-label="Country code" aria-describedby="err-phone">
             <option value="" selected disabled>Select</option>
             {
               PRIORITY.map((c, i) => (
@@ -118,9 +118,18 @@ const TOTAL_STEPS = 3;
               ))
             }
           </select>
-          <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" enterkeyhint="next" />
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            inputmode="tel"
+            autocomplete="tel-national"
+            enterkeyhint="next"
+            aria-label="WhatsApp number"
+            aria-describedby="err-phone"
+          />
         </div>
-        <p class="err" role="alert" data-err="phone" hidden></p>
+        <p class="err" role="alert" id="err-phone" data-err="phone" hidden></p>
 
         <label for="guests">Anyone else coming with you?</label>
         <input id="guests" name="guests" type="text" autocomplete="off" enterkeyhint="go" />
@@ -135,7 +144,7 @@ const TOTAL_STEPS = 3;
           <button type="button" class="choice" data-attending="yes">Yes</button>
           <button type="button" class="choice" data-attending="no">No</button>
         </div>
-        <p class="err" role="alert" data-err="attending" hidden></p>
+        <p class="err" role="alert" id="err-attending" data-err="attending" hidden></p>
 
         <div id="counts" hidden>
           <p class="hint">How many of you, for each? Zero is fine.</p>
@@ -147,7 +156,7 @@ const TOTAL_STEPS = 3;
                   <button type="button" data-step="-1" aria-label={`One fewer for ${f.name}`}>
                     −
                   </button>
-                  <output data-count>0</output>
+                  <output data-count aria-live="polite">0</output>
                   <button type="button" data-step="1" aria-label={`One more for ${f.name}`}>
                     +
                   </button>
@@ -177,7 +186,7 @@ const TOTAL_STEPS = 3;
                   No
                 </button>
               </div>
-              <p class="err" role="alert" data-err="accom" hidden />
+              <p class="err" role="alert" id="err-accom" data-err="accom" hidden />
 
               <div id="accom-detail" hidden>
                 <div class="stepper" data-travellers>
@@ -186,7 +195,7 @@ const TOTAL_STEPS = 3;
                     <button type="button" data-step="-1" aria-label="One fewer travelling">
                       −
                     </button>
-                    <output data-count>0</output>
+                    <output data-count aria-live="polite">0</output>
                     <button type="button" data-step="1" aria-label="One more travelling">
                       +
                     </button>
@@ -205,7 +214,7 @@ const TOTAL_STEPS = 3;
                     28 Dec
                   </button>
                 </div>
-                <p class="err" role="alert" data-err="nights" hidden />
+                <p class="err" role="alert" id="err-nights" data-err="nights" hidden />
               </div>
             </div>
           )
@@ -240,6 +249,11 @@ const TOTAL_STEPS = 3;
       <p class="tick">✓</p>
       <h2 id="confirm-head">That's done</h2>
       <p id="echo"></p>
+
+      {/* Showing back what was recorded turns "the button worked" into "they
+          have my answer", and it is the last chance for a guest to notice they
+          put 4 where they meant 1. */}
+      <dl class="summary" id="summary"></dl>
       <p class="hint">
         Plans change? Open your invitation link and fill this in again — we'll use your
         latest response.
@@ -340,11 +354,18 @@ const TOTAL_STEPS = 3;
     if (primary && !primary.disabled) primary.click();
   });
 
+  const FIELD_FOR = { name: '#name', phone: '#phone' };
+
   function err(name, msg) {
     const el = $(`[data-err="${name}"]`);
     if (!el) return;
     el.textContent = msg || '';
     el.hidden = !msg;
+    const field = FIELD_FOR[name] && $(FIELD_FOR[name]);
+    if (field) {
+      if (msg) field.setAttribute('aria-invalid', 'true');
+      else field.removeAttribute('aria-invalid');
+    }
   }
 
   function clearErrors() {
@@ -636,6 +657,36 @@ const TOTAL_STEPS = 3;
     return lines.join('\n');
   }
 
+  // What was actually recorded, read back on the confirmation screen.
+  function renderSummary(b, declined) {
+    const dl = $('#summary');
+    if (!dl) return;
+    const rows = [['Name', b.name]];
+    if (b.additional_guests) rows.push(['With', b.additional_guests]);
+
+    if (!declined) {
+      Object.keys(fnNames).forEach((id) => {
+        const n = b['count_' + id];
+        rows.push([fnNames[id], n === 0 ? 'not coming' : `${n} ${n === 1 ? 'person' : 'people'}`]);
+      });
+      if (b.accommodation === 'yes') {
+        rows.push([
+          'Staying',
+          `${b.travellers} travelling · ${b.nights.split('|').join(', ')} Dec`,
+        ]);
+      }
+      if (b.dietary) rows.push(['Kitchen', b.dietary]);
+    }
+    if (b.notes) rows.push(['Note', b.notes]);
+
+    dl.innerHTML = rows
+      .map(
+        ([k, v]) =>
+          `<dt>${k.replace(/[&<>]/g, '')}</dt><dd>${String(v).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c])}</dd>`
+      )
+      .join('');
+  }
+
   let sending = false;
 
   async function send(body, declined) {
@@ -663,6 +714,7 @@ const TOTAL_STEPS = 3;
       $('#echo').textContent = declined
         ? 'We’ve passed it on.'
         : `We'll WhatsApp you on ${prettyPhone()}.`;
+      renderSummary(body, declined);
       show('confirm');
     } else {
       $('#wa').href = 'https://wa.me/' + fallback + '?text=' + encodeURIComponent(summary(body));
@@ -879,6 +931,28 @@ const TOTAL_STEPS = 3;
   .done h2 {
     color: var(--ink);
     margin: 0.25rem 0 1rem;
+  }
+  .summary {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.35rem 1rem;
+    margin: 1.25rem 0;
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    text-align: left;
+    font-size: 0.95rem;
+  }
+  .summary dt {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .summary dd {
+    margin: 0;
+    color: var(--body);
+  }
+  .summary:empty {
+    display: none;
   }
   a {
     color: var(--ink);
