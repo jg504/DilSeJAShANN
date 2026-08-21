@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  /* Palette from src/styles/tokens.css — the OG image must read as the same
+     wedding as the card and the site. */
+  :root{
+    --bg:#F5E4D3; --panel:#FFF3E7; --ink:#952829; --line:#E18800; --body:#43302B;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1200px;height:630px}
+  body{
+    background:var(--panel);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Playfair Display',Georgia,serif;
+  }
+  .frame{
+    position:absolute;inset:26px;
+    border:1px solid var(--line);
+  }
+  .frame::after{
+    content:'';position:absolute;inset:7px;
+    border:2px solid var(--line);opacity:.35;
+  }
+  .stack{
+    position:relative;
+    display:flex;flex-direction:column;align-items:center;
+    gap:0;
+  }
+  .archwrap{position:relative;width:352px;height:330px}
+  .archwrap svg{position:absolute;inset:0}
+  .archwrap img{
+    position:absolute;left:50%;top:58%;
+    transform:translate(-50%,-50%);
+    width:252px;height:auto;
+  }
+  .wordmark{
+    margin-top:26px;
+    font-size:52px;font-weight:600;letter-spacing:.005em;
+    color:var(--ink);line-height:1;
+  }
+  .sub{
+    margin-top:14px;
+    font-family:ui-sans-serif,system-ui,'Helvetica Neue',sans-serif;
+    font-size:19px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--body);opacity:.72;
+  }
+</style>
+</head>
+<body>
+  <div class="frame"></div>
+
+  <div class="stack">
+    <div class="archwrap">
+      <!-- The arch is the signature element, carried from the card. Stroke only,
+           gold, so it frames rather than fills. -->
+      <svg viewBox="0 0 352 330" fill="none">
+        <path d="M6 324 L6 182 A170 170 0 0 1 346 182 L346 324"
+              stroke="#E18800" stroke-width="3" fill="none"
+              stroke-linecap="round"/>
+        <path d="M22 324 L22 182 A154 154 0 0 1 330 182 L330 324"
+              stroke="#E18800" stroke-width="1" fill="none"
+              opacity=".45"/>
+      </svg>
+      <img src="../../src/assets/monogram.webp" alt="">
+    </div>
+
+    <!-- No dates beyond the month: this image is identical on all seven links,
+         so anything narrower would tell a Wedding-only guest that something
+         happens on the other days. -->
+    <div class="wordmark">#DilSeJAShANN</div>
+    <div class="sub">December 2026 &middot; Gurgaon</div>
+  </div>
+</body>
+</html>

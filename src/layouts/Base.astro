@@ -2,13 +2,26 @@
 // Every page in the site goes through here, so noindex is set in exactly one
 // place. This site publishes venue addresses and a family schedule.
 import '../styles/tokens.css';
+import {
+  OG_TITLE,
+  OG_DESCRIPTION,
+  OG_IMAGE,
+  OG_IMAGE_WIDTH,
+  OG_IMAGE_HEIGHT,
+} from '../data/og';
 
 interface Props {
   title: string;
   description?: string;
+  /** Suppress the preview card on pages that must never be shareable. */
+  noPreview?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, noPreview = false } = Astro.props;
+
+// Absolute URLs — WhatsApp will not resolve a relative og:image.
+const ogUrl = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL(OG_IMAGE, Astro.site).href;
 ---
 
 <!doctype html>
@@ -19,6 +32,29 @@ const { title, description } = Astro.props;
     <meta name="robots" content="noindex, nofollow" />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+
+    {
+      /* Preview copy is identical on every link — see src/data/og.ts. Only
+         og:url differs, because it is this page's own address. */
+      !noPreview && (
+        <>
+          <meta property="og:type" content="website" />
+          <meta property="og:site_name" content="#DilSeJAShANN" />
+          <meta property="og:title" content={OG_TITLE} />
+          <meta property="og:description" content={OG_DESCRIPTION} />
+          <meta property="og:url" content={ogUrl} />
+          <meta property="og:image" content={ogImage} />
+          <meta property="og:image:type" content="image/png" />
+          <meta property="og:image:width" content={OG_IMAGE_WIDTH} />
+          <meta property="og:image:height" content={OG_IMAGE_HEIGHT} />
+          <meta property="og:image:alt" content="#DilSeJAShANN" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={OG_TITLE} />
+          <meta name="twitter:description" content={OG_DESCRIPTION} />
+          <meta name="twitter:image" content={ogImage} />
+        </>
+      )
+    }
   </head>
   <body>
     <slot />

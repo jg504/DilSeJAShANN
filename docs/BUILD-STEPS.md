@@ -70,8 +70,8 @@ Do this before any form UI. It is the least predictable part of the build.
 
 ## Phase 4 — sharing
 
-- [ ] **4.1** Per-slug OG tags, tier-neutral copy that sells the RSVP
-- [ ] **4.2** OG image rendered — 1200×630, JPEG or PNG, under 300KB
+- [x] **4.1** Per-slug OG tags, tier-neutral copy that sells the RSVP
+- [x] **4.2** OG image rendered — 1200×630, JPEG or PNG, under 300KB
 - [ ] **4.3** All seven previews checked in a real WhatsApp chat on a phone
 - [ ] **4.4** PNG-then-link send order tested — does the preview still render?
 
