@@ -31,6 +31,26 @@ const ogImage = new URL(OG_IMAGE, Astro.site).href;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
+
+    {/* The two faces are 67KB of the page's ~73KB transfer. They are not
+        render-blocking — font-display: swap means text paints immediately in
+        the fallback — but preloading starts them during the CSS round trip
+        instead of after it, which shortens the visible swap on Slow 4G. */}
+    <link
+      rel="preload"
+      href="/fonts/playfair-display-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/source-sans-3-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
 

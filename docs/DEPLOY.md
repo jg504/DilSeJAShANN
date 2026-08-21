@@ -58,6 +58,49 @@ in `src/assets/`, so Astro processes them at build time.
 
 ---
 
+## Commands
+
+| Command | What it does |
+|---|---|
+| `npm run validate` | Content check. Fails on `<<FILL>>`, the tier table, ceremony and story shape, and story function-neutrality. |
+| `npm run build` | Strict. Runs `validate` first, so an incomplete record cannot ship. |
+| `npm run build:draft` | Skips validation. What Cloudflare uses until the content lands. |
+| `npm run verify` | **Post-build.** Checks `dist/` for tier leaks, gating, `.ics` sets, OG parity, stale output, layout-triggering animations and the weight budget. |
+
+Both build scripts empty `dist/` first. Astro only clears the top level, and
+Cloudflare restores a build output cache, so a stale nested file — a leftover
+`.ics` for a function a guest is not invited to — could otherwise reach
+production.
+
+**Run `npm run verify` after any change to a page template.** It is the only
+thing standing between a refactor and a tier leak, and it has been checked
+against eight deliberately injected faults.
+
+---
+
+## Measured weight
+
+Invitation page, gzipped as Cloudflare serves it:
+
+| | |
+|---|---|
+| HTML | 4.4 KB |
+| CSS | 1.5 KB |
+| Two woff2 faces | 65.6 KB |
+| **Total** | **71.4 KB in 3 requests** |
+
+Against the 800KB above-the-fold budget for Class A.
+
+The LCP path is only the HTML and CSS — 5.9KB — because `font-display: swap`
+paints text in the fallback face immediately. The fonts are preloaded so they
+start during the CSS round trip rather than after it.
+
+**Not yet done:** an actual throttled run. These are transfer measurements and
+arithmetic, not a Slow 4G or 4× CPU trace. Build steps 8.4 and 8.6 stay open
+until someone runs it on a real device.
+
+---
+
 ## Access
 
 Cloudflare Access protects `/admin/*` and `/share`. It requires the custom domain and
