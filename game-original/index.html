@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>#DilSeJAShANN - Memory Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background-color: #f6ebd9;
+        }
+
+        /* Screen Configurations */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s;
+        }
+
+        .hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Welcome Landing Screen (File 1.png background) */
+        #welcome-screen {
+            background-image: url('1.png');
+            justify-content: flex-end;
+            padding-bottom: 9%;
+        }
+
+        /* Re-styled Button to match your maroon design precisely */
+        .start-btn {
+            width: 75%;
+            max-width: 320px;
+            height: 58px;
+            background-color: #832727; /* Rich maroon background color match */
+            border: 2px solid #ffffff; /* Crisp white border outline */
+            border-radius: 30px; /* Capsule shape curvature */
+            color: #ffffff; /* White typography color */
+            font-size: 0.95rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: transform 0.1s ease, background-color 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.3;
+            padding: 5px 15px;
+        }
+
+        .start-btn:active {
+            transform: scale(0.97);
+            background-color: #6d1f1f;
+        }
+
+        /* Game Board Screen (File 2.png background) */
+        #game-screen {
+            background-image: url('2.png');
+            justify-content: flex-start;
+            padding-top: 5vh;
+        }
+
+        /* Header Match The Pairs Banner */
+        .game-header {
+            width: 65%;
+            max-width: 250px;
+            height: 45px;
+            border: 2px solid #c28e5d;
+            background-color: #faf3e8;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #722727;
+            font-size: 1.05rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            margin-bottom: 4vh;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+        }
+
+        /* 4x4 Grid Container */
+        .grid-container {
+            width: 90%;
+            max-width: 380px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 10px;
+            padding: 5px;
+        }
+
+        /* 3D Card Architecture */
+        .card {
+            aspect-ratio: 3 / 4;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 12px;
+            box-shadow: 0 4px 8 rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        /* Card Back (Uses card_back.png logo) */
+        .card-back {
+            background-image: url('card_back.png');
+            background-size: cover;
+            background-position: center;
+            background-color: #fff;
+        }
+
+        /* Card Front (Reveals photo fragments from pair1-8.png) */
+        .card-front {
+            background-size: cover;
+            background-position: center;
+            background-color: #fff;
+            transform: rotateY(180deg);
+        }
+
+        /* Modal Congratulatory Finish (File 5.png background) */
+        #win-screen {
+            background-image: url('5.png');
+            justify-content: center;
+            background-color: #fbf5ec;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- WELCOME LANDING PAGE SCREEN -->
+    <div id="welcome-screen" class="screen">
+        <button class="start-btn" onclick="startGame()">
+            START THE GAME
+            <span style="font-size: 0.62rem; font-weight: normal; letter-spacing: 0.5px; opacity: 0.9; margin-top: 2px;">TO REVEAL THE SPECIAL DATE</span>
+        </button>
+    </div>
+
+    <!-- ACTIVE GAMEPLAY MATRIX BOARD -->
+    <div id="game-screen" class="screen hidden">
+        <div class="game-header">MATCH THE PAIRS</div>
+        <div class="grid-container" id="grid"></div>
+    </div>
+
+    <!-- SAVE THE DATE DESTINATION REVEAL SCREEN -->
+    <div id="win-screen" class="screen hidden"></div>
+
+    <script>
+        const cardImages = [
+            'pair1.png', 'pair1.png',
+            'pair2.png', 'pair2.png',
+            'pair3.png', 'pair3.png',
+            'pair4.png', 'pair4.png',
+            'pair5.png', 'pair5.png',
+            'pair6.png', 'pair6.png',
+            'pair7.png', 'pair7.png',
+            'pair8.png', 'pair8.png'
+        ];
+
+        let flippedCards = [];
+        let matchedPairsCount = 0;
+        let isProcessing = false;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startGame() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            initializeGrid();
+        }
+
+        function initializeGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            
+            const shuffledCards = shuffle([...cardImages]);
+
+            shuffledCards.forEach((imgSrc, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.image = imgSrc;
+
+                card.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-face card-back"></div>
+                        <div class="card-face card-front" style="background-image: url('${imgSrc}');"></div>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => handleCardClick(card));
+                grid.appendChild(card);
+            });
+        }
+
+        function handleCardClick(card) {
+            if (isProcessing || card.classList.contains('flipped') || flippedCards.includes(card)) {
+                return;
+            }
+
+            card.classList.add('flipped');
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            isProcessing = true;
+            const [card1, card2] = flippedCards;
+
+            if (card1.dataset.image === card2.dataset.image) {
+                matchedPairsCount++;
+                flippedCards = [];
+                isProcessing = false;
+
+                if (matchedPairsCount === 8) {
+                    setTimeout(() => {
+                        triggerWinTransition();
+                    }, 600);
+                }
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    flippedCards = [];
+                    isProcessing = false;
+                }, 1000);
+            }
+        }
+
+        function triggerWinTransition() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('win-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
