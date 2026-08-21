@@ -1,0 +1,47 @@
+---
+// Live from day one as a placeholder, so the link in circulation never 404s
+// and becomes the gallery in January without anything being re-sent.
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Photos — #DilSeJAShANN">
+  <main>
+    <p class="wordmark">#DilSeJAShANN</p>
+    <h1>Photographs</h1>
+    <p>
+      The photographs are being put together and will appear here in the new year. Do
+      come back.
+    </p>
+  </main>
+</Base>
+
+<style>
+  main {
+    max-width: var(--measure);
+    margin: 0 auto;
+    padding: var(--gap-lg) var(--gap) var(--gap-xl);
+    text-align: center;
+  }
+  .wordmark {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: var(--t-md);
+    color: var(--ink);
+    margin: 0 0 var(--gap-xl);
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: var(--t-xl);
+    color: var(--ink);
+    margin: 0 0 var(--gap);
+  }
+  p {
+    font-family: var(--sans);
+    font-size: var(--t-base);
+    line-height: 1.65;
+    color: var(--body);
+    margin: 0 auto;
+    max-width: 26rem;
+  }
+</style>

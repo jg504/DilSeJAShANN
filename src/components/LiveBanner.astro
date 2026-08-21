@@ -1,0 +1,214 @@
+---
+// Live mode. During the wedding days the invitation leads with what is
+// happening now, or what is next, pinned above everything else.
+//
+// COMPUTED CLIENT-SIDE, ALWAYS IN IST. A static site's HTML is baked at build
+// time, so a build-time switch would show whatever was true at the last deploy.
+// And guests will be holding phones set to London, Dubai and California — the
+// answer must be Gurgaon's clock regardless of the device.
+//
+// Three states: before the first day (nothing shown), during, and after.
+//
+// THIS CANNOT BE FIXED WHILE IT IS RUNNING. Append ?now=<ISO> to any invitation
+// URL to fake the clock and check a state — e.g. ?now=2026-12-27T16:00. The
+// value is read as IST.
+interface Props {
+  functions: {
+    id: string;
+    name: string;
+    date: string;
+    startTime?: string;
+    ceremonies?: { name: string; startTime: string }[];
+    venue: string;
+    mapsUrl: string;
+  }[];
+  contact: { name: string; phone: string };
+}
+
+const { functions, contact } = Astro.props;
+
+// Only this link's functions are passed, so live mode can never announce a
+// function this guest was not invited to.
+const events = functions.map((f) => ({
+  name: f.name,
+  date: f.date,
+  venue: f.venue,
+  mapsUrl: f.mapsUrl,
+  times: f.ceremonies?.length
+    ? f.ceremonies.map((c) => ({ label: c.name, at: c.startTime }))
+    : [{ label: '', at: f.startTime ?? '' }],
+}));
+---
+
+<div id="live" class="live" hidden></div>
+
+<script define:vars={{ events, contact }}>
+  const el = document.getElementById('live');
+  if (el) {
+    // Every comparison happens on absolute epoch milliseconds, with IST written
+    // explicitly into the parsed string. No local-timezone assumptions anywhere.
+    const IST = '+05:30';
+    const HOURS = 60 * 60 * 1000;
+    const RUNS_FOR = 4 * HOURS;
+
+    const minutes = (raw) => {
+      if (!raw) return null;
+      const m = String(raw).trim().match(/^(\d{1,2})[:.](\d{2})\s*(am|pm)?$/i);
+      if (!m) return null;
+      let h = Number(m[1]);
+      const mm = Number(m[2]);
+      const ap = m[3] ? m[3].toLowerCase() : '';
+      if (ap === 'pm' && h < 12) h += 12;
+      if (ap === 'am' && h === 12) h = 0;
+      if (h > 23 || mm > 59) return null;
+      return h * 60 + mm;
+    };
+
+    const pad = (n) => String(n).padStart(2, '0');
+    const at = (date, mins) =>
+      Date.parse(`${date}T${pad(Math.floor(mins / 60))}:${pad(mins % 60)}:00${IST}`);
+
+    const params = new URLSearchParams(location.search);
+    const faked = params.get('now');
+    const now = faked ? Date.parse(/[+-]\d{2}:\d{2}$/.test(faked) ? faked : faked + IST) : Date.now();
+
+    const planned = events
+      .map((e) => {
+        const mins = e.times.map((t) => minutes(t.at)).filter((v) => v !== null);
+        // An unfilled or unparseable time still gets the guest to the right
+        // place on the right day rather than dropping the event entirely.
+        const allDay = mins.length === 0;
+        const start = allDay ? at(e.date, 0) : at(e.date, Math.min.apply(null, mins));
+        const end = allDay ? at(e.date, 0) + 24 * HOURS : at(e.date, Math.max.apply(null, mins)) + RUNS_FOR;
+        return { ...e, start, end, allDay };
+      })
+      .sort((a, b) => a.start - b.start);
+
+    const first = planned[0];
+    const last = planned[planned.length - 1];
+    const windowStart = Date.parse(`${first.date}T00:00:00${IST}`);
+
+    if (!isNaN(now) && now >= windowStart) {
+      const live = planned.find((e) => now >= e.start && now < e.end);
+      const next = planned.find((e) => now < e.start);
+
+      const esc = (s) =>
+        String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+      const timeLine = (e) =>
+        e.allDay
+          ? ''
+          : e.times
+              .filter((t) => minutes(t.at) !== null)
+              .map((t) => (t.label ? `${esc(t.label)} ${esc(t.at)}` : esc(t.at)))
+              .join(' · ');
+
+      const dayLabel = (e) => {
+        const d = new Date(e.start);
+        const today = new Date(now);
+        const fmt = (x) =>
+          x.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'Asia/Kolkata' });
+        return fmt(d) === fmt(today) ? 'Today' : fmt(d);
+      };
+
+      let html = '';
+
+      if (live) {
+        html =
+          `<p class="live-label">Happening now</p>` +
+          `<p class="live-name">${esc(live.name)}</p>` +
+          (timeLine(live) ? `<p class="live-time">${timeLine(live)}</p>` : '') +
+          `<p class="live-venue">${esc(live.venue)}</p>` +
+          `<div class="live-actions">` +
+          `<a class="live-btn" href="${esc(live.mapsUrl)}" target="_blank" rel="noopener noreferrer">Get Directions</a>` +
+          `<a class="live-btn quiet" href="tel:${esc(contact.phone)}">Call ${esc(contact.name)}</a>` +
+          `</div>`;
+      } else if (next) {
+        html =
+          `<p class="live-label">Up next</p>` +
+          `<p class="live-name">${esc(next.name)}</p>` +
+          `<p class="live-time">${dayLabel(next)}${timeLine(next) ? ' · ' + timeLine(next) : ''}</p>` +
+          `<p class="live-venue">${esc(next.venue)}</p>` +
+          `<div class="live-actions">` +
+          `<a class="live-btn" href="${esc(next.mapsUrl)}" target="_blank" rel="noopener noreferrer">Get Directions</a>` +
+          `<a class="live-btn quiet" href="tel:${esc(contact.phone)}">Call ${esc(contact.name)}</a>` +
+          `</div>`;
+      } else {
+        // After everything. No venue, no directions — nowhere left to go.
+        html =
+          `<p class="live-label">Thank you for celebrating with us</p>` +
+          `<p class="live-after">It meant everything having you there.</p>`;
+      }
+
+      el.innerHTML = html;
+      el.hidden = false;
+      el.classList.add('is-live');
+    }
+  }
+</script>
+
+<style>
+  .live {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+    padding: var(--gap);
+    margin: var(--gap) 0 0;
+    text-align: left;
+  }
+  .live :global(.live-label) {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: var(--t-xs);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 var(--gap-xs);
+  }
+  .live :global(.live-name) {
+    font-family: var(--display);
+    font-size: var(--t-lg);
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.15;
+  }
+  .live :global(.live-time) {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: var(--t-base);
+    color: var(--body);
+    margin: var(--gap-xs) 0 0;
+  }
+  .live :global(.live-venue),
+  .live :global(.live-after) {
+    font-family: var(--sans);
+    font-size: var(--t-base);
+    line-height: 1.55;
+    color: var(--body);
+    margin: var(--gap-xs) 0 0;
+  }
+  .live :global(.live-actions) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-sm);
+    margin-top: var(--gap);
+  }
+  .live :global(.live-btn) {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: var(--t-sm);
+    text-decoration: none;
+    padding: 0.7rem 1.1rem;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: var(--panel);
+  }
+  .live :global(.live-btn.quiet) {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+</style>

@@ -8,6 +8,7 @@
 // from this link's own functions rather than the full 26–28 span.
 import Base from '../../layouts/Base.astro';
 import Arch from '../../components/Arch.astro';
+import LiveBanner from '../../components/LiveBanner.astro';
 import data from '../../data/invites.json';
 
 export function getStaticPaths() {
@@ -78,6 +79,9 @@ const swatches = (raw: unknown[]): Swatch[] =>
 
 <Base title="#DilSeJAShANN">
   <div class="page">
+    {/* Pinned above everything during the wedding days. Hidden otherwise. */}
+    <LiveBanner functions={functions} contact={side.contacts[0]} />
+
     <header class="hero" id="hero">
       <p class="wordmark">#DilSeJAShANN</p>
 

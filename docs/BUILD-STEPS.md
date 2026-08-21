@@ -110,10 +110,10 @@ Do this before any form UI. It is the least predictable part of the build.
 
 ## Phase 7 — the day itself
 
-- [ ] **7.1** Live mode — client-side, IST, three states
-- [ ] **7.2** Tested with a faked date: before, during each function, after
-- [ ] **7.3** Both transitions tested
-- [ ] **7.4** `/photos` placeholder route live
+- [x] **7.1** Live mode — client-side, IST, three states
+- [x] **7.2** Tested with a faked date: before, during each function, after
+- [x] **7.3** Both transitions tested
+- [x] **7.4** `/photos` placeholder route live
 
 **Done when:** it works unattended. You cannot fix this while wearing a sherwani.
 
