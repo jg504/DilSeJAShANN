@@ -1,0 +1,16 @@
+{
+  // Cloudflare Workers Static Assets. This project is a Worker, not classic
+  // Pages, so `npx wrangler deploy` needs this file to know what to upload.
+  // The name must match the existing Worker — a different name silently
+  // creates a second Worker and leaves the domain on the old one.
+  "name": "dilsejashann",
+  "compatibility_date": "2026-08-21",
+
+  "assets": {
+    "directory": "./dist",
+
+    // Astro emits 404.html. Without this, a wrong slug returns the asset
+    // server's bare 404 instead of our page.
+    "not_found_handling": "404-page"
+  }
+}
