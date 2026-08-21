@@ -1,0 +1,42 @@
+# Cloudflare reads this file and applies the headers, then does not serve it.
+# Rules are matched most-specific first.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  # 'unsafe-inline' is a knowing compromise: Astro inlines this site's small
+  # scripts and scoped styles, and there is no build step here emitting CSP
+  # hashes. The valuable parts still hold — no third-party script can load, the
+  # page cannot be framed, and connect-src is narrowed to the one endpoint the
+  # RSVP form posts to, including the googleusercontent host Apps Script
+  # redirects to.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; form-action 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'
+
+# Astro hashes these filenames, so they can never go stale.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Deliberately short. The typefaces are still provisional — a long immutable
+# cache would strand guests on the placeholder face after the real one lands.
+# Raise this once the card designer's fonts are in and the filenames are final.
+/fonts/*
+  Cache-Control: public, max-age=86400
+
+# The preview image is effectively frozen once links go out, but WhatsApp
+# caches it independently anyway.
+/og.png
+  Cache-Control: public, max-age=604800
+
+/favicon.svg
+  Cache-Control: public, max-age=604800
+/favicon.ico
+  Cache-Control: public, max-age=604800
+/apple-touch-icon.png
+  Cache-Control: public, max-age=604800
+
+# The invitation must never be served stale — content is still being filled in,
+# and a guest re-opening the link on the day needs the current page.
+/i/*
+  Cache-Control: public, max-age=0, must-revalidate

@@ -50,6 +50,35 @@ function stamp(date: string, mins: number) {
 
 const esc = (s: string) => String(s).replace(/([,;\\])/g, '\\$1').replace(/\n/g, '\\n');
 
+/**
+ * RFC 5545 content lines must not exceed 75 octets. Longer ones are folded by
+ * inserting CRLF and a single space; a parser rejoins by stripping that space.
+ *
+ * A real venue plus a Gurugram address runs past 140 octets, and clients differ
+ * on whether they truncate an over-long line or reject the file. Counted in
+ * OCTETS, not characters — the summary contains an em dash, which is three
+ * bytes — and never split mid-sequence, which would produce invalid UTF-8.
+ */
+function fold(line: string): string {
+  const enc = new TextEncoder();
+  const dec = new TextDecoder();
+  const bytes = enc.encode(line);
+  if (bytes.length <= 75) return line;
+
+  const parts: string[] = [];
+  let start = 0;
+  let limit = 75;
+  while (start < bytes.length) {
+    let end = Math.min(start + limit, bytes.length);
+    // Walk back off any UTF-8 continuation byte (10xxxxxx).
+    while (end > start && end < bytes.length && (bytes[end] & 0xc0) === 0x80) end--;
+    parts.push(dec.decode(bytes.subarray(start, end)));
+    start = end;
+    limit = 74; // continuation lines carry a leading space
+  }
+  return parts.join('\r\n ');
+}
+
 export const GET: APIRoute = ({ props, params }) => {
   const fn = props.fn as Fn;
 
@@ -100,7 +129,7 @@ export const GET: APIRoute = ({ props, params }) => {
   lines.push(`LOCATION:${esc(`${fn.venue}, ${fn.address}`)}`);
   lines.push('END:VEVENT', 'END:VCALENDAR');
 
-  return new Response(lines.join('\r\n') + '\r\n', {
+  return new Response(lines.map(fold).join('\r\n') + '\r\n', {
     headers: {
       'Content-Type': 'text/calendar; charset=utf-8',
       'Content-Disposition': `attachment; filename="${params.fn}.ics"`,

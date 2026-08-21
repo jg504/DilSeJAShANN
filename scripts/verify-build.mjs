@@ -139,6 +139,60 @@ for (const s of slugs) {
   if (/\broom/i.test(body)) fail(`i/${s}/rsvp: contains the word "room"`);
 }
 
+// ---------------------------------------------------------------- accessibility
+// Each of these was a real defect found by auditing the built output, so each
+// is now checked on every build rather than remembered.
+for (const [page] of guestPages) {
+  const html = read(page);
+  const h1s = (html.match(/<h1[\s>]/g) || []).length;
+  if (h1s !== 1) fail(`${page}: has ${h1s} <h1> elements, expected exactly 1`);
+  if (!/<html[^>]*\blang=/.test(html)) fail(`${page}: <html> has no lang`);
+  if (!html.includes('favicon.svg')) fail(`${page}: no favicon link`);
+  if (!html.includes('theme-color')) fail(`${page}: no theme-color`);
+  if (!html.includes('focus-visible')) fail(`${page}: no :focus-visible styles`);
+
+  // Heading levels must not skip — h1 then h3 leaves a gap in the outline.
+  const levels = [...html.matchAll(/<h([1-6])[\s>]/g)].map((m) => Number(m[1]));
+  for (let i = 1; i < levels.length; i++) {
+    if (levels[i] > levels[i - 1] + 1) {
+      fail(`${page}: heading jumps from h${levels[i - 1]} to h${levels[i]}`);
+    }
+  }
+}
+
+for (const s of slugs) {
+  const rsvp = read(`i/${s}/rsvp/index.html`);
+  // A guest with JavaScript off must not meet a form that silently does nothing.
+  if (!rsvp.includes('<noscript')) fail(`i/${s}/rsvp: no <noscript> fallback`);
+  // Validation errors have to be announced, not just displayed.
+  if (!rsvp.includes('role="alert"')) fail(`i/${s}/rsvp: errors are not announced`);
+  if (!rsvp.includes('aria-live')) fail(`i/${s}/rsvp: step changes are not announced`);
+  // Enter must advance, and back must step back rather than leave the form.
+  if (!rsvp.includes('popstate')) fail(`i/${s}/rsvp: no history handling`);
+}
+
+for (const p of ['favicon.svg', 'favicon.ico', 'apple-touch-icon.png', '_headers']) {
+  if (!existsSync(join(dist, p))) fail(`missing: ${p}`);
+}
+
+// ---------------------------------------------------------------- ics validity
+// RFC 5545: content lines must not exceed 75 octets, and the file uses CRLF.
+for (const s of slugs) {
+  for (const id of byS[s].functions) {
+    const p = join(dist, 'i', s, `${id}.ics`);
+    if (!existsSync(p)) continue;
+    const raw = readFileSync(p, 'utf8');
+    if (!raw.includes('\r\n')) fail(`i/${s}/${id}.ics: not CRLF terminated`);
+    for (const line of raw.split('\r\n')) {
+      const octets = Buffer.byteLength(line, 'utf8');
+      if (octets > 75) fail(`i/${s}/${id}.ics: ${octets}-octet line exceeds the RFC 5545 limit of 75`);
+    }
+    for (const req of ['BEGIN:VCALENDAR', 'BEGIN:VEVENT', 'UID:', 'DTSTAMP:', 'DTSTART', 'END:VCALENDAR']) {
+      if (!raw.includes(req)) fail(`i/${s}/${id}.ics: missing ${req}`);
+    }
+  }
+}
+
 // ---------------------------------------------------------------- OG tags
 const tagsOf = (html) =>
   Object.fromEntries(
