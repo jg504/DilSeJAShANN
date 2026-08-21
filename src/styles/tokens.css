@@ -1,0 +1,24 @@
+/* Design tokens — dilsejashann.com
+ *
+ * Every colour in the build derives from these six values. Never hardcode a hex
+ * in a component. Deviations are allowed but must carry a comment saying why,
+ * or nobody can tell a decision from a mistake three months later.
+ *
+ * Source: the card artwork — #952829 maroon, #E18800 gold, #FFF3E7 cream.
+ * Reasoning for each value is logged in docs/DECISIONS.md.
+ */
+
+:root{
+  --bg:     #F5E4D3; /* cream deepened — outer surround, desktop only */
+  --panel:  #FFF3E7; /* brand cream — content surface, what guests read on */
+  --ink:    #952829; /* brand maroon — headings, primary */
+  --line:   #E18800; /* brand gold — arch stroke, borders, rules */
+
+  /* = --ink, deliberately. The brand gold fails AA as a button fill: 2.72:1
+     against white text, 2.49:1 against cream. A maroon fill with cream text is
+     7.36:1. If a darker gold arrives that clears 4.5:1, change this token only
+     and the RSVP button restyles in one place. */
+  --accent: #952829;
+
+  --body:   #43302B; /* maroon desaturated and darkened — 11.3:1 on --panel */
+}

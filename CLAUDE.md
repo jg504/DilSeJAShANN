@@ -129,7 +129,10 @@ values. Never hardcode a hex in a component.
 }
 ```
 
-Palette not yet chosen. Build against the tokens; the values get set later.
+**Palette chosen and set** in `src/styles/tokens.css`, derived from the card's
+`#952829` maroon, `#E18800` gold and `#FFF3E7` cream. The reasoning for each value —
+including why `--ink` and `--accent` deliberately share one hex — is in
+`docs/DECISIONS.md`. Read that before changing any of them.
 
 **Deviations are allowed but must carry a comment saying why:**
 
@@ -550,6 +553,9 @@ the schedule.
 
 ## Working conventions
 
+- **Read `docs/DECISIONS.md` first.** It logs what is already settled and why. Do not
+  reopen a decision recorded there without raising it explicitly. `docs/DEPLOY.md`
+  covers the Cloudflare Pages configuration and the pending file migration.
 - Plan mode before any structural change. Show the plan, wait for approval.
 - Commit at the start and end of every task.
 - Do not refactor code outside the current task.

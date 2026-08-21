@@ -1,0 +1,89 @@
+{
+  "functions": {
+    "f1": {
+      "name": "Cocktails",
+      "date": "2026-12-26",
+      "startTime": "<<FILL>>",
+      "venue": "<<FILL>>",
+      "address": "<<FILL>>",
+      "mapsUrl": "<<FILL>>",
+      "dressCode": "<<FILL>>",
+      "dressColors": [],
+      "dressNote": ""
+    },
+    "f2": {
+      "name": "Wedding",
+      "date": "2026-12-27",
+      "ceremonies": [
+        { "name": "Anand Karaj", "startTime": "<<FILL>>" },
+        { "name": "Phere", "startTime": "<<FILL>>" }
+      ],
+      "venue": "<<FILL>>",
+      "address": "<<FILL>>",
+      "mapsUrl": "<<FILL>>",
+      "dressCode": "<<FILL>>",
+      "dressColors": [],
+      "dressNote": "Heads must be covered for the Anand Karaj."
+    },
+    "f3": {
+      "name": "Reception",
+      "date": "2026-12-28",
+      "startTime": "<<FILL>>",
+      "venue": "<<FILL>>",
+      "address": "<<FILL>>",
+      "mapsUrl": "<<FILL>>",
+      "dressCode": "<<FILL>>",
+      "dressColors": [],
+      "dressNote": ""
+    }
+  },
+
+  "sides": {
+    "groom": {
+      "greeting": "<<FILL>>",
+      "contacts": [
+        { "name": "<<FILL>>", "phone": "<<FILL>>" },
+        { "name": "<<FILL>>", "phone": "<<FILL>>" }
+      ],
+      "hotel": {
+        "name": "<<FILL>>",
+        "address": "<<FILL>>",
+        "mapsUrl": "<<FILL>>",
+        "note": "<<FILL>>"
+      },
+      "travel": {
+        "airport": "<<FILL>>",
+        "station": "<<FILL>>",
+        "cabNote": "<<FILL>>"
+      }
+    },
+    "bride": {
+      "greeting": "<<FILL>>",
+      "contacts": [
+        { "name": "<<FILL>>", "phone": "<<FILL>>" },
+        { "name": "<<FILL>>", "phone": "<<FILL>>" }
+      ],
+      "hotel": {
+        "name": "<<FILL>>",
+        "address": "<<FILL>>",
+        "mapsUrl": "<<FILL>>",
+        "note": "<<FILL>>"
+      },
+      "travel": {
+        "airport": "<<FILL>>",
+        "station": "<<FILL>>",
+        "cabNote": "<<FILL>>"
+      }
+    }
+  },
+
+  "invites": [
+    { "slug": "0do4wz1", "index": 1, "side": "groom", "functions": ["f1", "f2", "f3"], "accom": true,  "nights": ["26", "27", "28"] },
+    { "slug": "d9snwr2", "index": 2, "side": "groom", "functions": ["f2", "f3"],       "accom": false },
+    { "slug": "9im8nd3", "index": 3, "side": "groom", "functions": ["f2"],             "accom": false },
+    { "slug": "7m18zu4", "index": 4, "side": "groom", "functions": ["f3"],             "accom": false },
+    { "slug": "et3m9n5", "index": 5, "side": "bride", "functions": ["f2", "f3"],       "accom": true,  "nights": ["26", "27", "28"] },
+    { "slug": "re89kq6", "index": 6, "side": "bride", "functions": ["f2"],             "accom": false },
+    { "slug": "7kgiax7", "index": 7, "side": "bride", "functions": ["f3"],             "accom": false }
+  ]
+}
