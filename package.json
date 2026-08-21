@@ -1,0 +1,17 @@
+{
+  "name": "dilsejashann",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "validate": "node scripts/validate-invites.mjs",
+    "prebuild": "node scripts/validate-invites.mjs",
+    "build": "astro build",
+    "build:draft": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^7.2.4"
+  }
+}

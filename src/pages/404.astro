@@ -1,0 +1,24 @@
+---
+// A wrong or mistyped slug lands here. It must not hint that other links
+// exist, so the copy is identical to the root fallback.
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Not found">
+  <p>Please use your personal invitation link.</p>
+</Base>
+
+<style>
+  p {
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+</style>

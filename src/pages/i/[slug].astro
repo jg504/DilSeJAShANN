@@ -1,0 +1,163 @@
+---
+// The invitation. One template for all seven links.
+//
+// TIER PRIVACY: getStaticPaths resolves each link's data at build time and
+// passes only that link's slice as props. The full invites.json never reaches
+// the browser, and this page ships no client JS. Nothing here may name a tier,
+// an index, a side, or another link's functions — including the date range in
+// the hero, which is derived from this link's own functions rather than the
+// full 26–28 span. See CLAUDE.md.
+//
+// Unstyled beyond the tokens. This is the skeleton from build step 1.4/1.5 —
+// correct content on seven routes. The visual build is step 5.
+import Base from '../../layouts/Base.astro';
+import data from '../../data/invites.json';
+
+export function getStaticPaths() {
+  return data.invites.map((invite) => {
+    const functions = invite.functions.map((id) => ({
+      id,
+      ...data.functions[id as keyof typeof data.functions],
+    }));
+
+    return {
+      params: { slug: invite.slug },
+      props: {
+        functions,
+        side: data.sides[invite.side as keyof typeof data.sides],
+        accom: invite.accom,
+      },
+    };
+  });
+}
+
+const { functions, side, accom } = Astro.props;
+
+const fmt = (iso: string) =>
+  new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+
+// Derived from this link's functions only. A Wedding-only guest must not see
+// a range implying anything happens on the 26th or the 28th.
+const dates = [...new Set(functions.map((f) => f.date))].sort();
+const dateLine =
+  dates.length === 1
+    ? fmt(dates[0])
+    : `${fmt(dates[0])} – ${fmt(dates[dates.length - 1])}`;
+
+// Only invitations including the Wedding may link to the ceremony explainers.
+const showCeremonies = functions.some((f) => f.id === 'f2');
+---
+
+<Base title="#DilSeJAShANN" description="<<FILL>>">
+  <main>
+    <p class="wordmark">#DilSeJAShANN</p>
+    <p class="dates">{dateLine}</p>
+
+    <p>{side.greeting}</p>
+
+    <p><a href="rsvp">RSVP</a></p>
+
+    {
+      functions.map((f) => (
+        <section>
+          <h2>{f.name}</h2>
+          <p>{fmt(f.date)}</p>
+
+          {'ceremonies' in f && Array.isArray(f.ceremonies) ? (
+            <ul>
+              {f.ceremonies.map((c) => (
+                <li>
+                  {c.name} — {c.startTime}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>{(f as { startTime: string }).startTime}</p>
+          )}
+
+          <p>{f.venue}</p>
+          <p>{f.address}</p>
+          <p>
+            <a href={f.mapsUrl} target="_blank" rel="noopener noreferrer">
+              Get Directions
+            </a>
+          </p>
+
+          <p>{f.dressCode}</p>
+          {f.dressColors.length > 0 && (
+            <ul>
+              {f.dressColors.map((c) => (
+                <li>{c}</li>
+              ))}
+            </ul>
+          )}
+          {f.dressNote && <p>{f.dressNote}</p>}
+        </section>
+      ))
+    }
+
+    {showCeremonies && (
+      <p><a href="/ceremonies">About the ceremonies</a></p>
+    )}
+
+    {
+      accom && (
+        <section>
+          <h2>Staying with us</h2>
+          <p>{side.hotel.name}</p>
+          <p>{side.hotel.address}</p>
+          <p>
+            <a href={side.hotel.mapsUrl} target="_blank" rel="noopener noreferrer">
+              Get Directions
+            </a>
+          </p>
+          <p>{side.hotel.note}</p>
+        </section>
+      )
+    }
+
+    <section>
+      <h2>Getting here</h2>
+      <p>{side.travel.airport}</p>
+      <p>{side.travel.station}</p>
+      <p>{side.travel.cabNote}</p>
+    </section>
+
+    <section>
+      <h2>Any questions</h2>
+      <ul>
+        {
+          side.contacts.map((c) => (
+            <li>
+              {c.name} — <a href={`tel:${c.phone}`}>{c.phone}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <p><a href="rsvp">RSVP</a></p>
+  </main>
+</Base>
+
+<style>
+  main {
+    max-width: 34rem;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+  .wordmark,
+  h2 {
+    color: var(--ink);
+  }
+  section {
+    border-top: 1px solid var(--line);
+    margin-top: 2rem;
+    padding-top: 1rem;
+  }
+</style>

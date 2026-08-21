@@ -3,8 +3,6 @@
 Settled decisions and the reasoning behind them. **Read this before reopening any of
 them.** If something here looks wrong, raise it — do not quietly reverse it.
 
----
-
 ## Palette — settled 2026-08-21
 
 - **Brand hexes are `#952829` maroon, `#E18800` gold, `#FFF3E7` cream** — from the card
@@ -32,17 +30,20 @@ them.** If something here looks wrong, raise it — do not quietly reverse it.
 
 ## Slugs — settled 2026-08-21
 
-- **Seven slugs generated and frozen**, in `src/data/invites.json`.
-- **Generated with Python's `secrets`**, not `crypto.randomUUID()` — no Node on the
-  machine. CLAUDE.md named that API to rule out hand-picked strings; a CSPRNG meets the
-  intent.
+- **Seven slugs generated and frozen**, in `src/data/invites.json`. Generated with
+  Python's `secrets`, not `crypto.randomUUID()` — no Node at the time. CLAUDE.md named
+  that API to rule out hand-picked strings; a CSPRNG meets the intent.
 - **The index→tier mapping is fixed once links go out. Never reassign.**
 
-## Toolchain — open, as of 2026-08-21
+## Build — settled 2026-08-21
 
-- **No Node runtime on the build machine.** The Astro scaffold, `package.json` and the
-  build-time validation script are blocked on it. Nothing has been scaffolded — do not
-  assume a `package.json` exists.
+- **`npm run build` is strict, `npm run build:draft` skips validation** — a strict-only
+  build would block all UI work behind content chasing.
+- **Cloudflare points at `build:draft` until content lands**, then switches to `build`
+  before distribution. Nothing is distributed, so a failing deploy costs nothing now.
+- **Astro scaffolded by hand, not `npm create astro`** — the template ships a demo page
+  and components that would have to be deleted, and collides with `src/`.
+- **Node v24.19.0, npm 11.17.0, Astro v7.2.4**, via the official macOS ARM64 `.pkg`.
 
 ## Schema — frozen
 

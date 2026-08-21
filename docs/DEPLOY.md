@@ -27,11 +27,23 @@ the live site breaks.**
 
 Pages project → Settings → Builds & deployments:
 
-- **Build command:** `npm run build`
+- **Build command:** `npm run build:draft` — see below
 - **Build output directory:** `dist`
 - **Root directory:** leave blank
 
-Change these **before** pushing the scaffold, not after.
+### `build` vs `build:draft`
+
+- `npm run build` runs `scripts/validate-invites.mjs` first and **fails** if any record
+  is incomplete. A page with a missing venue can never ship.
+- `npm run build:draft` skips validation so UI work can continue while content is being
+  chased.
+
+`invites.json` still holds 40 `<<FILL>>` values, so **strict `build` fails today** and
+would fail every deploy. Cloudflare therefore points at `build:draft` for now.
+
+**Switch Cloudflare to `npm run build` before the links are distributed.** This is on
+the pre-launch checklist. Until that switch happens, validation is not protecting the
+live site — it only protects local builds.
 
 ---
 
