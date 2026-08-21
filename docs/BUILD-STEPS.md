@@ -9,14 +9,14 @@ Tick as you go.
 
 ## Phase 0 — before any code
 
-- [ ] **0.1** Repo created, `git init`, `CLAUDE.md` and `docs/schema.md` committed
-- [ ] **0.2** Cloudflare Pages project connected to the repo
-- [ ] **0.3** `dilsejashann.com` pointed at the Pages project, HTTPS live
-- [ ] **0.4** Seven slugs generated and pasted into `invites.json`
+- [x] **0.1** Repo created, `git init`, `CLAUDE.md` and `docs/schema.md` committed
+- [x] **0.2** Cloudflare Pages project connected to the repo
+- [x] **0.3** `dilsejashann.com` pointed at the Pages project, HTTPS live
+- [x] **0.4** Seven slugs generated and pasted into `invites.json`
 - [ ] **0.5** Function content collected — times, addresses, Maps links, dress codes
 - [ ] **0.6** Side content collected — greetings, contacts, hotels, travel notes
 - [ ] **0.7** Typeface names obtained from the card's designer
-- [ ] **0.8** Palette chosen
+- [x] **0.8** Palette chosen
 
 Content chasing (0.5–0.7) runs in parallel with everything below. Do not wait on it.
 
@@ -24,13 +24,13 @@ Content chasing (0.5–0.7) runs in parallel with everything below. Do not wait 
 
 ## Phase 1 — skeleton
 
-- [ ] **1.1** Astro scaffold, static output, deployed and live on the domain
-- [ ] **1.2** `invites.json` in place with all seven records
-- [ ] **1.3** Design tokens as CSS custom properties, one file
-- [ ] **1.4** One invitation template, dynamic route on slug
-- [ ] **1.5** All seven URLs resolve with correct functions; wrong slug returns 404
-- [ ] **1.6** `noindex` and `robots.txt` on everything
-- [ ] **1.7** Build-time validation script — fails on `<<FILL>>` or a missing field
+- [x] **1.1** Astro scaffold, static output, deployed and live on the domain
+- [x] **1.2** `invites.json` in place with all seven records
+- [x] **1.3** Design tokens as CSS custom properties, one file
+- [x] **1.4** One invitation template, dynamic route on slug
+- [x] **1.5** All seven URLs resolve with correct functions; wrong slug returns 404
+- [x] **1.6** `noindex` and `robots.txt` on everything
+- [x] **1.7** Build-time validation script — fails on `<<FILL>>` or a missing field
 
 **Done when:** seven working URLs, unstyled, correct content on each.
 
@@ -40,13 +40,13 @@ Content chasing (0.5–0.7) runs in parallel with everything below. Do not wait 
 
 Do this before any form UI. It is the least predictable part of the build.
 
-- [ ] **2.1** Spreadsheet created with `groom` and `bride` tabs, identical headers
-- [ ] **2.2** Phone column set to plain-text format in both tabs
-- [ ] **2.3** Apps Script `doPost` written — routes on `side`, wrapped in `LockService`
-- [ ] **2.4** Deployed as Web App, execute as owner, access anyone
-- [ ] **2.5** A row posted from a plain HTML page lands correctly in the right tab
-- [ ] **2.6** CORS approach confirmed working from the deployed site, not localhost
-- [ ] **2.7** Resubmission logic — supersede on matching phone number
+- [x] **2.1** Spreadsheet created with `groom` and `bride` tabs, identical headers
+- [x] **2.2** Phone column set to plain-text format in both tabs
+- [x] **2.3** Apps Script `doPost` written — routes on `side`, wrapped in `LockService`
+- [x] **2.4** Deployed as Web App, execute as owner, access anyone
+- [x] **2.5** A row posted from a plain HTML page lands correctly in the right tab
+- [x] **2.6** CORS approach confirmed working from the deployed site, not localhost
+- [x] **2.7** Resubmission logic — supersede on matching phone number
 
 **Done when:** you can submit from a live page and see the row appear.
 

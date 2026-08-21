@@ -1,35 +1,22 @@
 # Deploy — dilsejashann.com
 
-Cloudflare Pages, connected to `github.com/jg504/DilSeJAShANN`. Domain
-`dilsejashann.com`, registered at Cloudflare Registrar.
+**This is a Cloudflare Worker with Static Assets, not classic Pages.** The distinction
+matters: there is no "build output directory" setting. The deploy step runs
+`npx wrangler deploy`, and `wrangler.jsonc` in the repo root is what tells it to upload
+`dist/`. Without that file the build succeeds and the deploy fails.
 
----
+- Worker name: **`dilsejashann`** — must match `wrangler.jsonc`, or a deploy creates a
+  second Worker and leaves the domain on the old one
+- Repo: `github.com/jg504/DilSeJAShANN`, production branch `main`
+- Domain `dilsejashann.com`, registered at Cloudflare Registrar
 
-## Current state — pre-Astro
+## Dashboard settings
 
-The site deploys as **raw static files served from the repository root**. There is no
-build step, no `package.json`, and no build command set in the Pages dashboard.
-
-| Path | Source |
-|---|---|
-| `/` | `index.html` — plain fallback |
-| `/game/` | `game/index.html` — memory game, self-contained |
-| `/shared/` | `shared/index.html` — Cloudflare Access test |
-| `/robots.txt` | `robots.txt` |
-
----
-
-## Required before the first Astro push
-
-Astro builds to `dist/`. Pages currently serves the repo root. **If a push contains an
-Astro project before the dashboard is changed, the deploy serves the wrong directory and
-the live site breaks.**
-
-Pages project → Settings → Builds & deployments:
+Workers & Pages → `dilsejashann` → Settings → Build:
 
 - **Build command:** `npm run build:draft` — see below
-- **Build output directory:** `dist`
-- **Root directory:** leave blank
+- **Deploy command:** `npx wrangler deploy`
+- **Root directory:** `/`
 
 ### `build` vs `build:draft`
 
@@ -47,9 +34,9 @@ live site — it only protects local builds.
 
 ---
 
-## File migration plan
+## File migration — done 2026-08-21
 
-When the scaffold lands, existing files move as below. **Public URLs do not change.**
+Files moved as below. **Public URLs did not change**, verified live.
 
 | From | To | Note |
 |---|---|---|
@@ -65,19 +52,21 @@ finished, self-contained artefact and is not being rebuilt.
 **No photographs go in `public/`.** Source photos for the story and gallery pages belong
 in `src/assets/`, so Astro processes them at build time.
 
-Note that `game/` also holds a duplicate set of `.webp` files at its top level alongside
-`game/assets/`. Reconcile that during the move rather than copying both.
+`game/` still holds a duplicate set of `.webp` files at its top level alongside
+`game/assets/`; `index.html` references the top-level copies. Nothing was deleted.
+`monogram.webp` and `damask.webp` were copied into `src/assets/` as design source.
 
 ---
 
 ## Access
 
 Cloudflare Access protects `/admin/*` and `/share`. It requires the custom domain and
-does not work on `*.pages.dev`. Session duration set to maximum.
+does not work on `*.pages.dev`. Session duration set to maximum. **Not yet configured.**
 
 ---
 
-## Blocked
+## Verified live 2026-08-21
 
-All of the above waits on a Node runtime, which is not installed on the build machine as
-of 2026-08-21. See `docs/DECISIONS.md`.
+`/`, `/game/`, `/robots.txt` and all seven `/i/<slug>/` return 200; an unknown slug
+returns 404 via `not_found_handling`. Tier privacy checked against the deployed HTML,
+not just a local build.
