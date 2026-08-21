@@ -595,5 +595,8 @@ the schedule.
 - [ ] `prefers-reduced-motion: reduce` collapses every animation
 - [ ] No animation touches a layout-triggering property
 - [ ] `noindex` on every route, `robots.txt` disallows all
+- [ ] `public/_rsvp-test.html` deleted, and every test row removed from both tabs
+- [ ] Cloudflare build command switched from `npm run build:draft` to `npm run build`,
+      so validation gates the live deploy
 - [ ] **A non-technical person completes a full RSVP on their own phone, unprompted,
       with no help.** Where they hesitate is the drop-off.

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>RSVP endpoint test</title>
+<!--
+  TEMPORARY. Delete before the links are distributed.
+
+  This exists to satisfy build steps 2.5 and 2.6: prove a row lands in the
+  right tab, and prove the CORS approach works from the deployed site rather
+  than from localhost. It is unlinked and noindexed, but it is still a public
+  URL — it must not survive to launch.
+
+  Deliberately plain: this is a diagnostic, not a wedding page, so it does not
+  use the design tokens.
+-->
+<style>
+  body{font:15px/1.5 system-ui,sans-serif;margin:0;padding:24px;max-width:640px}
+  label{display:block;margin:14px 0 4px;font-weight:600}
+  input,select{width:100%;padding:8px;font:inherit;box-sizing:border-box}
+  button{margin-top:16px;padding:10px 16px;font:inherit;cursor:pointer}
+  pre{background:#f4f4f4;padding:12px;overflow:auto;white-space:pre-wrap;word-break:break-all}
+  .warn{background:#fff4d5;border-left:4px solid #d19b00;padding:10px 12px}
+</style>
+</head>
+<body>
+
+<h1>RSVP endpoint test</h1>
+
+<p class="warn"><strong>Temporary diagnostic.</strong> Delete this file before
+distributing the links.</p>
+
+<label for="url">Apps Script Web App URL</label>
+<input id="url" placeholder="https://script.google.com/macros/s/…/exec">
+
+<label for="side">Tab</label>
+<select id="side">
+  <option value="groom">groom</option>
+  <option value="bride">bride</option>
+</select>
+
+<label for="phone">phone_e164</label>
+<input id="phone" value="+919000000001">
+
+<button id="send">Send test row</button>
+<button id="ping">Ping (GET)</button>
+
+<h2>Payload</h2>
+<pre id="payload"></pre>
+
+<h2>Result</h2>
+<pre id="out">—</pre>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+function payload() {
+  // All seventeen columns. Columns 12-14 are empty strings, which is what a
+  // non-accom link sends — never omitted, never null.
+  return {
+    submission_id: crypto.randomUUID(),
+    slug: 'TEST000',
+    index: 0,
+    side: $('side').value,
+    name: 'ENDPOINT TEST — delete me',
+    phone_e164: $('phone').value,
+    additional_guests: '',
+    count_f1: 0,
+    count_f2: 2,
+    count_f3: 2,
+    accommodation: '',
+    travellers: '',
+    nights: '',
+    dietary: '',
+    notes: 'posted from _rsvp-test.html'
+  };
+}
+
+function render() { $('payload').textContent = JSON.stringify(payload(), null, 2); }
+render();
+$('side').addEventListener('change', render);
+$('phone').addEventListener('input', render);
+
+$('send').addEventListener('click', async () => {
+  const url = $('url').value.trim();
+  if (!url) { $('out').textContent = 'Paste the Web App URL first.'; return; }
+  const body = JSON.stringify(payload());
+  $('out').textContent = 'posting…';
+
+  // Apps Script returns no CORS headers on POST. text/plain keeps the request
+  // "simple" so the browser sends no preflight; no-cors means the response is
+  // opaque, so a completed request is treated as success. The only real
+  // confirmation is the row appearing in the sheet.
+  try {
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body
+    });
+    $('out').textContent =
+      'Request completed (response is opaque by design).\n\n' +
+      'Now check the sheet. If no row appeared, the request reached nothing —\n' +
+      'check the deployment is "execute as owner, access anyone".';
+  } catch (err) {
+    $('out').textContent = 'FAILED: ' + err;
+  }
+});
+
+$('ping').addEventListener('click', async () => {
+  const url = $('url').value.trim();
+  if (!url) { $('out').textContent = 'Paste the Web App URL first.'; return; }
+  $('out').textContent = 'pinging…';
+  try {
+    const res = await fetch(url);           // GET is readable, POST is not
+    $('out').textContent = res.status + '\n' + (await res.text());
+  } catch (err) {
+    $('out').textContent = 'FAILED: ' + err + '\n\nA CORS error here is expected ' +
+      'on some deployments and does not mean POST is broken.';
+  }
+});
+</script>
+</body>
+</html>
