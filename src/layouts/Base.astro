@@ -32,6 +32,12 @@ const ogImage = new URL(OG_IMAGE, Astro.site).href;
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
 
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    {/* Tints the browser chrome on Android to match the page. */}
+    <meta name="theme-color" content="#FFF3E7" />
+
     {/* The two faces are 67KB of the page's ~73KB transfer. They are not
         render-blocking — font-display: swap means text paints immediately in
         the fallback — but preloading starts them during the CSS round trip
@@ -102,5 +108,41 @@ const ogImage = new URL(OG_IMAGE, Astro.site).href;
     margin: 0;
     background: var(--panel);
     color: var(--body);
+  }
+
+  /* Keyboard users could not previously see where they were. :focus-visible
+     rather than :focus so a tap does not leave a ring behind on a phone. */
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  /* Available to screen readers, invisible on screen. Used for headings that
+     structure the page but would be redundant to show. */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* A guest who prints the invitation should get the details, not the
+     furniture. */
+  @media print {
+    a[href^='http']::after {
+      content: ' (' attr(href) ')';
+      font-size: 0.85em;
+      word-break: break-all;
+    }
+    .no-print {
+      display: none !important;
+    }
   }
 </style>

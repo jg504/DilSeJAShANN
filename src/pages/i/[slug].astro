@@ -88,7 +88,9 @@ const swatches = (raw: unknown[]): Swatch[] =>
       <div class="hero-arch">
         <Arch />
         <div class="hero-inner">
-          <p class="couple">{couple}</p>
+          {/* The names are the page's heading. Previously the document started
+              at h2, which leaves a screen reader with no title for the page. */}
+          <h1 class="couple">{couple}</h1>
           <p class="hero-dates">{dateLine}</p>
         </div>
       </div>
@@ -347,7 +349,7 @@ const swatches = (raw: unknown[]): Swatch[] =>
        colliding with the stroke. */
     width: 74%;
   }
-  .couple {
+  h1.couple {
     font-family: var(--display);
     font-weight: 500;
     font-size: var(--t-xl);

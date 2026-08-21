@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="#DilSeJAShANN">
+  <!-- The arch, reduced to what still reads at 16px: a solid maroon ground with
+       the arch cut in cream. An outline stroke disappears at favicon size. -->
+  <rect width="64" height="64" rx="14" fill="#952829"/>
+  <path d="M20 50 L20 30 A12 12 0 0 1 44 30 L44 50 Z" fill="#FFF3E7"/>
+  <circle cx="32" cy="34" r="4.5" fill="#E18800"/>
+</svg>

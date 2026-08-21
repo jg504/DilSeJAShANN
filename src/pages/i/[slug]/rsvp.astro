@@ -46,15 +46,42 @@ const TOTAL_STEPS = 3;
 <Base title="RSVP — #DilSeJAShANN">
   <main>
     <p class="wordmark">#DilSeJAShANN</p>
+    <h1 class="sr-only">RSVP</h1>
 
-    <p class="progress" id="progress">Step 1 of {TOTAL_STEPS}</p>
+    {/* Without this a guest with JavaScript off or broken meets a form that
+        silently does nothing, and we never learn they tried. */}
+    <noscript>
+      <style>
+        #form,
+        .progress {
+          display: none;
+        }
+      </style>
+      <div class="noscript">
+        <p><strong>This form needs JavaScript, and it looks like it is turned off.</strong></p>
+        <p>Send us your reply on WhatsApp instead and we'll add it by hand — please include
+          your name, how many of you are coming, and to which of the events.</p>
+        <p>
+          <a
+            class="cta-link"
+            href={`https://wa.me/${FALLBACK_WHATSAPP}`}
+            target="_blank"
+            rel="noopener noreferrer">Message us on WhatsApp</a
+          >
+        </p>
+      </div>
+    </noscript>
+
+    {/* aria-live so a screen reader announces the step change; the panels
+        themselves are swapped, which is otherwise silent. */}
+    <p class="progress" id="progress" aria-live="polite">Step 1 of {TOTAL_STEPS}</p>
 
     <form id="form" novalidate>
       <!-- Step 1 -->
       <section class="panel" data-panel="1">
         <label for="name">Your name</label>
-        <input id="name" name="name" type="text" autocomplete="name" />
-        <p class="err" data-err="name" hidden></p>
+        <input id="name" name="name" type="text" autocomplete="name" enterkeyhint="next" />
+        <p class="err" role="alert" data-err="name" hidden></p>
 
         <label for="dial">WhatsApp number</label>
         <p class="hint">
@@ -91,12 +118,12 @@ const TOTAL_STEPS = 3;
               ))
             }
           </select>
-          <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" />
+          <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" enterkeyhint="next" />
         </div>
-        <p class="err" data-err="phone" hidden></p>
+        <p class="err" role="alert" data-err="phone" hidden></p>
 
         <label for="guests">Anyone else coming with you?</label>
-        <input id="guests" name="guests" type="text" />
+        <input id="guests" name="guests" type="text" autocomplete="off" enterkeyhint="go" />
 
         <button type="button" class="primary" data-next="2">Continue</button>
       </section>
@@ -108,7 +135,7 @@ const TOTAL_STEPS = 3;
           <button type="button" class="choice" data-attending="yes">Yes</button>
           <button type="button" class="choice" data-attending="no">No</button>
         </div>
-        <p class="err" data-err="attending" hidden></p>
+        <p class="err" role="alert" data-err="attending" hidden></p>
 
         <div id="counts" hidden>
           <p class="hint">How many of you, for each? Zero is fine.</p>
@@ -150,7 +177,7 @@ const TOTAL_STEPS = 3;
                   No
                 </button>
               </div>
-              <p class="err" data-err="accom" hidden />
+              <p class="err" role="alert" data-err="accom" hidden />
 
               <div id="accom-detail" hidden>
                 <div class="stepper" data-travellers>
@@ -178,7 +205,7 @@ const TOTAL_STEPS = 3;
                     28 Dec
                   </button>
                 </div>
-                <p class="err" data-err="nights" hidden />
+                <p class="err" role="alert" data-err="nights" hidden />
               </div>
             </div>
           )
@@ -186,10 +213,10 @@ const TOTAL_STEPS = 3;
 
         <label for="dietary">Anything we should tell the kitchen?</label>
         <p class="hint">Allergies, Jain, no onion or garlic, anything at all. Leave blank otherwise.</p>
-        <input id="dietary" name="dietary" type="text" />
+        <input id="dietary" name="dietary" type="text" autocomplete="off" enterkeyhint="next" />
 
         <label for="notes">Anything else we should know?</label>
-        <input id="notes" name="notes" type="text" />
+        <input id="notes" name="notes" type="text" autocomplete="off" enterkeyhint="go" />
 
         <div class="nav">
           <button type="button" class="back" data-back="2">Back</button>
@@ -200,7 +227,7 @@ const TOTAL_STEPS = 3;
       <!-- Decline closing step -->
       <section class="panel" data-panel="decline" hidden>
         <p class="q">Sorry you can't make it — anything you'd like to pass on?</p>
-        <input id="decline-note" name="decline-note" type="text" />
+        <input id="decline-note" name="decline-note" type="text" autocomplete="off" enterkeyhint="go" />
         <div class="nav">
           <button type="button" class="back" data-back="2">Back</button>
           <button type="button" class="primary" id="submit-decline">Send</button>
@@ -211,7 +238,7 @@ const TOTAL_STEPS = 3;
     <!-- Confirmation -->
     <section class="panel done" data-panel="confirm" hidden>
       <p class="tick">✓</p>
-      <h1 id="confirm-head">That's done</h1>
+      <h2 id="confirm-head">That's done</h2>
       <p id="echo"></p>
       <p class="hint">
         Plans change? Open your invitation link and fill this in again — we'll use your
@@ -222,7 +249,7 @@ const TOTAL_STEPS = 3;
 
     <!-- Failure -->
     <section class="panel done" data-panel="error" hidden>
-      <h1>That didn't go through</h1>
+      <h2>That didn't go through</h2>
       <p>
         We couldn't save your response, so please send it to us on WhatsApp instead —
         the message already has all your answers in it, just press send. We'll add it
@@ -256,9 +283,14 @@ const TOTAL_STEPS = 3;
 
   const state = { attending: null, accom: null, nights: new Set() };
 
-  function show(key) {
+  let current = '1';
+
+  function show(key, push = true) {
     Object.values(panels).forEach((p) => (p.hidden = true));
-    panels[key].hidden = false;
+    const panel = panels[key];
+    panel.hidden = false;
+    current = key;
+
     const prog = $('#progress');
     if (key === '1' || key === '2' || key === '3') {
       prog.hidden = false;
@@ -269,8 +301,44 @@ const TOTAL_STEPS = 3;
     } else {
       prog.hidden = true;
     }
+
     window.scrollTo({ top: 0 });
+
+    // Move focus into the new panel. Without this a keyboard or screen-reader
+    // user stays on the button that has just been hidden.
+    panel.setAttribute('tabindex', '-1');
+    panel.focus({ preventScroll: true });
+
+    // Each step becomes a history entry, so the phone's back gesture goes back
+    // one step instead of leaving a half-filled form. Losing a form that way
+    // ends the session permanently.
+    if (push) {
+      try {
+        history.pushState({ step: key }, '');
+      } catch (e) {}
+    }
   }
+
+  window.addEventListener('popstate', (e) => {
+    const step = (e.state && e.state.step) || '1';
+    if (panels[step]) show(step, false);
+  });
+
+  try {
+    history.replaceState({ step: '1' }, '');
+  } catch (e) {}
+
+  // Enter in a text field should advance, the way it does in every other form.
+  // Every control here is type="button", so without this Enter does nothing.
+  $('#form').addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const t = e.target;
+    if (!t || t.tagName !== 'INPUT') return;
+    e.preventDefault();
+    const panel = panels[current];
+    const primary = panel && panel.querySelector('.primary');
+    if (primary && !primary.disabled) primary.click();
+  });
 
   function err(name, msg) {
     const el = $(`[data-err="${name}"]`);
@@ -684,7 +752,31 @@ const TOTAL_STEPS = 3;
   .err {
     margin: 0.4rem 0 0;
     font-size: 0.85rem;
+    font-weight: 600;
     color: var(--ink);
+  }
+  .panel:focus {
+    outline: none;
+  }
+  .noscript {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: var(--gap);
+    margin-bottom: var(--gap);
+    line-height: 1.6;
+  }
+  .noscript p {
+    margin: 0 0 var(--gap-sm);
+  }
+  .cta-link {
+    display: inline-block;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    min-height: 44px;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: var(--panel);
+    text-decoration: none;
   }
 
   /* Tap targets over dropdowns, everywhere it is a choice. */
@@ -784,7 +876,7 @@ const TOTAL_STEPS = 3;
     margin: 0;
     color: var(--ink);
   }
-  .done h1 {
+  .done h2 {
     color: var(--ink);
     margin: 0.25rem 0 1rem;
   }
