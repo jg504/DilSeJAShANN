@@ -62,10 +62,28 @@ in `src/assets/`, so Astro processes them at build time.
 
 | Command | What it does |
 |---|---|
+| `npm test` | Unit tests for the logic that must not be wrong: RSVP report arithmetic, phone normalisation, and the live-mode state machine. |
 | `npm run validate` | Content check. Fails on `<<FILL>>`, the tier table, ceremony and story shape, and story function-neutrality. |
 | `npm run build` | Strict. Runs `validate` first, so an incomplete record cannot ship. |
 | `npm run build:draft` | Skips validation. What Cloudflare uses until the content lands. |
 | `npm run verify` | **Post-build.** Checks `dist/` for tier leaks, gating, `.ics` sets, OG parity, stale output, layout-triggering animations and the weight budget. |
+| `npm run check` | All of the above: test, build, verify. Run this before pushing. |
+
+### What is unit-tested, and why those three
+
+Each covers logic where being quietly wrong costs more than being obviously
+broken:
+
+- **`src/lib/report.ts`** — bed-nights decide how many beds get booked.
+- **`src/lib/phone.ts`** — `phone_e164` is the sheet's record key; a mangled
+  number is a guest who cannot be chased.
+- **`src/lib/live.ts`** — runs unattended across the wedding days and cannot be
+  fixed while it is running.
+
+All three are imported by the pages that use them, so the tested code is the
+code that ships. That is checked too: `verify` follows script bundles rather
+than reading page HTML alone, because a behaviour check that silently starts
+passing against nothing is worse than no check.
 
 Both build scripts empty `dist/` first. Astro only clears the top level, and
 Cloudflare restores a build output cache, so a stale nested file — a leftover

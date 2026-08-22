@@ -3,6 +3,9 @@
 // Kept in one place so the two can never disagree about times, folding or
 // timezone handling.
 
+import { minutes } from './time.ts';
+export { minutes };
+
 export type Fn = {
   name: string;
   date: string;
@@ -14,20 +17,6 @@ export type Fn = {
 
 const HOURS = 60 * 60 * 1000;
 const RUNS_FOR = 4;
-
-/** "18:30" or "6:30 pm" -> minutes since midnight, or null if unparseable. */
-export function minutes(raw: string | undefined): number | null {
-  if (!raw) return null;
-  const m = raw.trim().match(/^(\d{1,2})[:.](\d{2})\s*(am|pm)?$/i);
-  if (!m) return null;
-  let h = Number(m[1]);
-  const mm = Number(m[2]);
-  const ap = m[3]?.toLowerCase();
-  if (ap === 'pm' && h < 12) h += 12;
-  if (ap === 'am' && h === 12) h = 0;
-  if (h > 23 || mm > 59) return null;
-  return h * 60 + mm;
-}
 
 const pad = (n: number) => String(n).padStart(2, '0');
 

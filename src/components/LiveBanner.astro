@@ -7,11 +7,12 @@
 // And guests will be holding phones set to London, Dubai and California — the
 // answer must be Gurgaon's clock regardless of the device.
 //
-// Three states: before the first day (nothing shown), during, and after.
+// The state machine lives in src/lib/live.ts and is covered by
+// scripts/test-live.mjs, because THIS CANNOT BE FIXED WHILE IT IS RUNNING.
+// This file only renders.
 //
-// THIS CANNOT BE FIXED WHILE IT IS RUNNING. Append ?now=<ISO> to any invitation
-// URL to fake the clock and check a state — e.g. ?now=2026-12-27T16:00. The
-// value is read as IST.
+// Append ?now=<ISO> to any invitation URL to fake the clock and check a state —
+// e.g. ?now=2026-12-27T16:00. The value is read as IST.
 interface Props {
   functions: {
     id: string;
@@ -40,109 +41,63 @@ const events = functions.map((f) => ({
 }));
 ---
 
+<script
+  type="application/json"
+  id="live-config"
+  set:html={JSON.stringify({ events, contact })}
+/>
+
 <div id="live" class="live" hidden></div>
 
-<script define:vars={{ events, contact }}>
+<script>
+  import { plan, stateAt, timeLine, dayLabel } from '../lib/live.ts';
+  import { fakedNow } from '../lib/time.ts';
+
   const el = document.getElementById('live');
-  if (el) {
-    // Every comparison happens on absolute epoch milliseconds, with IST written
-    // explicitly into the parsed string. No local-timezone assumptions anywhere.
-    const IST = '+05:30';
-    const HOURS = 60 * 60 * 1000;
-    const RUNS_FOR = 4 * HOURS;
+  const cfgEl = document.getElementById('live-config');
 
-    const minutes = (raw) => {
-      if (!raw) return null;
-      const m = String(raw).trim().match(/^(\d{1,2})[:.](\d{2})\s*(am|pm)?$/i);
-      if (!m) return null;
-      let h = Number(m[1]);
-      const mm = Number(m[2]);
-      const ap = m[3] ? m[3].toLowerCase() : '';
-      if (ap === 'pm' && h < 12) h += 12;
-      if (ap === 'am' && h === 12) h = 0;
-      if (h > 23 || mm > 59) return null;
-      return h * 60 + mm;
-    };
+  if (el && cfgEl) {
+    const { events, contact } = JSON.parse(cfgEl.textContent!);
+    const now = fakedNow(new URLSearchParams(location.search).get('now')) ?? Date.now();
+    const state = stateAt(plan(events), now);
 
-    const pad = (n) => String(n).padStart(2, '0');
-    const at = (date, mins) =>
-      Date.parse(`${date}T${pad(Math.floor(mins / 60))}:${pad(mins % 60)}:00${IST}`);
+    const esc = (s: unknown) =>
+      String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
-    const params = new URLSearchParams(location.search);
-    const faked = params.get('now');
-    const now = faked ? Date.parse(/[+-]\d{2}:\d{2}$/.test(faked) ? faked : faked + IST) : Date.now();
+    const actions = (fn: any) =>
+      `<div class="live-actions">` +
+      `<a class="live-btn" href="${esc(fn.mapsUrl)}" target="_blank" rel="noopener noreferrer">Get Directions</a>` +
+      `<a class="live-btn quiet" href="tel:${esc(contact.phone)}">Call ${esc(contact.name)}</a>` +
+      `</div>`;
 
-    const planned = events
-      .map((e) => {
-        const mins = e.times.map((t) => minutes(t.at)).filter((v) => v !== null);
-        // An unfilled or unparseable time still gets the guest to the right
-        // place on the right day rather than dropping the event entirely.
-        const allDay = mins.length === 0;
-        const start = allDay ? at(e.date, 0) : at(e.date, Math.min.apply(null, mins));
-        const end = allDay ? at(e.date, 0) + 24 * HOURS : at(e.date, Math.max.apply(null, mins)) + RUNS_FOR;
-        return { ...e, start, end, allDay };
-      })
-      .sort((a, b) => a.start - b.start);
+    let html = '';
 
-    const first = planned[0];
-    const last = planned[planned.length - 1];
-    const windowStart = Date.parse(`${first.date}T00:00:00${IST}`);
+    if (state.kind === 'now') {
+      const t = timeLine(state.fn);
+      html =
+        `<p class="live-label">Happening now</p>` +
+        `<p class="live-name">${esc(state.fn.name)}</p>` +
+        (t ? `<p class="live-time">${esc(t)}</p>` : '') +
+        `<p class="live-venue">${esc(state.fn.venue)}</p>` +
+        actions(state.fn);
+    } else if (state.kind === 'next') {
+      const t = timeLine(state.fn);
+      html =
+        `<p class="live-label">Up next</p>` +
+        `<p class="live-name">${esc(state.fn.name)}</p>` +
+        `<p class="live-time">${esc(dayLabel(state.fn, now))}${t ? ' · ' + esc(t) : ''}</p>` +
+        `<p class="live-venue">${esc(state.fn.venue)}</p>` +
+        actions(state.fn);
+    } else if (state.kind === 'after') {
+      // Nowhere left to go, so no venue and no directions.
+      html =
+        `<p class="live-label">Thank you for celebrating with us</p>` +
+        `<p class="live-after">It meant everything having you there.</p>`;
+    }
 
-    if (!isNaN(now) && now >= windowStart) {
-      const live = planned.find((e) => now >= e.start && now < e.end);
-      const next = planned.find((e) => now < e.start);
-
-      const esc = (s) =>
-        String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-
-      const timeLine = (e) =>
-        e.allDay
-          ? ''
-          : e.times
-              .filter((t) => minutes(t.at) !== null)
-              .map((t) => (t.label ? `${esc(t.label)} ${esc(t.at)}` : esc(t.at)))
-              .join(' · ');
-
-      const dayLabel = (e) => {
-        const d = new Date(e.start);
-        const today = new Date(now);
-        const fmt = (x) =>
-          x.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'Asia/Kolkata' });
-        return fmt(d) === fmt(today) ? 'Today' : fmt(d);
-      };
-
-      let html = '';
-
-      if (live) {
-        html =
-          `<p class="live-label">Happening now</p>` +
-          `<p class="live-name">${esc(live.name)}</p>` +
-          (timeLine(live) ? `<p class="live-time">${timeLine(live)}</p>` : '') +
-          `<p class="live-venue">${esc(live.venue)}</p>` +
-          `<div class="live-actions">` +
-          `<a class="live-btn" href="${esc(live.mapsUrl)}" target="_blank" rel="noopener noreferrer">Get Directions</a>` +
-          `<a class="live-btn quiet" href="tel:${esc(contact.phone)}">Call ${esc(contact.name)}</a>` +
-          `</div>`;
-      } else if (next) {
-        html =
-          `<p class="live-label">Up next</p>` +
-          `<p class="live-name">${esc(next.name)}</p>` +
-          `<p class="live-time">${dayLabel(next)}${timeLine(next) ? ' · ' + timeLine(next) : ''}</p>` +
-          `<p class="live-venue">${esc(next.venue)}</p>` +
-          `<div class="live-actions">` +
-          `<a class="live-btn" href="${esc(next.mapsUrl)}" target="_blank" rel="noopener noreferrer">Get Directions</a>` +
-          `<a class="live-btn quiet" href="tel:${esc(contact.phone)}">Call ${esc(contact.name)}</a>` +
-          `</div>`;
-      } else {
-        // After everything. No venue, no directions — nowhere left to go.
-        html =
-          `<p class="live-label">Thank you for celebrating with us</p>` +
-          `<p class="live-after">It meant everything having you there.</p>`;
-      }
-
+    if (html) {
       el.innerHTML = html;
       el.hidden = false;
-      el.classList.add('is-live');
     }
   }
 </script>
