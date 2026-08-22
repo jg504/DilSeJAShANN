@@ -75,7 +75,6 @@ them.** If something here looks wrong, raise it — do not quietly reverse it.
 
 ## Open questions
 
-- **`Phere` or `Vivaah`** — see below; still the one open naming question.
 - **`Phere` or `Vivaah`** — `invites.json` uses `Phere` per the CLAUDE.md template; the
   `/ceremonies` brief says the printed card may be titled `Vivaah`. Awaiting family
   confirmation, along with the four-vs-seven pheras question.
