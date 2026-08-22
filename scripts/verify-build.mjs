@@ -7,6 +7,7 @@
 // Run with `npm run verify` after any build. It exits non-zero on failure.
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 
@@ -292,26 +293,41 @@ if (existsSync(cssDir)) {
 
 // ---------------------------------------------------------------- weight
 // Class A budget: above the fold under ~800KB. LCP under 2.5s on Slow 4G.
-const fonts = ['fonts/playfair-display-latin.woff2', 'fonts/source-sans-3-latin.woff2'].reduce(
+// Measured per page and gzipped, as Cloudflare actually serves it. Summing
+// every file in _astro overstates it — a page loads only its own bundles.
+const KB = (n) => `${(n / 1024).toFixed(1)}KB`;
+const gz = (rel) => (existsSync(join(dist, rel)) ? gzipSync(readFileSync(join(dist, rel)), { level: 9 }).length : 0);
+
+function pageWeight(page) {
+  const html = read(page);
+  let bytes = gz(page);
+  let requests = 1;
+  for (const m of html.matchAll(/(?:src|href)="(\/_astro\/[^"]+\.(?:js|css))"/g)) {
+    bytes += gz(m[1].replace(/^\//, ''));
+    requests++;
+  }
+  return { bytes, requests };
+}
+
+const fontBytes = ['fonts/playfair-display-latin.woff2', 'fonts/source-sans-3-latin.woff2'].reduce(
   (a, f) => a + size(f),
   0
 );
-let css = 0;
-let js = 0;
-if (existsSync(cssDir)) {
-  for (const f of readdirSync(cssDir)) {
-    const s = statSync(join(cssDir, f)).size;
-    if (f.endsWith('.css')) css += s;
-    else if (f.endsWith('.js')) js += s;
-  }
-}
-const inviteHtml = size(`i/${slugs[0]}/index.html`);
-const aboveFold = inviteHtml + css + js + fonts;
-const KB = (n) => `${(n / 1024).toFixed(1)}KB`;
+
+const invite = pageWeight(`i/${slugs[0]}/index.html`);
+const rsvp = pageWeight(`i/${slugs[0]}/rsvp/index.html`);
+const aboveFold = invite.bytes + fontBytes;
+
 notes.push(
-  `invitation page weight: html ${KB(inviteHtml)} + css ${KB(css)} + js ${KB(js)} + fonts ${KB(fonts)} = ${KB(aboveFold)}`
+  `invitation: ${KB(invite.bytes)} gz + ${KB(fontBytes)} fonts = ${KB(aboveFold)} in ${invite.requests + 2} requests`
 );
+notes.push(`rsvp page:  ${KB(rsvp.bytes)} gz in ${rsvp.requests} requests`);
+
+// Class A budget: above the fold under ~800KB, LCP under 2.5s on Slow 4G.
 if (aboveFold > 800 * 1024) fail(`above-the-fold payload ${KB(aboveFold)} exceeds the 800KB budget`);
+// The invitation page is the landing page — extra blocking requests cost LCP
+// directly on a slow connection.
+if (invite.requests > 3) fail(`invitation page makes ${invite.requests} sub-resource requests, expected at most 3`);
 if (size('og.png') > 300 * 1024) fail(`og.png ${KB(size('og.png'))} exceeds 300KB`);
 
 // ---------------------------------------------------------------- report
