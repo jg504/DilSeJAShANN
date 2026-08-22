@@ -276,7 +276,9 @@ const TOTAL_STEPS = 3;
 </Base>
 
 <script
-  define:vars={{
+  type="application/json"
+  id="rsvp-config"
+  set:html={JSON.stringify({
     slug,
     index,
     side,
@@ -287,8 +289,17 @@ const TOTAL_STEPS = 3;
     RETRY_BASE_MS,
     TOTAL_STEPS,
     fnNames: Object.fromEntries(functions.map((f) => [f.id, f.name])),
-  }}
->
+  })}
+/>
+
+<script>
+  // Phone handling comes from src/lib/phone.ts, which is covered by
+  // scripts/test-phone.mjs. phone_e164 is the record key for the sheet, so that
+  // logic is tested rather than duplicated inline here.
+  import { e164 as toE164, pretty as prettyOf, problem, national as nationalOf } from '../../../lib/phone';
+
+  const cfg = JSON.parse(document.getElementById('rsvp-config').textContent);
+  const { slug, index, side, accom, endpoint, fallback, MAX_ATTEMPTS, RETRY_BASE_MS, TOTAL_STEPS, fnNames } = cfg;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
@@ -420,34 +431,28 @@ const TOTAL_STEPS = 3;
   );
 
   // --- phone
-  function selected() {
+  // The selected <option> carries the country's numbers as data attributes;
+  // this reshapes them into what src/lib/phone.ts expects.
+  function country() {
     const o = $('#dial').selectedOptions[0];
-    return o && o.dataset.dial ? o.dataset : null;
+    if (!o || !o.dataset.dial) return null;
+    return {
+      dial: o.dataset.dial,
+      min: Number(o.dataset.min),
+      max: Number(o.dataset.max),
+      group: (o.dataset.group || '').split(',').filter(Boolean).map(Number),
+    };
   }
 
-  function national() {
-    const c = selected();
-    if (!c) return '';
-    let d = $('#phone').value.replace(/\D/g, '').replace(/^0+/, '');
-    // A duplicated country code typed into the national field.
-    if (d.startsWith(c.dial) && d.length > Number(c.max)) d = d.slice(c.dial.length);
-    return d;
-  }
-
-  function e164() {
-    const c = selected();
-    return c ? '+' + c.dial + national() : '';
-  }
-
-  function prettyPhone() {
-    const c = selected();
-    if (!c) return '';
-    const d = national();
-    const g = (c.group || '').split(',').filter(Boolean).map(Number);
-    if (!g.length || g.reduce((a, b) => a + b, 0) !== d.length) return '+' + c.dial + ' ' + d;
-    let i = 0;
-    return '+' + c.dial + ' ' + g.map((n) => d.slice(i, (i += n))).join(' ');
-  }
+  const rawPhone = () => $('#phone').value;
+  const e164 = () => {
+    const c = country();
+    return c ? toE164(rawPhone(), c) : '';
+  };
+  const prettyPhone = () => {
+    const c = country();
+    return c ? prettyOf(rawPhone(), c) : '';
+  };
 
   // --- validation. Never clears a field: losing a half-filled form on a phone
   // ends the session permanently.
@@ -458,17 +463,18 @@ const TOTAL_STEPS = 3;
       err('name', 'Please tell us your name.');
       ok = false;
     }
-    const c = selected();
+    const c = country();
     if (!c) {
       err('phone', 'Please choose your country.');
       ok = false;
     } else {
-      const d = national();
-      if (!d) {
+      const p = problem(rawPhone(), c);
+      if (p === 'empty') {
         err('phone', 'Please enter your WhatsApp number.');
         ok = false;
-      } else if (d.length < Number(c.min) || d.length > Number(c.max)) {
-        err('phone', `That looks like ${d.length} digits. Please check the number.`);
+      } else if (p) {
+        const n = nationalOf(rawPhone(), c).length;
+        err('phone', `That looks like ${n} digits. Please check the number.`);
         ok = false;
       }
     }

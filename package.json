@@ -12,7 +12,8 @@
     "preview": "astro preview",
     "verify": "node scripts/verify-build.mjs",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
-    "test": "node scripts/test-report.mjs"
+    "test": "node scripts/test-report.mjs && node scripts/test-phone.mjs",
+    "check": "npm test && npm run build:draft && npm run verify"
   },
   "dependencies": {
     "astro": "^7.2.4"

@@ -23,7 +23,7 @@ const { title } = Astro.props;
   </head>
   <body>
     <header class="bar">
-      <strong>{title}</strong>
+      <h1>{title}</h1>
       <span class="warn">Private — do not share this page or its link.</span>
     </header>
     <main>
@@ -72,6 +72,11 @@ const { title } = Astro.props;
     padding: 0.85rem 1.25rem;
     border-bottom: 1px solid var(--a-line);
     background: var(--a-soft);
+  }
+  .bar h1 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
   }
   .warn {
     color: var(--a-bad);

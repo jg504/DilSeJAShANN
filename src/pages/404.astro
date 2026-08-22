@@ -5,6 +5,9 @@ import Base from '../layouts/Base.astro';
 ---
 
 <Base title="Not found" noPreview>
+  {/* Deliberately identical to the root fallback — a wrong slug must not hint
+      that other links exist. */}
+  <h1 class="sr-only">Page not found</h1>
   <p>Please use your personal invitation link.</p>
 </Base>
 

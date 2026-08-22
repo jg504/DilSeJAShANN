@@ -163,15 +163,37 @@ for (const [page] of guestPages) {
   }
 }
 
+/**
+ * A page's HTML plus every script bundle it loads.
+ *
+ * Astro inlines small scripts but bundles ones that import a module, so
+ * behaviour checked in the HTML alone silently "disappears" the moment a
+ * script gains an import — which is exactly what happened when the phone
+ * logic moved into a tested module.
+ */
+function pageAndScripts(page) {
+  let text = read(page);
+  for (const m of text.matchAll(/<script[^>]+src="([^"]+\.js)"/g)) {
+    const p = join(dist, m[1].replace(/^\//, ''));
+    if (existsSync(p)) text += '\n' + readFileSync(p, 'utf8');
+  }
+  return text;
+}
+
 for (const s of slugs) {
   const rsvp = read(`i/${s}/rsvp/index.html`);
+  const withJs = pageAndScripts(`i/${s}/rsvp/index.html`);
   // A guest with JavaScript off must not meet a form that silently does nothing.
   if (!rsvp.includes('<noscript')) fail(`i/${s}/rsvp: no <noscript> fallback`);
   // Validation errors have to be announced, not just displayed.
   if (!rsvp.includes('role="alert"')) fail(`i/${s}/rsvp: errors are not announced`);
   if (!rsvp.includes('aria-live')) fail(`i/${s}/rsvp: step changes are not announced`);
   // Enter must advance, and back must step back rather than leave the form.
-  if (!rsvp.includes('popstate')) fail(`i/${s}/rsvp: no history handling`);
+  if (!withJs.includes('popstate')) fail(`i/${s}/rsvp: no history handling`);
+  // The record key must come from the tested module, not a private copy.
+  if (!/normalis|replace\(\/\\D\/g/.test(withJs)) {
+    fail(`i/${s}/rsvp: no phone normalisation reachable from the page`);
+  }
 }
 
 for (const p of ['favicon.svg', 'favicon.ico', 'apple-touch-icon.png', '_headers']) {
