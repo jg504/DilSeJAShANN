@@ -92,6 +92,9 @@ const swatches = (raw: unknown[]): Swatch[] =>
               at h2, which leaves a screen reader with no title for the page. */}
           <h1 class="couple">{couple}</h1>
           <p class="hero-dates">{dateLine}</p>
+          {/* Counts to THIS link's first function, in IST. Filled client-side
+              because a static build would bake in the day it was deployed. */}
+          <p class="countdown" id="countdown" data-first={dates[0]} hidden></p>
         </div>
       </div>
 
@@ -134,6 +137,16 @@ const swatches = (raw: unknown[]): Swatch[] =>
               <a class="btn quiet" href={`${f.id}.ics`} download>
                 Add to Calendar
               </a>
+              {/* Guests paste this into a cab app, which a Maps link cannot
+                  serve. Hidden when the browser has no clipboard access. */}
+              <button
+                type="button"
+                class="btn quiet copy-address no-print"
+                data-copy={`${f.venue}, ${f.address}`}
+                hidden
+              >
+                Copy address
+              </button>
             </div>
 
             <div class="dress">
@@ -152,6 +165,22 @@ const swatches = (raw: unknown[]): Swatch[] =>
             </div>
           </section>
         ))
+      }
+
+      {
+        functions.length > 1 && (
+          <section class="fn reveal">
+            <h2>All of it, in one go</h2>
+            <p class="lead">
+              Put every date in your calendar at once, rather than one at a time.
+            </p>
+            <div class="actions">
+              <a class="btn quiet" href="all.ics" download>
+                Add all to Calendar
+              </a>
+            </div>
+          </section>
+        )
       }
 
       {
@@ -252,6 +281,51 @@ const swatches = (raw: unknown[]): Swatch[] =>
     try {
       sessionStorage.setItem(KEY, '1');
     } catch (e) {}
+  }
+
+  // Countdown to this link's own first function. A Reception-only guest counts
+  // to the 28th, never the 26th — the same rule as the hero date line.
+  //
+  // Computed once on load rather than on a timer: a day-level count does not
+  // need one, and a ticking interval costs battery and can jank on a low-end
+  // phone for no gain.
+  const cd = document.getElementById('countdown');
+  if (cd && cd.dataset.first) {
+    const IST = '+05:30';
+    const start = Date.parse(`${cd.dataset.first}T00:00:00${IST}`);
+    // Same ?now= override as live mode, so both can be checked on a real phone
+    // before the day. Read as IST unless an offset is given.
+    const faked = new URLSearchParams(location.search).get('now');
+    const base = faked
+      ? Date.parse(/[+-]\d{2}:\d{2}$/.test(faked) ? faked : faked + IST)
+      : Date.now();
+    const days = Math.ceil((start - base) / 86400000);
+    if (days > 0) {
+      cd.textContent = days === 1 ? 'Tomorrow' : `${days} days to go`;
+      cd.hidden = false;
+    }
+    // Zero or negative means the day has arrived or passed, and live mode owns
+    // the page from that point.
+  }
+
+  // Copy address — revealed only when the browser can actually do it.
+  const copyBtns = document.querySelectorAll<HTMLButtonElement>('.copy-address');
+  if (navigator.clipboard && window.isSecureContext) {
+    copyBtns.forEach((b) => {
+      b.hidden = false;
+      b.addEventListener('click', async () => {
+        const was = b.textContent;
+        try {
+          await navigator.clipboard.writeText(b.dataset.copy || '');
+          b.textContent = 'Copied';
+        } catch (e) {
+          b.textContent = 'Press and hold to copy';
+        }
+        setTimeout(() => {
+          b.textContent = was;
+        }, 1600);
+      });
+    });
   }
 
   // Scroll reveals via IntersectionObserver — never a scroll listener, never
@@ -365,6 +439,14 @@ const swatches = (raw: unknown[]): Swatch[] =>
     color: var(--body);
     opacity: 0.75;
     margin: var(--gap-sm) 0 0;
+  }
+  .countdown {
+    font-family: var(--sans);
+    font-size: var(--t-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: var(--gap-xs) 0 0;
   }
   .greeting {
     font-family: var(--sans);

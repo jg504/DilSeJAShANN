@@ -50,8 +50,11 @@ if (existsSync(iDir)) {
   }
 }
 for (const s of slugs) {
+  // all.ics is the combined calendar and is expected on any link with more
+  // than one function; every other .ics must correspond to a function.
+  const allowed = [...byS[s].functions, ...(byS[s].functions.length > 1 ? ['all'] : [])];
   for (const f of readdirSync(join(dist, 'i', s))) {
-    if (f.endsWith('.ics') && !byS[s].functions.includes(f.replace('.ics', ''))) {
+    if (f.endsWith('.ics') && !allowed.includes(f.replace('.ics', ''))) {
       fail(`stale file: i/${s}/${f}`);
     }
   }
