@@ -63,11 +63,19 @@ them.** If something here looks wrong, raise it — do not quietly reverse it.
 - **Seventeen columns, in `docs/schema.md`.** Do not add an eighteenth. After
   distribution, a schema change means phoning two hundred people.
 
+## Content — settled 2026-08-22
+
+- **`dressColors: []` means "no colours specified".** Confirmed for the Cocktails and
+  the Wedding. The ambiguity is closed: empty is a real answer, not an unfilled field.
+- **A ceremony may carry its own venue and Maps pin.** The Anand Karaj is at the
+  Gurudwara and the phere is next door at Club Patio — one venue per function could not
+  express that, and a single pin would send guests to the wrong entrance for the
+  ceremony they arrive for. The `.ics` uses the *earliest* ceremony's venue, since that
+  is where a guest must actually turn up.
+
 ## Open questions
 
-- **`dressColors: []` is ambiguous** — empty may mean "no colours given" or "not yet
-  filled". The validation script cannot tell the two apart, so an unfilled record would
-  pass. Settle the convention before content lands.
+- **`Phere` or `Vivaah`** — see below; still the one open naming question.
 - **`Phere` or `Vivaah`** — `invites.json` uses `Phere` per the CLAUDE.md template; the
   `/ceremonies` brief says the printed card may be titled `Vivaah`. Awaiting family
   confirmation, along with the four-vs-seven pheras question.

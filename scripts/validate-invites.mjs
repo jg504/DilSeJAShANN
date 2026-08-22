@@ -71,7 +71,18 @@ for (const [id, fn] of Object.entries(data.functions ?? {})) {
   // The Wedding carries two ceremonies in one function. A guest reading only
   // one start time arrives at the wrong hour.
   if (hasCeremonies) {
-    fn.ceremonies.forEach((c, i) => require(c, ['name', 'startTime'], `functions.${id}.ceremonies[${i}]`));
+    fn.ceremonies.forEach((c, i) => {
+      require(c, ['name', 'startTime'], `functions.${id}.ceremonies[${i}]`);
+      // A ceremony may sit at its own venue — the Anand Karaj and the phere are
+      // next door to each other, not in the same room. If one is named it needs
+      // its own pin, or guests are sent to the wrong entrance.
+      if (c.venue && !c.mapsUrl) {
+        fail(`functions.${id}.ceremonies[${i}] has a venue but no mapsUrl`);
+      }
+      if (c.mapsUrl && !c.venue) {
+        fail(`functions.${id}.ceremonies[${i}] has a mapsUrl but no venue`);
+      }
+    });
   }
 }
 

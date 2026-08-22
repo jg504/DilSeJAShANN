@@ -1,15 +1,14 @@
 {
-  "couple": "<<FILL>>",
-
+  "couple": "Anusha & Jaskaran",
   "functions": {
     "f1": {
       "name": "Cocktails",
       "date": "2026-12-26",
-      "startTime": "<<FILL>>",
-      "venue": "<<FILL>>",
-      "address": "<<FILL>>",
-      "mapsUrl": "<<FILL>>",
-      "dressCode": "<<FILL>>",
+      "startTime": "7:00 pm",
+      "venue": "Club Patio",
+      "address": "South City I, Sector 41, Gurgaon",
+      "mapsUrl": "https://maps.app.goo.gl/5LuenHLkHbxannWM8",
+      "dressCode": "Indo-Western",
       "dressColors": [],
       "dressNote": ""
     },
@@ -17,13 +16,23 @@
       "name": "Wedding",
       "date": "2026-12-27",
       "ceremonies": [
-        { "name": "Anand Karaj", "startTime": "<<FILL>>" },
-        { "name": "Phere", "startTime": "<<FILL>>" }
+        {
+          "name": "Anand Karaj",
+          "startTime": "11:00 am",
+          "venue": "Gurudwara Sadh Sangat",
+          "mapsUrl": "https://maps.app.goo.gl/MdQkpFWmBrNe9dtc6"
+        },
+        {
+          "name": "Phere",
+          "startTime": "2:00 pm",
+          "venue": "Club Patio",
+          "mapsUrl": "https://maps.app.goo.gl/5LuenHLkHbxannWM8"
+        }
       ],
-      "venue": "<<FILL>>",
-      "address": "<<FILL>>",
-      "mapsUrl": "<<FILL>>",
-      "dressCode": "<<FILL>>",
+      "venue": "Club Patio",
+      "address": "South City I, Sector 41, Gurgaon",
+      "mapsUrl": "https://maps.app.goo.gl/5LuenHLkHbxannWM8",
+      "dressCode": "Indian",
       "dressColors": [],
       "dressNote": "Heads must be covered for the Anand Karaj."
     },
@@ -39,13 +48,18 @@
       "dressNote": ""
     }
   },
-
   "sides": {
     "groom": {
       "greeting": "<<FILL>>",
       "contacts": [
-        { "name": "<<FILL>>", "phone": "<<FILL>>" },
-        { "name": "<<FILL>>", "phone": "<<FILL>>" }
+        {
+          "name": "<<FILL>>",
+          "phone": "<<FILL>>"
+        },
+        {
+          "name": "<<FILL>>",
+          "phone": "<<FILL>>"
+        }
       ],
       "hotel": {
         "name": "<<FILL>>",
@@ -62,8 +76,14 @@
     "bride": {
       "greeting": "<<FILL>>",
       "contacts": [
-        { "name": "<<FILL>>", "phone": "<<FILL>>" },
-        { "name": "<<FILL>>", "phone": "<<FILL>>" }
+        {
+          "name": "<<FILL>>",
+          "phone": "<<FILL>>"
+        },
+        {
+          "name": "<<FILL>>",
+          "phone": "<<FILL>>"
+        }
       ],
       "hotel": {
         "name": "<<FILL>>",
@@ -78,14 +98,83 @@
       }
     }
   },
-
   "invites": [
-    { "slug": "0do4wz1", "index": 1, "side": "groom", "functions": ["f1", "f2", "f3"], "accom": true,  "nights": ["26", "27", "28"] },
-    { "slug": "d9snwr2", "index": 2, "side": "groom", "functions": ["f2", "f3"],       "accom": false },
-    { "slug": "9im8nd3", "index": 3, "side": "groom", "functions": ["f2"],             "accom": false },
-    { "slug": "7m18zu4", "index": 4, "side": "groom", "functions": ["f3"],             "accom": false },
-    { "slug": "et3m9n5", "index": 5, "side": "bride", "functions": ["f2", "f3"],       "accom": true,  "nights": ["26", "27", "28"] },
-    { "slug": "re89kq6", "index": 6, "side": "bride", "functions": ["f2"],             "accom": false },
-    { "slug": "7kgiax7", "index": 7, "side": "bride", "functions": ["f3"],             "accom": false }
+    {
+      "slug": "0do4wz1",
+      "index": 1,
+      "side": "groom",
+      "functions": [
+        "f1",
+        "f2",
+        "f3"
+      ],
+      "accom": true,
+      "nights": [
+        "26",
+        "27",
+        "28"
+      ]
+    },
+    {
+      "slug": "d9snwr2",
+      "index": 2,
+      "side": "groom",
+      "functions": [
+        "f2",
+        "f3"
+      ],
+      "accom": false
+    },
+    {
+      "slug": "9im8nd3",
+      "index": 3,
+      "side": "groom",
+      "functions": [
+        "f2"
+      ],
+      "accom": false
+    },
+    {
+      "slug": "7m18zu4",
+      "index": 4,
+      "side": "groom",
+      "functions": [
+        "f3"
+      ],
+      "accom": false
+    },
+    {
+      "slug": "et3m9n5",
+      "index": 5,
+      "side": "bride",
+      "functions": [
+        "f2",
+        "f3"
+      ],
+      "accom": true,
+      "nights": [
+        "26",
+        "27",
+        "28"
+      ]
+    },
+    {
+      "slug": "re89kq6",
+      "index": 6,
+      "side": "bride",
+      "functions": [
+        "f2"
+      ],
+      "accom": false
+    },
+    {
+      "slug": "7kgiax7",
+      "index": 7,
+      "side": "bride",
+      "functions": [
+        "f3"
+      ],
+      "accom": false
+    }
   ]
 }

@@ -114,10 +114,30 @@ const swatches = (raw: unknown[]): Swatch[] =>
               /* Two ceremonies in one function. A guest who reads only one
                  start time arrives at the wrong hour. */
               <ul class="times">
-                {f.ceremonies.map((c) => (
+                {f.ceremonies.map((c: any) => (
                   <li>
-                    <span class="ceremony">{c.name}</span>
-                    <span class="time">{c.startTime}</span>
+                    <div class="ceremony-head">
+                      <span class="ceremony">{c.name}</span>
+                      <span class="time">{c.startTime}</span>
+                    </div>
+                    {/* The two ceremonies can be at different venues. A guest
+                        arriving for the first needs that pin, not the one for
+                        where the day ends up. */}
+                    {c.venue && (
+                      <div class="ceremony-where">
+                        <span class="ceremony-venue">{c.venue}</span>
+                        {c.mapsUrl && (
+                          <a
+                            class="ceremony-map"
+                            href={c.mapsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Directions
+                          </a>
+                        )}
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -562,12 +582,35 @@ const swatches = (raw: unknown[]): Swatch[] =>
     padding: 0;
   }
   .times li {
+    padding: 0.6rem 0;
+    border-bottom: 1px dotted var(--line);
+  }
+  .ceremony-head {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     gap: var(--gap);
-    padding: 0.5rem 0;
-    border-bottom: 1px dotted var(--line);
+  }
+  .ceremony-where {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--gap-sm);
+    margin-top: 0.2rem;
+  }
+  .ceremony-venue {
+    font-family: var(--sans);
+    font-size: var(--t-sm);
+    color: var(--body);
+    opacity: 0.85;
+  }
+  .ceremony-map {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: var(--t-xs);
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
   .ceremony {
     font-family: var(--display);

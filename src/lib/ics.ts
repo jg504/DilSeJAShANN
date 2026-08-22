@@ -12,7 +12,7 @@ export type Fn = {
   startTime?: string;
   venue: string;
   address: string;
-  ceremonies?: { name: string; startTime: string }[];
+  ceremonies?: { name: string; startTime: string; venue?: string; mapsUrl?: string }[];
 };
 
 const HOURS = 60 * 60 * 1000;
@@ -90,7 +90,15 @@ export function event(fn: Fn, uid: string, now: string): string[] {
   }
 
   if (description) lines.push(`DESCRIPTION:${esc(description)}`);
-  lines.push(`LOCATION:${esc(`${fn.venue}, ${fn.address}`)}`);
+  // Where the guest must actually turn up. When the ceremonies are at
+  // different venues, that is the earliest one's — not where the day ends up.
+  const firstVenue =
+    fn.ceremonies?.length
+      ? [...fn.ceremonies]
+          .filter((c) => minutes(c.startTime) !== null)
+          .sort((a, b) => minutes(a.startTime)! - minutes(b.startTime)!)[0]?.venue
+      : undefined;
+  lines.push(`LOCATION:${esc(`${firstVenue ?? fn.venue}, ${fn.address}`)}`);
   lines.push('END:VEVENT');
   return lines;
 }
