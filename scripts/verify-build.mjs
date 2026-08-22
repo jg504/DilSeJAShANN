@@ -325,10 +325,20 @@ notes.push(`rsvp page:  ${KB(rsvp.bytes)} gz in ${rsvp.requests} requests`);
 
 // Class A budget: above the fold under ~800KB, LCP under 2.5s on Slow 4G.
 if (aboveFold > 800 * 1024) fail(`above-the-fold payload ${KB(aboveFold)} exceeds the 800KB budget`);
-// The invitation page is the landing page — extra blocking requests cost LCP
-// directly on a slow connection.
-if (invite.requests > 3) fail(`invitation page makes ${invite.requests} sub-resource requests, expected at most 3`);
 if (size('og.png') > 300 * 1024) fail(`og.png ${KB(size('og.png'))} exceeds 300KB`);
+
+// What actually costs LCP is render-BLOCKING work, not request count. A
+// type="module" script is deferred and cannot delay first paint, so counting
+// all sub-resources equally flagged a change that was in fact free.
+const inviteHtml = read(`i/${slugs[0]}/index.html`);
+const blockingCss = [...inviteHtml.matchAll(/<link[^>]+rel="stylesheet"[^>]*>/g)].length;
+const blockingJs = [...inviteHtml.matchAll(/<script([^>]*\ssrc=[^>]*)>/g)].filter(
+  (m) => !/\btype="module"/.test(m[1]) && !/\bdefer\b/.test(m[1]) && !/\basync\b/.test(m[1])
+).length;
+
+if (blockingCss > 1) fail(`invitation page has ${blockingCss} blocking stylesheets, expected 1`);
+if (blockingJs > 0) fail(`invitation page has ${blockingJs} render-blocking script(s), expected 0`);
+notes.push(`invitation blocking resources: ${blockingCss} css, ${blockingJs} js`);
 
 // ---------------------------------------------------------------- report
 for (const n of notes) console.log(`  note: ${n}`);

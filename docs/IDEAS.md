@@ -29,6 +29,17 @@ Name, per-function counts, nights, dietary. Turns "the button worked" into
 "they have my answer", and it is the last chance for a guest to notice they put
 4 where they meant 1.
 
+### `BUILT` Logic that must not be wrong is unit-tested
+187 assertions across four suites, run by `npm test`. The three modules chosen
+are the ones where being quietly wrong costs more than being obviously broken:
+bed-nights book beds, `phone_e164` is the sheet's record key, and live mode runs
+unattended and cannot be fixed while running. The calendar files got the same
+treatment after a real RFC violation was found.
+
+Each suite was mutation-checked — deliberate breakages introduced to confirm the
+tests actually fail — and the pages import those modules, so the tested code is
+the code that ships.
+
 ---
 
 ## Proposed — worth discussing

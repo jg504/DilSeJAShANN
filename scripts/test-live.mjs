@@ -127,6 +127,22 @@ eq('not today', L.dayLabel(planned[2], at('2026-12-27T09:00')), '28 December');
 // date in UTC.
 eq('late IST evening is still today', L.dayLabel(planned[1], at('2026-12-27T23:30')), 'Today');
 
+
+// --- countdown day maths ------------------------------------------------------
+// Rounds up, so any part of the day before counts as one. Zero or negative
+// means the day has arrived and live mode owns the page.
+eq('a week out', T.daysUntil('2026-12-26', at('2026-12-19T00:00')), 7);
+eq('two days out', T.daysUntil('2026-12-26', at('2026-12-24T00:00')), 2);
+eq('the eve, morning', T.daysUntil('2026-12-26', at('2026-12-25T09:00')), 1);
+eq('the eve, one minute to midnight', T.daysUntil('2026-12-26', at('2026-12-25T23:59')), 1);
+eq('midnight exactly is zero', T.daysUntil('2026-12-26', at('2026-12-26T00:00')), 0);
+eq('during the day is zero or less', T.daysUntil('2026-12-26', at('2026-12-26T12:00')), 0);
+eq('the day after is negative', T.daysUntil('2026-12-26', at('2026-12-27T12:00')), -1);
+// A guest on a London clock at 20:00 GMT on the 25th is already past midnight
+// IST on the 26th, so their countdown must be over, not showing "Tomorrow".
+eq('london clock past IST midnight', T.daysUntil('2026-12-26', at('2026-12-25T20:00+00:00')), 0);
+eq('garbage date is safe', T.daysUntil('not-a-date', at('2026-12-25T09:00')), 0);
+
 // --- report ---------------------------------------------------------------------
 if (failures.length) {
   console.error(`\nLIVE MODE TESTS FAILED — ${failures.length} of ${passed + failures.length}:\n`);

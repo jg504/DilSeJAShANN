@@ -37,3 +37,17 @@ export function fakedNow(raw: string | null | undefined): number | null {
   const ms = Date.parse(/[+-]\d{2}:\d{2}$/.test(raw) ? raw : raw + IST);
   return Number.isNaN(ms) ? null : ms;
 }
+
+/**
+ * Whole days from now until midnight IST on `date`.
+ *
+ * Rounds up, so any part of the day before counts as one: at 23:00 on the 25th
+ * the answer is 1, which reads as "Tomorrow" rather than "today". Zero or
+ * negative means the day has arrived or passed, and live mode owns the page
+ * from that point.
+ */
+export function daysUntil(date: string, now: number): number {
+  const start = istAt(date);
+  if (Number.isNaN(start) || Number.isNaN(now)) return 0;
+  return Math.ceil((start - now) / 86400000);
+}

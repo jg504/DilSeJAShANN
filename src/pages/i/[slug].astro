@@ -267,6 +267,8 @@ const swatches = (raw: unknown[]): Swatch[] =>
 </Base>
 
 <script>
+  import { fakedNow, daysUntil } from '../../lib/time.ts';
+
   // The signature moment runs once per session. Internal navigation must not
   // replay it, and neither should a guest re-opening the link from WhatsApp.
   const hero = document.getElementById('hero');
@@ -291,15 +293,11 @@ const swatches = (raw: unknown[]): Swatch[] =>
   // phone for no gain.
   const cd = document.getElementById('countdown');
   if (cd && cd.dataset.first) {
-    const IST = '+05:30';
-    const start = Date.parse(`${cd.dataset.first}T00:00:00${IST}`);
     // Same ?now= override as live mode, so both can be checked on a real phone
-    // before the day. Read as IST unless an offset is given.
-    const faked = new URLSearchParams(location.search).get('now');
-    const base = faked
-      ? Date.parse(/[+-]\d{2}:\d{2}$/.test(faked) ? faked : faked + IST)
-      : Date.now();
-    const days = Math.ceil((start - base) / 86400000);
+    // before the day. The date maths lives in src/lib/time.ts alongside live
+    // mode's, so the two cannot disagree about when a day begins.
+    const base = fakedNow(new URLSearchParams(location.search).get('now')) ?? Date.now();
+    const days = daysUntil(cd.dataset.first, base);
     if (days > 0) {
       cd.textContent = days === 1 ? 'Tomorrow' : `${days} days to go`;
       cd.hidden = false;
