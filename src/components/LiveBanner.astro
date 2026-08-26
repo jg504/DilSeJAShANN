@@ -35,8 +35,15 @@ const events = functions.map((f) => ({
   date: f.date,
   venue: f.venue,
   mapsUrl: f.mapsUrl,
+  // Each ceremony carries its own venue where it has one, so live mode can
+  // point at the building the guest should actually be walking into.
   times: f.ceremonies?.length
-    ? f.ceremonies.map((c) => ({ label: c.name, at: c.startTime }))
+    ? f.ceremonies.map((c: any) => ({
+        label: c.name,
+        at: c.startTime,
+        venue: c.venue,
+        mapsUrl: c.mapsUrl,
+      }))
     : [{ label: '', at: f.startTime ?? '' }],
 }));
 ---
@@ -50,7 +57,7 @@ const events = functions.map((f) => ({
 <div id="live" class="live" hidden></div>
 
 <script>
-  import { plan, stateAt, timeLine, dayLabel } from '../lib/live.ts';
+  import { plan, stateAt, timeLine, dayLabel, whereNow } from '../lib/live.ts';
   import { fakedNow } from '../lib/time.ts';
 
   const el = document.getElementById('live');
@@ -66,7 +73,7 @@ const events = functions.map((f) => ({
 
     const actions = (fn: any) =>
       `<div class="live-actions">` +
-      `<a class="live-btn" href="${esc(fn.mapsUrl)}" target="_blank" rel="noopener noreferrer">Get Directions</a>` +
+      `<a class="live-btn" href="${esc(whereNow(fn, now).mapsUrl)}" target="_blank" rel="noopener noreferrer">Get Directions</a>` +
       `<a class="live-btn quiet" href="tel:${esc(contact.phone)}">Call ${esc(contact.name)}</a>` +
       `</div>`;
 
@@ -78,7 +85,7 @@ const events = functions.map((f) => ({
         `<p class="live-label">Happening now</p>` +
         `<p class="live-name">${esc(state.fn.name)}</p>` +
         (t ? `<p class="live-time">${esc(t)}</p>` : '') +
-        `<p class="live-venue">${esc(state.fn.venue)}</p>` +
+        `<p class="live-venue">${esc(whereNow(state.fn, now).venue)}</p>` +
         actions(state.fn);
     } else if (state.kind === 'next') {
       const t = timeLine(state.fn);
@@ -86,7 +93,7 @@ const events = functions.map((f) => ({
         `<p class="live-label">Up next</p>` +
         `<p class="live-name">${esc(state.fn.name)}</p>` +
         `<p class="live-time">${esc(dayLabel(state.fn, now))}${t ? ' · ' + esc(t) : ''}</p>` +
-        `<p class="live-venue">${esc(state.fn.venue)}</p>` +
+        `<p class="live-venue">${esc(whereNow(state.fn, now).venue)}</p>` +
         actions(state.fn);
     } else if (state.kind === 'after') {
       // Nowhere left to go, so no venue and no directions.

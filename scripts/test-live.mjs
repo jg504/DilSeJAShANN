@@ -143,6 +143,54 @@ eq('the day after is negative', T.daysUntil('2026-12-26', at('2026-12-27T12:00')
 eq('london clock past IST midnight', T.daysUntil('2026-12-26', at('2026-12-25T20:00+00:00')), 0);
 eq('garbage date is safe', T.daysUntil('not-a-date', at('2026-12-25T09:00')), 0);
 
+
+// --- which venue to send a guest to, right now --------------------------------
+// The Wedding runs across two venues next door to each other. Showing the
+// function's venue all day would send someone arriving for the Anand Karaj into
+// the wrong building.
+const TWO_VENUE = [fn('Wedding', '2026-12-27', [
+  { label: 'Anand Karaj', at: '11:00 am', venue: 'Gurudwara', mapsUrl: 'G' },
+  { label: 'Phere', at: '2:00 pm', venue: 'Club Patio', mapsUrl: 'C' },
+], 'Club Patio')];
+const tv = L.plan(TWO_VENUE)[0];
+
+eq('before either ceremony, point at the first',
+  L.whereNow(tv, at('2026-12-27T09:00')).venue, 'Gurudwara');
+eq('at the anand karaj', L.whereNow(tv, at('2026-12-27T11:30')).venue, 'Gurudwara');
+eq('one minute before the phere', L.whereNow(tv, at('2026-12-27T13:59')).venue, 'Gurudwara');
+eq('at the phere exactly', L.whereNow(tv, at('2026-12-27T14:00')).venue, 'Club Patio');
+eq('during the phere', L.whereNow(tv, at('2026-12-27T16:00')).venue, 'Club Patio');
+eq('the pin follows the venue', L.whereNow(tv, at('2026-12-27T11:30')).mapsUrl, 'G');
+eq('and switches with it', L.whereNow(tv, at('2026-12-27T16:00')).mapsUrl, 'C');
+
+// Ceremonies listed out of order must not change the answer.
+const REVERSED = [fn('Wedding', '2026-12-27', [
+  { label: 'Phere', at: '2:00 pm', venue: 'Club Patio', mapsUrl: 'C' },
+  { label: 'Anand Karaj', at: '11:00 am', venue: 'Gurudwara', mapsUrl: 'G' },
+], 'Club Patio')];
+eq('order in the data does not matter',
+  L.whereNow(L.plan(REVERSED)[0], at('2026-12-27T11:30')).venue, 'Gurudwara');
+
+// A function with one venue falls back to its own.
+const ONE_VENUE = [fn('Reception', '2026-12-28', [{ label: '', at: '8:00 pm' }], 'The Oberoi')];
+eq('single-venue function uses its own',
+  L.whereNow(L.plan(ONE_VENUE)[0], at('2026-12-28T21:00')).venue, 'The Oberoi');
+
+// An all-day function has no segments at all.
+const ALLDAY = [fn('Wedding', '2026-12-27', [{ label: '', at: '<<FILL>>' }], 'Somewhere')];
+eq('all-day falls back to the function venue',
+  L.whereNow(L.plan(ALLDAY)[0], at('2026-12-27T12:00')).venue, 'Somewhere');
+eq('all-day has no active segment',
+  L.activeSegment(L.plan(ALLDAY)[0], at('2026-12-27T12:00')), null);
+
+// A ceremony with a time but no venue of its own inherits the function's.
+const PARTIAL = [fn('Wedding', '2026-12-27', [
+  { label: 'Anand Karaj', at: '11:00 am' },
+  { label: 'Phere', at: '2:00 pm', venue: 'Club Patio', mapsUrl: 'C' },
+], 'Main Hall')];
+eq('a ceremony without its own venue inherits',
+  L.whereNow(L.plan(PARTIAL)[0], at('2026-12-27T11:30')).venue, 'Main Hall');
+
 // --- report ---------------------------------------------------------------------
 if (failures.length) {
   console.error(`\nLIVE MODE TESTS FAILED — ${failures.length} of ${passed + failures.length}:\n`);

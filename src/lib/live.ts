@@ -13,12 +13,14 @@ import { istAt, minutes } from './time.ts';
 const HOURS = 60 * 60 * 1000;
 const RUNS_FOR = 4 * HOURS;
 
+export type Time = { label: string; at: string; venue?: string; mapsUrl?: string };
+
 export type Fn = {
   name: string;
   date: string;
   venue: string;
   mapsUrl: string;
-  times: { label: string; at: string }[];
+  times: Time[];
 };
 
 export type Planned = Fn & { start: number; end: number; allDay: boolean };
@@ -69,6 +71,40 @@ export function stateAt(planned: Planned[], now: number): State {
   if (next) return { kind: 'next', fn: next };
 
   return { kind: 'after' };
+}
+
+/**
+ * Where the guest should be RIGHT NOW, which is not always the function's venue.
+ *
+ * The Wedding runs across two venues — the Anand Karaj at the Gurudwara, the
+ * phere next door at Club Patio. Showing the function's venue all day would
+ * send someone arriving at 11am to the wrong building. Resolves to the latest
+ * ceremony that has already started, or the first one if none has.
+ *
+ * Returns null when there are no usable times, so the caller falls back to the
+ * function's own venue.
+ */
+export function activeSegment(e: Planned, now: number): Time | null {
+  const timed = e.times
+    .map((t) => ({ t, mins: minutes(t.at) }))
+    .filter((x): x is { t: Time; mins: number } => x.mins !== null)
+    .sort((a, b) => a.mins - b.mins);
+  if (!timed.length) return null;
+
+  let active = timed[0];
+  for (const x of timed) {
+    if (now >= istAt(e.date, x.mins)) active = x;
+  }
+  return active.t;
+}
+
+/** Venue and pin for where to go now, falling back to the function's own. */
+export function whereNow(e: Planned, now: number): { venue: string; mapsUrl: string } {
+  const seg = activeSegment(e, now);
+  return {
+    venue: seg?.venue ?? e.venue,
+    mapsUrl: seg?.mapsUrl ?? e.mapsUrl,
+  };
 }
 
 /** The times to print, skipping any that could not be parsed. */
