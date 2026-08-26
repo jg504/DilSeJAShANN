@@ -9,26 +9,11 @@
  * writes the header row, and formats the phone column as plain text.
  */
 
-/**
- * The spreadsheet id, read from Script Properties.
- *
- * NOT stored in this file. The repository is public, and more importantly a
- * hardcoded id means this file cannot be pasted in as-is — which is exactly how
- * the endpoint was once taken down: a redeploy from the repo overwrote the real
- * id with the placeholder, and every read and write started throwing.
- *
- * Set it once: Project Settings → Script Properties → SHEET_ID.
- */
-function sheetId() {
-  const id = PropertiesService.getScriptProperties().getProperty('SHEET_ID');
-  if (!id) {
-    throw new Error(
-      'SHEET_ID is not set. Add it in Project Settings → Script Properties, ' +
-        'using the id from the spreadsheet URL.'
-    );
-  }
-  return id;
-}
+// The spreadsheet id lives in Script Properties, never in this file. Set it at
+// Project Settings > Script Properties > SHEET_ID. Do NOT hardcode it here: a
+// file that must be hand-edited after pasting will eventually be pasted
+// unedited, which is exactly how this endpoint once went down.
+const SHEET_ID = PropertiesService.getScriptProperties().getProperty('SHEET_ID');
 
 const TABS = ['groom', 'bride'];
 
@@ -65,7 +50,7 @@ const LOCK_TIMEOUT_MS = 30000;
  * Safe to re-run — it will not touch existing rows.
  */
 function setup() {
-  const ss = SpreadsheetApp.openById(sheetId());
+  const ss = SpreadsheetApp.openById(SHEET_ID);
 
   TABS.forEach(function (name) {
     let sheet = ss.getSheetByName(name);
@@ -124,7 +109,7 @@ function doGet(e) {
   const id = p.check;
   if (!id) return reply({ ok: true, service: 'dilsejashann rsvp' });
 
-  const ss = SpreadsheetApp.openById(sheetId());
+  const ss = SpreadsheetApp.openById(SHEET_ID);
   for (let t = 0; t < TABS.length; t++) {
     const sheet = ss.getSheetByName(TABS[t]);
     if (!sheet) continue;
@@ -164,7 +149,7 @@ function doPost(e) {
       return reply({ ok: false, error: 'bad phone' });
     }
 
-    const ss = SpreadsheetApp.openById(sheetId());
+    const ss = SpreadsheetApp.openById(SHEET_ID);
     const sheet = ss.getSheetByName(side);
     if (!sheet) return reply({ ok: false, error: 'missing tab' });
 
@@ -218,7 +203,7 @@ function doPost(e) {
  */
 function readTabs(which) {
   const want = which === 'both' ? TABS : TABS.filter(function (t) { return t === which; });
-  const ss = SpreadsheetApp.openById(sheetId());
+  const ss = SpreadsheetApp.openById(SHEET_ID);
   const out = {};
 
   want.forEach(function (name) {
