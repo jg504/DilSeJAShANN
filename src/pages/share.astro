@@ -10,11 +10,15 @@ import invites from '../data/invites.json';
 
 // This page is the single worst thing on the site to leak: it lists all seven
 // links and spells out the tier behind each one. Cloudflare Access is the real
-// protection, but Access is configured in a dashboard and cannot be verified
-// from a build, so the links are withheld until ADMIN_KEY exists. That makes
-// "I set the site up properly" the condition for publishing them, rather than
-// "I pushed a commit".
-const enabled = Boolean(import.meta.env.ADMIN_KEY);
+// protection, and it is dashboard state a build cannot verify — so the links
+// are withheld until someone explicitly asserts Access is on.
+//
+// The gate is ACCESS_READY, deliberately NOT ADMIN_KEY. It was ADMIN_KEY, and
+// that was wrong: ADMIN_KEY is needed to make the dashboards work at all, so
+// setting it is not evidence that Access exists. Anyone doing the obvious
+// thing — set the key, get the dashboards — would have published all seven
+// links on the next deploy.
+const enabled = Boolean(import.meta.env.ACCESS_READY);
 
 const SITE = 'https://dilsejashann.com';
 
@@ -52,12 +56,21 @@ const message = `Please open this and let us know if you can join us — it only
           Before it will show them, two things must be true:
         </p>
         <ol>
-          <li>Cloudflare Access is protecting <code>/share</code> and <code>/admin/*</code></li>
           <li>
-            <code>ADMIN_KEY</code> is set as a Cloudflare build variable
+            Cloudflare Access is protecting <code>/share</code> and
+            <code>/admin/*</code> — open one in a private window and confirm you are
+            challenged
+          </li>
+          <li>
+            <code>ACCESS_READY</code> is set as a Cloudflare build variable, to any
+            value
           </li>
         </ol>
-        <p>Then redeploy and the table below will appear.</p>
+        <p>
+          Then redeploy and the table below will appear. Setting
+          <code>ADMIN_KEY</code> alone is deliberately not enough — that key exists to
+          make the dashboards work, not to assert that Access is switched on.
+        </p>
       </div>
     )
   }

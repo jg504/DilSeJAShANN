@@ -73,6 +73,16 @@ them.** If something here looks wrong, raise it — do not quietly reverse it.
   ceremony they arrive for. The `.ics` uses the *earliest* ceremony's venue, since that
   is where a guest must actually turn up.
 
+## Access gating — settled 2026-08-26
+
+- **`/share` is gated on `ACCESS_READY`, the dashboards on that plus `ADMIN_KEY`.**
+  The gate previously keyed off `ADMIN_KEY` alone. That was wrong: the key is what
+  makes the dashboards work, so setting it is a normal step and not evidence that
+  Cloudflare Access exists. It was set on 2026-08-26 with Access still unconfigured;
+  the next deploy would have published all seven links and their tiers.
+- **A build cannot verify dashboard state**, so the flag is an explicit human
+  assertion. Confirm the challenge in a private window before setting it.
+
 ## Open questions
 
 - **`Phere` or `Vivaah`** — `invites.json` uses `Phere` per the CLAUDE.md template; the

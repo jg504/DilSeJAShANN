@@ -249,12 +249,25 @@ for (const p of ['index.html', '404.html']) {
 // ---------------------------------------------------------------- admin
 // Astro loads .env at build time via Vite; plain node does not. Without this
 // the check compares a build that had the key against a verifier that did not.
-let envKey = process.env.ADMIN_KEY;
-if (!envKey && existsSync(join(root, '.env'))) {
-  const m = readFileSync(join(root, '.env'), 'utf8').match(/^ADMIN_KEY=(.*)$/m);
-  if (m) envKey = m[1].trim();
+function envVar(name) {
+  if (process.env[name]) return process.env[name];
+  if (existsSync(join(root, '.env'))) {
+    const m = readFileSync(join(root, '.env'), 'utf8').match(new RegExp(`^${name}=(.*)$`, 'm'));
+    if (m) return m[1].trim();
+  }
+  return '';
 }
-const adminKeySet = Boolean(envKey);
+// The two gates are deliberately different, and this mirrors them exactly:
+//
+//   /share  needs ACCESS_READY only — it embeds no token, just the links.
+//   /admin  needs ACCESS_READY AND ADMIN_KEY — it embeds a token that can read
+//           every guest's name and phone number.
+//
+// Keying either off the token alone would publish all seven links the moment
+// someone set ADMIN_KEY to make the dashboards work, which is a normal thing
+// to do and is exactly how this nearly went wrong.
+const accessReady = Boolean(envVar('ACCESS_READY'));
+const adminKeySet = Boolean(envVar('ADMIN_KEY')) && accessReady;
 for (const p of ['admin/groom/index.html', 'admin/bride/index.html', 'admin/combined/index.html']) {
   if (!existsSync(join(dist, p))) {
     fail(`missing: ${p}`);
@@ -268,8 +281,10 @@ for (const p of ['admin/groom/index.html', 'admin/bride/index.html', 'admin/comb
 }
 const share = read('share/index.html');
 const shareHasSlugs = slugs.some((s) => share.includes(s));
-if (shareHasSlugs !== adminKeySet) {
-  fail(`share: links ${shareHasSlugs ? 'exposed' : 'withheld'} but ADMIN_KEY is ${adminKeySet ? 'set' : 'unset'}`);
+if (shareHasSlugs !== accessReady) {
+  fail(
+    `share: links ${shareHasSlugs ? 'exposed' : 'withheld'} but ACCESS_READY is ${accessReady ? 'set' : 'unset'}`
+  );
 }
 
 // ---------------------------------------------------------------- robots

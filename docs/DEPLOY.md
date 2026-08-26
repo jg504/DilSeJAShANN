@@ -18,6 +18,26 @@ Workers & Pages → `dilsejashann` → Settings → Build:
 - **Deploy command:** `npx wrangler deploy`
 - **Root directory:** `/`
 
+### Build variables
+
+| Variable | Gates |
+|---|---|
+| `ADMIN_KEY` | The token the dashboards use to read the sheet. Must match the Apps Script Script Property of the same name. |
+| `ACCESS_READY` | Set to any value **only once Cloudflare Access is confirmed to be challenging** `/admin/*` and `/share`. |
+
+`/share` renders the seven links when `ACCESS_READY` is set. The dashboards need
+**both**, because they embed the token.
+
+**These are deliberately separate.** The gate used to key off `ADMIN_KEY` alone,
+which was wrong: setting that key is the normal thing to do to make the
+dashboards work, and it is not evidence that Access exists. Under the old gate,
+setting it would have published every invitation link and its tier on the next
+deploy. `ACCESS_READY` exists to be a statement about who can reach the page,
+not about whether a feature works.
+
+Verify the assertion before setting it — open `/share` in a private window and
+confirm you are challenged.
+
 ### `build` vs `build:draft`
 
 - `npm run build` runs `scripts/validate-invites.mjs` first and **fails** if any record

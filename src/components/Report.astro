@@ -12,9 +12,17 @@ interface Props {
 }
 const { which } = Astro.props;
 
-// Injected at build time from the Cloudflare build environment. Never
-// committed. Without it the page refuses to render anything.
+// Injected at build time from the Cloudflare build environment. Never committed.
+//
+// BOTH are required. ADMIN_KEY is the token, and it is embedded in this page —
+// so if Cloudflare Access is not actually protecting /admin/*, shipping it
+// hands every guest's name and phone number to anyone who finds the URL.
+// ACCESS_READY is the separate, explicit assertion that Access is on, and it
+// exists because setting ADMIN_KEY is something you do to make the dashboard
+// work, not a statement about who can reach it.
 const adminKey = import.meta.env.ADMIN_KEY ?? '';
+const accessReady = Boolean(import.meta.env.ACCESS_READY);
+const enabled = Boolean(adminKey) && accessReady;
 
 const endpoint =
   'https://script.google.com/macros/s/AKfycbzEqwax5hSzUdZhpo5e8Az7ZWeLC4CBkyKQZo4WBOL31ZABz5bOwVNiuCVAkv8mH2g/exec';
@@ -35,23 +43,27 @@ const config = {
 ---
 
 {
-  !adminKey ? (
+  !enabled ? (
     <div class="err">
       <p>
-        <strong>ADMIN_KEY is not set, so this dashboard is disabled.</strong>
+        <strong>This dashboard is disabled until the site is locked down.</strong>
       </p>
       <p>
-        This is intentional. Until the key exists the page ships with no token in it,
-        so it cannot leak guest phone numbers if Cloudflare Access is not yet switched
-        on. Set it in both places, then redeploy:
+        Intentional. This page embeds a token that can read every guest's name and
+        phone number, so it ships empty until Cloudflare Access is confirmed to be
+        protecting it. Set all three, then redeploy:
       </p>
       <ol>
         <li>
           Apps Script → Project Settings → Script Properties → add <code>ADMIN_KEY</code>
         </li>
         <li>
-          Cloudflare → Worker → Settings → Variables → add <code>ADMIN_KEY</code> with the
-          same value
+          Cloudflare → Worker → Settings → Build variables → add <code>ADMIN_KEY</code>
+          with the same value
+        </li>
+        <li>
+          Cloudflare Access protecting <code>/admin/*</code>, then a build variable
+          <code>ACCESS_READY</code> set to any value
         </li>
       </ol>
     </div>
@@ -66,7 +78,7 @@ const config = {
 }
 
 {
-  adminKey && (
+  enabled && (
     <script>
       import { current, headcount, declined, bedNights, kitchen, buried, repeats, num } from '../lib/report';
 
