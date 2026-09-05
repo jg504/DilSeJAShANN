@@ -68,6 +68,11 @@ const guestPages = [];
 for (const s of slugs) {
   guestPages.push([`i/${s}/index.html`, s]);
   guestPages.push([`i/${s}/rsvp/index.html`, s]);
+  // The save-the-date carries a video of this guest's own date range. It is
+  // held to the same rule as the invitation — the whole reason there are four
+  // versions is that a Reception-only guest must not learn there were three
+  // days.
+  guestPages.push([`s/${s}/index.html`, s]);
 }
 
 for (const [page, own] of guestPages) {
@@ -93,6 +98,24 @@ for (const [page, own] of guestPages) {
   if (html.includes('/admin')) fail(`${page}: links to /admin`);
   if (/href="\/?share/.test(html)) fail(`${page}: links to /share`);
   if (html.includes('<<FILL')) notes.push(`${page}: still contains <<FILL>> (expected pre-launch)`);
+}
+
+// A save-the-date must reference exactly its own video and no other. Four
+// versions exist; referencing the wrong one hands a guest dates they were not
+// invited to, and referencing two leaks the existence of another tier.
+const stdData = JSON.parse(readFileSync(join(root, 'src/data/savethedate.json'), 'utf8'));
+const KEYS = ['26-28', '27-28', '27', '28'];
+for (const s of slugs) {
+  const inv = byS[s];
+  const days = inv.functions.map((f) => stdData.dates[f]).sort();
+  const key = days.length === 3 ? '26-28' : days.length === 2 ? `${days[0]}-${days[1]}` : days[0];
+  const html = read(`s/${s}/index.html`);
+  const referenced = KEYS.filter((k) => html.includes(`/std/${stdData.videos[k]}`));
+  if (referenced.length !== 1) {
+    fail(`s/${s}: references ${referenced.length} videos (${referenced.join(', ') || 'none'}), expected 1`);
+  } else if (referenced[0] !== key) {
+    fail(`s/${s}: shows the "${referenced[0]}" video but this link's dates are "${key}"`);
+  }
 }
 
 // ---------------------------------------------------------------- gating

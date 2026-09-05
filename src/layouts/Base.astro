@@ -103,6 +103,11 @@ const ogImage = new URL(OG_IMAGE, Astro.site).href;
         </>
       )
     }
+
+    {/* Page-specific head content. A page passing slot="head" with no slot here
+        has it silently dropped — Astro does not warn — which is how the
+        save-the-date's image preloads went missing on the first build. */}
+    <slot name="head" />
   </head>
   <body class={framed ? 'framed' : undefined}>
     <slot />

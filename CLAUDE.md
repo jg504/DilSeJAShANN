@@ -65,6 +65,10 @@ circulation, forwarding will happen.
    guest page.
 8. **`noindex` on every page**, `robots.txt` disallows all. This site publishes venue
    addresses and a family schedule.
+9. **Dates in artwork count.** The save-the-date reveal originally sat on a background
+   image that was itself a card reading "26-28 DECEMBER 2026", so every tier saw the full
+   range behind their own video. `verify-build.mjs` cannot catch this — the dates are
+   pixels, not markup. Any image placed on a per-tier page must be checked by eye.
 
 ---
 
@@ -289,6 +293,7 @@ after distribution, a schema change means phoning two hundred people.
 
 | Route | Purpose |
 |---|---|
+| `/s/[slug]` | **Save-the-date.** Sent first, a week or so before the invitation. The memory game; winning reveals a video carrying *this link's own date range*. Same seven slugs as `/i/`. |
 | `/i/[slug]` | The invitation. One template, driven by `invites.json`. |
 | `/i/[slug]/rsvp` | RSVP form. Accommodation block only when `accom: true`. |
 | `/story` | Shared story and photos. Reachable from all seven links. |

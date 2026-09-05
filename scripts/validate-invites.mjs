@@ -229,6 +229,46 @@ if (!Array.isArray(cer.ceremonies) || cer.ceremonies.length !== 2) {
   }
 }
 
+// --- savethedate.json --------------------------------------------------------
+// The save-the-date reveals a video carrying THIS guest's date range. Four
+// versions, keyed off the same functions array everything else uses. A key that
+// resolves to nothing would ship a page with a dead <video>, and a filename
+// still marked DRAFT would ship an unfinished cut of the couple's own
+// save-the-date — so both fail the strict build, the way lorem does.
+const STD = fileURLToPath(new URL('../src/data/savethedate.json', import.meta.url));
+const STD_DIR = fileURLToPath(new URL('../public/std/', import.meta.url));
+const std = JSON.parse(readFileSync(STD, 'utf8'));
+
+const KEYS = ['26-28', '27-28', '27', '28'];
+for (const k of KEYS) {
+  const file = std.videos?.[k];
+  if (!file) {
+    fail(`savethedate.json: no video for "${k}"`);
+    continue;
+  }
+  if (!existsSync(join(STD_DIR, file))) {
+    fail(`savethedate.json: "${k}" points at ${file}, which is not in public/std/`);
+  }
+  if (/draft/i.test(file)) {
+    fail(
+      `savethedate.json: "${k}" is still ${file} — a draft cut. ` +
+        `Re-export at 1206x1713 or larger; the 804x1142 draft upscales on a phone.`
+    );
+  }
+}
+
+// Every invite must map to one of the four keys, so nobody can be handed a
+// video for dates they were not invited to.
+for (const inv of data.invites ?? []) {
+  const days = (inv.functions ?? []).map((f) => std.dates?.[f]).sort();
+  if (days.some((d) => !d)) {
+    fail(`invite ${inv.index}: a function has no date in savethedate.json.dates`);
+    continue;
+  }
+  const key = days.length === 3 ? '26-28' : days.length === 2 ? `${days[0]}-${days[1]}` : days[0];
+  if (!KEYS.includes(key)) fail(`invite ${inv.index}: date key "${key}" has no video`);
+}
+
 // --- story.json --------------------------------------------------------------
 // Reachable from all seven links, so it must stay function-neutral: no function
 // name, no date, no side. Two of the seven end a day before everyone else.

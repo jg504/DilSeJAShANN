@@ -1,0 +1,434 @@
+---
+// The save-the-date. Sent first; the RSVP invitation follows a week or so later.
+//
+// TIER PRIVACY: the reveal video carries this guest's own date range and nothing
+// else. A Reception-only guest must never learn there were three days, so the
+// video key is derived from THIS link's functions — the same array the
+// invitation, the .ics routes and live mode all key off — and looked up in an
+// explicit map. Not computed as a min-max range: there are exactly four legal
+// function sets, and an unmapped one must fail the build rather than quietly
+// label somebody with the wrong dates.
+//
+// The game came from public/game/index.html, where it had been live and linked
+// from nothing since August. It had to move: the page must be per-slug, and
+// anything in public/ ships unprocessed.
+import Base from '../../layouts/Base.astro';
+import data from '../../data/invites.json';
+import std from '../../data/savethedate.json';
+import type { ImageMetadata } from 'astro';
+
+const art = import.meta.glob<{ default: ImageMetadata }>('../../assets/game/*.webp', {
+  eager: true,
+});
+const img = (name: string) => art[`../../assets/game/${name}`]?.default?.src ?? '';
+
+export function getStaticPaths() {
+  const DATES = std.dates as Record<string, string>;
+  const VIDEOS = std.videos as Record<string, string>;
+
+  return data.invites.map((invite) => {
+    const days = invite.functions.map((f) => DATES[f]).sort();
+    // Explicit, not a computed range.
+    const key =
+      days.length === 3 ? '26-28' : days.length === 2 ? `${days[0]}-${days[1]}` : days[0];
+    const video = VIDEOS[key];
+    if (!video) {
+      throw new Error(
+        `No save-the-date video for functions ${invite.functions.join('+')} (key "${key}"). ` +
+          `Add it to src/data/savethedate.json.`
+      );
+    }
+    return { params: { slug: invite.slug }, props: { video } };
+  });
+}
+
+const { video } = Astro.props;
+
+// Eight pairs, sixteen cards. Resolved at build so the script gets hashed,
+// optimised URLs rather than raw paths into public/.
+const PAIRS = Array.from({ length: 8 }, (_, i) => img(`pair${i + 1}.webp`));
+const BACKS = {
+  welcome: img('1.webp'),
+  game: img('2.webp'),
+  card: img('card_back.webp'),
+  // 5.webp, the old win-screen background, is deliberately absent — see the
+  // comment on the win section.
+};
+---
+
+<Base title="Save the date — #DilSeJAShANN">
+  {/* The game screen's background used to be a CSS background-image on a hidden
+      element, so the browser only began fetching it when START was tapped —
+      which is why the logo arrived late. Preloading it here pulls it down while
+      the welcome screen is being read. */}
+  <link rel="preload" as="image" href={BACKS.game} slot="head" />
+  <link rel="preload" as="image" href={BACKS.card} slot="head" />
+
+  <main>
+    {/* Everything visible on this page is baked into background images, so
+        without this a screen reader finds two buttons and no page. No dates
+        here — those differ per link and live in the video. */}
+    <h1 class="sr-only">Save the date — Anusha & Jaskaran</h1>
+
+    <section id="welcome" class="screen" style={`background-image:url('${BACKS.welcome}')`}>
+      <button class="start" id="start" type="button" disabled>
+        <span class="start-main">START THE GAME</span>
+        <span class="start-sub">TO REVEAL THE SPECIAL DATE</span>
+      </button>
+      <div class="loading" id="loading" aria-live="polite">
+        <div class="bar"><i id="bar-fill"></i></div>
+        <p class="loading-text" id="loading-text">Getting things ready…</p>
+      </div>
+      <button type="button" class="skip" data-skip>Skip to the date</button>
+    </section>
+
+    <section id="game" class="screen hidden" style={`background-image:url('${BACKS.game}')`}>
+      <p class="banner">MATCH THE PAIRS</p>
+      {/* The sixteen cards are rendered here, not built by script.
+          Astro's scoped styles compile to `.card[data-astro-cid-…]`, and an
+          element created by innerHTML never carries that attribute — so when
+          the script built these, none of the card CSS applied and the grid
+          collapsed to a row of 6px bars. Rendering them means the layout is
+          correct before any JavaScript runs; the script only deals the
+          shuffled faces. */}
+      <div class="grid" id="grid">
+        {Array.from({ length: 16 }, (_, i) => (
+          <button type="button" class="card" aria-label={`Card ${i + 1}`} aria-pressed="false">
+            <span class="inner">
+              <span class="face back" style={`background-image:url('${BACKS.card}')`}></span>
+              <span class="face front"></span>
+            </span>
+          </button>
+        ))}
+      </div>
+      <button type="button" class="skip" data-skip>Skip to the date</button>
+    </section>
+
+    {/* NO BACKGROUND IMAGE HERE, DELIBERATELY. 5.webp is itself a complete
+        save-the-date card reading "26-28 DECEMBER 2026", so using it behind the
+        per-tier video showed every guest the full date range — a Reception-only
+        guest would have read 26-28 in the background while their video said 28.
+        The automated tier-privacy check cannot see this: the dates are pixels,
+        not markup. Only the video carries dates now. */}
+    <section id="win" class="screen hidden">
+      {/* preload="none" so the welcome screen never pays for it; the script
+          upgrades it to metadata once the game starts, so the reveal is ready
+          the moment it is needed. */}
+      <video id="reveal" src={`/std/${video}`} preload="none" muted playsinline loop controls></video>
+    </section>
+  </main>
+</Base>
+
+<script define:vars={{ PAIRS, BACKS }}>
+  const $ = (id) => document.getElementById(id);
+  const screens = { welcome: $('welcome'), game: $('game'), win: $('win') };
+
+  const show = (name) => {
+    for (const [k, el] of Object.entries(screens)) el.classList.toggle('hidden', k !== name);
+  };
+
+  // --- loading -------------------------------------------------------------
+  // Real decode progress, not a timer. START stays disabled until the images
+  // the game needs are actually in memory, so nothing pops in mid-play.
+  const needed = [BACKS.game, BACKS.card, ...PAIRS];
+  let done = 0;
+  const fill = $('bar-fill');
+  const ready = () => {
+    $('loading').hidden = true;
+    $('start').disabled = false;
+  };
+  const tick = () => {
+    done++;
+    fill.style.transform = `scaleX(${done / needed.length})`;
+    if (done >= needed.length) ready();
+  };
+  for (const src of needed) {
+    const im = new Image();
+    im.onload = tick;
+    im.onerror = tick; // A missing image must not lock the guest out of the game.
+    im.src = src;
+  }
+  // Whatever the network is doing, do not hold anyone hostage.
+  setTimeout(ready, 6000);
+
+  // --- game ----------------------------------------------------------------
+  const deck = [...PAIRS, ...PAIRS];
+  let flipped = [];
+  let matched = 0;
+  let busy = false;
+
+  const shuffle = (a) => {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  const win = () => {
+    show('win');
+    const v = $('reveal');
+    v.preload = 'auto';
+    v.play().catch(() => {});
+  };
+
+  const click = (card) => {
+    if (busy || card.classList.contains('flipped')) return;
+    card.classList.add('flipped');
+    card.setAttribute('aria-pressed', 'true');
+    flipped.push(card);
+    if (flipped.length < 2) return;
+
+    busy = true;
+    const [a, b] = flipped;
+    if (a.dataset.img === b.dataset.img) {
+      matched++;
+      flipped = [];
+      busy = false;
+      if (matched === PAIRS.length) setTimeout(win, 600);
+    } else {
+      setTimeout(() => {
+        for (const c of [a, b]) {
+          c.classList.remove('flipped');
+          c.setAttribute('aria-pressed', 'false');
+        }
+        flipped = [];
+        busy = false;
+      }, 1000);
+    }
+  };
+
+  const cards = [...document.querySelectorAll('.card')];
+
+  const start = () => {
+    show('game');
+    // The reveal is two taps away at most; begin fetching it now.
+    $('reveal').preload = 'metadata';
+    const dealt = shuffle([...deck]);
+    cards.forEach((card, i) => {
+      card.classList.remove('flipped');
+      card.setAttribute('aria-pressed', 'false');
+      card.dataset.img = dealt[i];
+      card.querySelector('.front').style.backgroundImage = `url('${dealt[i]}')`;
+    });
+  };
+
+  cards.forEach((card) => card.addEventListener('click', () => click(card)));
+
+  $('start').addEventListener('click', start);
+  document.querySelectorAll('[data-skip]').forEach((b) => b.addEventListener('click', win));
+</script>
+
+<style>
+  main {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: opacity 0.4s ease, visibility 0.4s;
+  }
+  .hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* ---------- welcome ---------- */
+  #welcome {
+    justify-content: flex-end;
+    padding-bottom: 9%;
+  }
+  .start {
+    width: 75%;
+    max-width: 320px;
+    min-height: 58px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 0.6rem 1rem;
+    font-family: var(--sans);
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--accent);
+    border: 2px solid #fff;
+    border-radius: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.2s ease;
+  }
+  .start[disabled] {
+    opacity: 0.55;
+    cursor: default;
+  }
+  .start:not([disabled]):active {
+    transform: scale(0.97);
+  }
+  .start-main {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .start-sub {
+    font-size: 0.62rem;
+    letter-spacing: 0.5px;
+    opacity: 0.9;
+  }
+
+  .loading {
+    width: 75%;
+    max-width: 320px;
+    margin-top: var(--gap);
+    text-align: center;
+  }
+  .bar {
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(149, 40, 41, 0.18);
+    overflow: hidden;
+  }
+  .bar i {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s ease;
+  }
+  .loading-text {
+    font-family: var(--sans);
+    font-size: var(--t-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    opacity: 0.75;
+    margin: var(--gap-xs) 0 0;
+  }
+
+  .skip {
+    margin-top: 18px;
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--ink);
+    opacity: 0.75;
+    background: none;
+    border: 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    min-height: 44px;
+  }
+
+  /* ---------- game ---------- */
+  #game {
+    justify-content: flex-start;
+    padding-top: 5vh;
+  }
+  .banner {
+    width: 65%;
+    max-width: 250px;
+    min-height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0 4vh;
+    font-family: var(--sans);
+    font-size: 1.05rem;
+    letter-spacing: 1px;
+    color: var(--ink);
+    background: #faf3e8;
+    border: 2px solid var(--line);
+    border-radius: 20px;
+  }
+  .grid {
+    width: 90%;
+    max-width: 380px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .card {
+    aspect-ratio: 3 / 4;
+    perspective: 1000px;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .inner {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .card.flipped .inner {
+    transform: rotateY(180deg);
+  }
+  .face {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background-size: cover;
+    background-position: center;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .front {
+    transform: rotateY(180deg);
+  }
+
+  /* ---------- reveal ---------- */
+  #win {
+    justify-content: center;
+    background: var(--bg);
+  }
+  #reveal {
+    width: 86%;
+    max-width: 380px;
+    border-radius: var(--radius);
+    box-shadow: 0 8px 30px rgba(90, 50, 40, 0.22);
+  }
+
+  /* A phone-shaped column on desktop. DECISIONS.md keeps the 430px constraint
+     out of the invitation pages and allows it here — this screen is a phone
+     experience and stretching it would only make it worse. */
+  @media (min-width: 640px) {
+    main {
+      background: var(--bg);
+    }
+    .screen {
+      left: 50%;
+      right: auto;
+      width: 430px;
+      max-width: 100%;
+      transform: translateX(-50%);
+      box-shadow: 0 0 60px rgba(90, 50, 40, 0.18);
+    }
+  }
+
+  /* The flip is the one piece of motion here and it is the whole point, but it
+     still collapses on request. */
+  @media (prefers-reduced-motion: reduce) {
+    .screen,
+    .inner,
+    .bar i {
+      transition: none;
+    }
+  }
+</style>

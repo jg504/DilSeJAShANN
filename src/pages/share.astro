@@ -37,7 +37,14 @@ const label: Record<number, string> = {
 const rows = invites.invites
   .slice()
   .sort((a, b) => a.index - b.index)
-  .map((i) => ({ ...i, url: `${SITE}/i/${i.slug}`, label: label[i.index] }));
+  .map((i) => ({
+    ...i,
+    // Same slug, two paths. Seven links rather than fourteen, and both sit in
+    // one row so a grandparent cannot pair the wrong two.
+    std: `${SITE}/s/${i.slug}`,
+    url: `${SITE}/i/${i.slug}`,
+    label: label[i.index],
+  }));
 
 // Paste-ready. Without this, family members write "here's the invite" and
 // nobody realises they are being asked to do something.
@@ -49,6 +56,10 @@ const rows = invites.invites
 const message = `Please open this and let us know if you can join us — it only takes a minute.
 
 ${invites.giftNote}`;
+
+// The save-the-date goes out first and asks for nothing — no RSVP, no gift note.
+// Putting either in would muddle the one thing it is for.
+const stdMessage = `Save the date for us — play the little game and it will show you when.`;
 ---
 
 <Admin title="Sending the invitations">
@@ -103,6 +114,12 @@ ${invites.giftNote}`;
 
   <h2>The seven links</h2>
   <p class="muted">
+    <strong>Two rounds, in order.</strong> The save-the-date goes out first — it asks for
+    nothing, it just shows the dates. The invitation follows a week or so later and is
+    the one that collects the RSVP. Both use the same seven links, so a guest keeps the
+    same row in both rounds.
+  </p>
+  <p class="muted">
     Each link shows a different set of functions. Check the description before you send.
     Once a link has gone out, it never changes hands — do not reuse it for someone else.
   </p>
@@ -123,9 +140,23 @@ ${invites.giftNote}`;
             <tr>
               <td class="num">{r.index}</td>
               <td>{r.label}</td>
-              <td><code>{r.url}</code></td>
+              <td>
+                <p class="phase">1 · Save the date</p>
+                <code>{r.std}</code>
+                <p class="phase">2 · Invitation</p>
+                <code>{r.url}</code>
+              </td>
               <td class="send">
-                <button type="button" class="copy" data-url={r.url}>Copy link</button>
+                <button type="button" class="copy" data-url={r.std}>Copy save the date</button>
+                <a
+                  class="whats"
+                  href={`https://wa.me/?text=${encodeURIComponent(`${stdMessage}\n${r.std}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  WhatsApp save the date
+                </a>
+                <button type="button" class="copy" data-url={r.url}>Copy invitation</button>
                 <a
                   class="whats"
                   href={`https://wa.me/?text=${encodeURIComponent(`${message}\n${r.url}`)}`}
@@ -200,6 +231,17 @@ ${invites.giftNote}`;
   .why {
     margin: 0.75rem 0 0;
     color: #6b7280;
+  }
+  .phase {
+    margin: 0.75rem 0 0.15rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.65;
+  }
+  .phase:first-child {
+    margin-top: 0;
   }
   .send {
     white-space: nowrap;

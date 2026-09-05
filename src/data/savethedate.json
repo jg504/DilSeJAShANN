@@ -1,0 +1,16 @@
+{
+  "_note": "Video files live in public/std/. Astro does not process video, so public/ is correct here — but nothing optimises them either, so they must be exported at a sensible size before they ship. A filename containing DRAFT fails the strict build, the same way lorem does.",
+
+  "dates": {
+    "f1": "26",
+    "f2": "27",
+    "f3": "28"
+  },
+
+  "videos": {
+    "26-28": "26-28-DRAFT.mp4",
+    "27-28": "27-28-DRAFT.mp4",
+    "27": "27-DRAFT.mp4",
+    "28": "28-DRAFT.mp4"
+  }
+}
