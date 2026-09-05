@@ -30,6 +30,23 @@ brings the venue line and Get Directions back automatically.
 **Never write "room" on the site** — rooms are shared and paired by phone; validation
 fails the build on the word.
 
+### The printed card says only "cover your head" — open 2026-09-05
+The invitation now reads **"Head and body must be fully covered for the Anand Karaj."**
+Jaskaran's wording. The A6 ceremony card's etiquette panel says only *"Cover your head.
+Scarves are available at the entrance."* — nothing about the body.
+
+So the site and the card disagree about a religious observance, and the card is the one
+that cannot be recalled once printed.
+
+**Needs:** a decision before the cards go to press. Either add the body requirement to
+the card's "Before you enter" panel, or tell me the site is overstating it and I will
+match the card.
+
+Worth considering separately: **"fully covered" may not be actionable for a guest who
+has not been to a Gurudwara.** It means shoulders and legs covered — no sleeveless, no
+short hemlines. Saying so plainly would prevent someone being turned away at the door,
+which is the failure this note exists to avoid.
+
 ### Ritual sequences — awaiting family elders
 Both sequences come from the printed cards, which CLAUDE.md records as drafted and not
 yet confirmed. The cards print first and cannot be recalled, so a correction after

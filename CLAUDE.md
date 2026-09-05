@@ -237,7 +237,7 @@ details drift and a guest ends up at the wrong address.
       ],
       "venue": "<<FILL>>", "address": "<<FILL>>", "mapsUrl": "<<FILL>>",
       "dressCode": "<<FILL>>", "dressColors": [],
-      "dressNote": "Heads must be covered for the Anand Karaj."
+      "dressNote": "Head and body must be fully covered for the Anand Karaj."
     },
     "f3": {
       "name": "Reception", "date": "2026-12-28", "startTime": "<<FILL>>",
