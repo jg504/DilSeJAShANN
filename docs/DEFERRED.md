@@ -42,6 +42,19 @@ links and two of them end a day before everyone else. Validation enforces that.
 Also: the invitation's story teaser reads *"A little about how the two of them got
 here"* — third person, on their own site. Worth a rewrite in the same pass.
 
+### The gift note on the printed PNG card — for your designer
+The site now carries it in three places: the invitation, the RSVP confirmation, and the
+paste-ready message on the family share page. The **card** is the formal invitation and
+the place older relatives will actually look, and that one is not mine to change.
+
+**Needs:** ask the designer to add it. The wording, so both match:
+
+> We already have a home, and it's full of everything we need. So please, no boxed
+> gifts — you being there is the only thing we're actually asking for.
+
+Jaskaran said it can be dropped later if it reads as too much. It lives in one field,
+`giftNote` in `src/data/invites.json`, and removing it there removes it everywhere.
+
 ### Before distribution
 - Switch the Cloudflare build command from `npm run build:draft` to `npm run build`, so
   validation gates the live deploy and lorem cannot ship.

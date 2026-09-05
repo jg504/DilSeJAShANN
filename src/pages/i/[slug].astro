@@ -24,6 +24,7 @@ export function getStaticPaths() {
       props: {
         couple: data.couple,
         venueNote: data.venueNote,
+        giftNote: data.giftNote,
         functions,
         side: data.sides[invite.side as keyof typeof data.sides],
         accom: invite.accom,
@@ -32,7 +33,7 @@ export function getStaticPaths() {
   });
 }
 
-const { couple, venueNote, functions, side, accom } = Astro.props;
+const { couple, venueNote, giftNote, functions, side, accom } = Astro.props;
 
 // A function whose ceremonies each name their own venue has already answered
 // "where do I go" — once per ceremony, with its own pin. Repeating the
@@ -295,6 +296,15 @@ const swatches = (raw: unknown[]): Swatch[] =>
             ))
           }
         </ul>
+      </section>
+
+      {/* "No boxed gifts" is the recognised idiom at an Indian wedding, so the
+          phrase is kept — but the reason is what stops it reading as a demand.
+          Deliberately low on the page: a guest has had two chances to RSVP
+          before reaching it. */}
+      <section class="fn reveal">
+        <h2>A small request</h2>
+        <p class="lead">{giftNote}</p>
       </section>
 
       {/* Shared by all seven links and function-neutral, so it is safe to link

@@ -41,7 +41,14 @@ const rows = invites.invites
 
 // Paste-ready. Without this, family members write "here's the invite" and
 // nobody realises they are being asked to do something.
-const message = `Please open this and let us know if you can join us — it only takes a minute.`;
+//
+// The gift note rides along as a second paragraph rather than a separate
+// message: this is where the relatives most likely to arrive with a boxed gift
+// will actually read it, and a third message would not get sent. The RSVP ask
+// stays first, because that is still what this message is for.
+const message = `Please open this and let us know if you can join us — it only takes a minute.
+
+${invites.giftNote}`;
 ---
 
 <Admin title="Sending the invitations">

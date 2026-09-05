@@ -258,6 +258,12 @@ const TOTAL_STEPS = 3;
         Plans change? Open your invitation link and fill this in again — we'll use your
         latest response.
       </p>
+
+      {/* The one moment a guest is certain to read it: they have just committed
+          and are thinking about the day. No friction here — the form is already
+          submitted. Shown on the decline path too; someone who cannot come is
+          MORE likely to send something by courier, not less. */}
+      <p class="gift">{data.giftNote}</p>
       <p><a href="../">Back to the invitation</a></p>
     </section>
 
@@ -796,6 +802,13 @@ const TOTAL_STEPS = 3;
     margin: 1.5rem 0 0.35rem;
     font-weight: 600;
     color: var(--ink);
+  }
+  .gift {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    line-height: 1.6;
+    color: var(--body);
   }
   .hint {
     margin: 0 0 0.6rem;

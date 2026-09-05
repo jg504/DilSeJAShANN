@@ -79,8 +79,10 @@ if (typeof data.couple !== 'string' || !data.couple.trim()) {
   fail('couple must be a non-empty display string');
 }
 
-if (typeof data.venueNote !== 'string' || !data.venueNote.trim()) {
-  fail('venueNote must be a non-empty string');
+for (const key of ['venueNote', 'giftNote']) {
+  if (typeof data[key] !== 'string' || !data[key].trim()) {
+    fail(`${key} must be a non-empty string`);
+  }
 }
 
 const FUNCTION_KEYS = ['name', 'date', 'venue', 'address', 'mapsUrl', 'dressCode', 'dressColors'];
