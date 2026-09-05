@@ -80,10 +80,24 @@ invitation paints in 0.5s on Slow 4G. A plain `<a>` out costs nothing. An embedd
 would be the first third-party script here and needs the dependency conversation
 CLAUDE.md asks for, with its gzipped size.
 
-**Needs:** the share URL, and a decision on the disclosure line. Selfie search means a
-guest uploads a photo of their face to a vendor. Say in one line what it does, and make
-sure the plain gallery works for anyone who would rather not — several of the older
-guests will not want to, and nobody should have to opt in to see their own photographs.
+Turtlepic can show a person **only their own pictures** after they upload a selfie.
+That is worth more than it first appears: a guest cannot be in a photograph of a day
+they did not attend, so the face filter does the tier filtering for free.
+
+The risk is not the search but what sits around it. If the gallery also offers a
+browse-all view, or shows album names, dates or photo counts, a guest learns there were
+three days whatever their selfie returns.
+
+**Needs, before this is wired up:**
+1. **Can Turtlepic hold three separate albums with three separate links, one per day?**
+   If yes, each guest's day page links only to the albums they were at and the tier rule
+   holds end to end. If it is one album per event, the browse view has to be checked for
+   what it reveals before anything links to it.
+2. The share URL(s).
+3. A disclosure line. Selfie search means uploading a photo of your face to a vendor.
+   Say in one line what it does, and make sure the plain gallery works for anyone who
+   would rather not — several of the older guests will not want to, and nobody should
+   have to opt in to see their own photographs.
 
 ### Build the gated photo gallery — January 2027
 Decided 2026-09-05, recorded in DECISIONS.md. **One page per day, gated like the
