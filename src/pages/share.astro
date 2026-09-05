@@ -163,7 +163,7 @@ const stdMessage = `Save the date for us — play the little game and it will sh
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  WhatsApp
+                  WhatsApp invitation
                 </a>
               </td>
             </tr>
@@ -253,6 +253,84 @@ const stdMessage = `Save the date for us — play the little game and it will sh
     border: 1px solid #d1d5db;
     border-radius: 5px;
     text-decoration: none;
+  }
+
+  /* ---------- phones ----------
+     A four-column table with two URLs and four buttons a row does not fit 390px.
+     It squeezed the description to eight lines, broke the URLs across five, and
+     pushed the WhatsApp buttons clean off the right edge — the actual mechanism,
+     invisible, on the page whose whole audience is parents and grandparents.
+
+     Below 48rem each row becomes a card. Same markup, so nothing about the links
+     or their order can drift between the two layouts. */
+  @media (max-width: 48rem) {
+    .scroll {
+      overflow: visible;
+    }
+    table,
+    tbody,
+    tr,
+    td {
+      display: block;
+      width: auto;
+    }
+    thead {
+      display: none;
+    }
+    tr {
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    td {
+      border: 0;
+      padding: 0;
+    }
+    /* The index becomes a badge rather than a lone digit in a column. */
+    td.num {
+      display: inline-block;
+      min-width: 1.9rem;
+      margin-bottom: 0.35rem;
+      padding: 0.1rem 0.5rem;
+      font-weight: 700;
+      background: #111827;
+      color: #fff;
+      border-radius: 99px;
+      text-align: center;
+    }
+    td.num + td {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+    /* URLs wrap on any character rather than punching out of the card. */
+    td code {
+      display: block;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      word-break: break-all;
+      color: #374151;
+    }
+    /* Full-width taps. These are the buttons the whole page exists for. */
+    .send {
+      white-space: normal;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 0.85rem;
+    }
+    .send .copy,
+    .send .whats {
+      margin: 0;
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 0.95rem;
+      line-height: 1.2;
+    }
   }
   blockquote {
     margin: 0 0 0.75rem;
