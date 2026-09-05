@@ -236,6 +236,13 @@ const events = functions.map((f) => ({
     color: var(--ink);
     text-decoration: underline;
     text-underline-offset: 3px;
+    /* Same reasoning as .ceremony-map: with no single Get Directions button
+       left, this is the route to the building, and it is being tapped outdoors
+       in December. */
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.2rem;
   }
   .live :global(.live-actions) {
     display: flex;

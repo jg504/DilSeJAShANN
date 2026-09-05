@@ -33,6 +33,17 @@ export function getStaticPaths() {
 
 const { couple, venueNote, functions, side, accom } = Astro.props;
 
+// A function whose ceremonies each name their own venue has already answered
+// "where do I go" — once per ceremony, with its own pin. Repeating the
+// function's venue underneath and offering a third Get Directions button is a
+// second answer to the same question, and on the Wedding it is the right answer
+// for only one of the two buildings. Live mode had the same fault; see
+// segments() in src/lib/live.ts.
+const ownVenues = (f: any) =>
+  Array.isArray(f.ceremonies) &&
+  f.ceremonies.length > 0 &&
+  f.ceremonies.every((c: any) => c.venue && c.mapsUrl);
+
 const fmtFull = (iso: string) =>
   new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', {
     weekday: 'long',
@@ -146,24 +157,35 @@ const swatches = (raw: unknown[]): Swatch[] =>
               <p class="time solo">{(f as { startTime: string }).startTime}</p>
             )}
 
-            <div class="venue">
-              <p class="venue-name">{f.venue}</p>
-              <p class="address">{f.address}</p>
-            </div>
+            {ownVenues(f) ? (
+              /* The rows above carry the venues. What is left to say is the
+                 street address, which both buildings share — they are next
+                 door to each other. */
+              <p class="address address-shared">{f.address}</p>
+            ) : (
+              <div class="venue">
+                <p class="venue-name">{f.venue}</p>
+                <p class="address">{f.address}</p>
+              </div>
+            )}
 
             <div class="actions">
-              <a class="btn" href={f.mapsUrl} target="_blank" rel="noopener noreferrer">
-                Get Directions
-              </a>
+              {!ownVenues(f) && (
+                <a class="btn" href={f.mapsUrl} target="_blank" rel="noopener noreferrer">
+                  Get Directions
+                </a>
+              )}
               <a class="btn quiet" href={`${f.id}.ics`} download>
                 Add to Calendar
               </a>
               {/* Guests paste this into a cab app, which a Maps link cannot
-                  serve. Hidden when the browser has no clipboard access. */}
+                  serve. Hidden when the browser has no clipboard access. The
+                  venue name is left out when the ceremonies sit at different
+                  ones — naming just the last would be worse than naming none. */}
               <button
                 type="button"
                 class="btn quiet copy-address no-print"
-                data-copy={`${f.venue}, ${f.address}`}
+                data-copy={ownVenues(f) ? f.address : `${f.venue}, ${f.address}`}
                 hidden
               >
                 Copy address
@@ -627,6 +649,14 @@ const swatches = (raw: unknown[]): Swatch[] =>
     color: var(--ink);
     text-decoration: underline;
     text-underline-offset: 3px;
+    /* A real tap target, not an 18px line of text. This is the only route to a
+       venue on a function whose ceremonies each have their own — see
+       ownVenues() above. Stays a link rather than becoming a third button
+       style; only the hit area grows. */
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.2rem;
   }
   .ceremony {
     font-family: var(--display);
@@ -661,6 +691,10 @@ const swatches = (raw: unknown[]): Swatch[] =>
   }
   .note,
   .lead {
+    margin-top: var(--gap-sm);
+  }
+
+  .address-shared {
     margin-top: var(--gap-sm);
   }
 
