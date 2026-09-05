@@ -39,54 +39,82 @@ const { intro, ceremonies } = data;
     {
       ceremonies.map((c) => (
         <article class="ceremony">
-          <h2>{c.name}</h2>
-          <p class="gloss">{c.gloss}</p>
+          {/* Four panels, which is exactly the printed card's four pages: the
+              cover, what is happening plus the etiquette, the order, and the
+              meaning. Swiped rather than flipped — the gesture without rotateY,
+              which is the jankiest thing on an old Android. Everything is in
+              the DOM at all times, so find-in-page and a screen reader are
+              unaffected; someone may be reading this at the Gurudwara on bad
+              data and must not have to interact to reach the words. */}
+          <div
+            class="pages"
+            tabindex="0"
+            role="region"
+            aria-label={`${c.name} — swipe or use the arrow keys`}
+          >
+            <section class="panel panel-cover">
+              {/* Page 1 of the printed card: the mark, the tradition, the name,
+                  the gloss. Name and gloss alone left 700px of empty cream. */}
+              <Monogram size="sm" class="cover-mark" />
+              <p class="tradition">{c.tradition}</p>
+              <h2>{c.name}</h2>
+              <p class="gloss">{c.gloss}</p>
+            </section>
 
-          {c.about.map((p) => (
-            <p class="about">{p}</p>
-          ))}
-
-          <section class="block">
-            <h3>Before you come</h3>
-            <dl class="etiquette">
-              {c.etiquette.map((e) => (
-                <>
-                  <dt>{e.title}</dt>
-                  <dd>{e.note}</dd>
-                </>
+            <section class="panel">
+              <h3>What is happening</h3>
+              {c.about.map((p) => (
+                <p class="about">{p}</p>
               ))}
-            </dl>
-          </section>
+              <h4 class="sub">Before you come</h4>
+              <dl class="etiquette">
+                {c.etiquette.map((e) => (
+                  <>
+                    <dt>{e.title}</dt>
+                    <dd>{e.note}</dd>
+                  </>
+                ))}
+              </dl>
+            </section>
 
-          <section class="block">
-            <h3>What happens, in order</h3>
-            <ol class="steps">
-              {c.sequence.map((s) => (
-                <li class="step">
-                  <span class="step-name">{s.name}</span>
-                  <span class="step-note">{s.note}</span>
-                </li>
-              ))}
-            </ol>
-          </section>
+            <section class="panel">
+              <h3>What happens, in order</h3>
+              <ol class="steps">
+                {c.sequence.map((s) => (
+                  <li class="step">
+                    <span class="step-name">{s.name}</span>
+                    <span class="step-note">{s.note}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
 
-          <section class="block">
-            <h3>{c.meaning.title}</h3>
-            {/* The card sets this block between a lead and a closing line —
-                "Composed by Guru Ram Das…" and "When the fourth Laav ends, they
-                are married." The cards print first and cannot be recalled, so
-                the site carries the same words. */}
-            {c.meaning.lead && <p class="meaning-lead">{c.meaning.lead}</p>}
-            <ol class="steps meaning">
-              {c.meaning.items.map((s) => (
-                <li class="step">
-                  <span class="step-name">{s.name}</span>
-                  <span class="step-note">{s.note}</span>
-                </li>
-              ))}
-            </ol>
-            {c.meaning.closing && <p class="meaning-closing">{c.meaning.closing}</p>}
-          </section>
+            <section class="panel">
+              <h3>{c.meaning.title}</h3>
+              {/* The card sets this block between a lead and a closing line —
+                  "Composed by Guru Ram Das…" and "When the fourth Laav ends,
+                  they are married." The cards print first and cannot be
+                  recalled, so the site carries the same words. */}
+              {c.meaning.lead && <p class="meaning-lead">{c.meaning.lead}</p>}
+              <ol class="steps meaning">
+                {c.meaning.items.map((s) => (
+                  <li class="step">
+                    <span class="step-name">{s.name}</span>
+                    <span class="step-note">{s.note}</span>
+                  </li>
+                ))}
+              </ol>
+              {c.meaning.closing && <p class="meaning-closing">{c.meaning.closing}</p>}
+            </section>
+          </div>
+
+          {/* Filled in by script. Without JS the scroller still works by drag
+              and every word is present, so these are enhancement, not plumbing. */}
+          <div class="pager no-print" hidden>
+            <button type="button" class="pager-arrow" data-dir="-1" aria-label="Previous page">‹</button>
+            <div class="dots" aria-hidden="true" />
+            <button type="button" class="pager-arrow" data-dir="1" aria-label="Next page">›</button>
+          </div>
         </article>
       ))
     }
@@ -94,59 +122,100 @@ const { intro, ceremonies } = data;
 </Base>
 
 <script>
-  // Reveal the sequence steps one after another as the guest moves down. The
-  // Laavan and the pheras are the natural place for the animation budget.
+  // Two jobs: wire the pager, and reveal each panel's steps when that panel is
+  // the one being looked at.
   //
-  // Same hardening as the invitation page: content is visible unless the head
-  // script has confirmed we can reveal it again, every callback sweeps all
-  // pending elements rather than trusting entries, and a timeout catches
-  // anything the observer misses. Nobody may lose the ceremony order to a
-  // stalled animation.
+  // THE REVEAL USED TO TEST VERTICAL POSITION. Inside a horizontal scroller
+  // every panel is vertically on screen at load, so the old check passed for all
+  // of them and the whole stagger fired at once into panels nobody was looking
+  // at. It observes panels now, not steps.
+  //
+  // The hardening is unchanged and matters more here, not less: steps are
+  // visible unless the head script has confirmed they can be revealed, every
+  // callback sweeps rather than trusting entries, and a timeout catches anything
+  // the observer misses. Nobody may lose the ceremony order to a stalled
+  // animation.
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const steps = Array.from(document.querySelectorAll<HTMLElement>('.step'));
+  const scrollers = Array.from(document.querySelectorAll<HTMLElement>('.pages'));
+  const allSteps = Array.from(document.querySelectorAll<HTMLElement>('.step'));
 
   if (reduced || !('IntersectionObserver' in window)) {
-    steps.forEach((el) => el.classList.add('shown'));
-  } else {
-    const pending = new Set(steps);
+    allSteps.forEach((el) => el.classList.add('shown'));
+  }
 
-    const show = (el: HTMLElement, delay: number) => {
-      if (!pending.delete(el)) return;
-      el.style.transitionDelay = `${delay}ms`;
-      el.classList.add('shown');
-      el.addEventListener(
-        'transitionend',
-        () => {
-          el.style.transitionDelay = '';
-          el.style.willChange = '';
-        },
-        { once: true }
-      );
-      io.unobserve(el);
-    };
+  for (const scroller of scrollers) {
+    const panels = Array.from(scroller.querySelectorAll<HTMLElement>('.panel'));
+    const article = scroller.closest('article')!;
+    const pager = article.querySelector<HTMLElement>('.pager');
+    const dotWrap = pager?.querySelector<HTMLElement>('.dots');
+    const arrows = Array.from(pager?.querySelectorAll<HTMLButtonElement>('.pager-arrow') ?? []);
 
-    const sweep = () => {
-      let i = 0;
-      pending.forEach((el) => {
-        if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
-          // Stagger only what appears together, capped so a long list never
-          // leaves the last item waiting.
-          show(el, Math.min(i++, 5) * 70);
-        }
-      });
-    };
-
-    const io = new IntersectionObserver(sweep, { threshold: 0.05, rootMargin: '0px 0px -6% 0px' });
-    steps.forEach((el) => io.observe(el));
-    requestAnimationFrame(sweep);
-    window.addEventListener('pageshow', sweep);
-    setTimeout(() => {
-      pending.forEach((el) => {
+    // --- reveal, per panel ---------------------------------------------------
+    const revealPanel = (panel: HTMLElement) => {
+      const steps = Array.from(panel.querySelectorAll<HTMLElement>('.step'));
+      steps.forEach((el, i) => {
+        if (el.classList.contains('shown')) return;
+        el.style.transitionDelay = `${Math.min(i, 5) * 70}ms`;
         el.classList.add('shown');
-        io.unobserve(el);
+        el.addEventListener('transitionend', () => { el.style.transitionDelay = ''; }, { once: true });
       });
-      pending.clear();
-    }, 2500);
+    };
+
+    if (!reduced && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          // Sweep, do not trust the entries: a fast swipe can carry a panel
+          // through the observed band inside one frame.
+          for (const panel of panels) {
+            const b = panel.getBoundingClientRect();
+            if (b.left < window.innerWidth * 0.9 && b.right > 0) revealPanel(panel);
+          }
+        },
+        { root: scroller, threshold: 0.15 }
+      );
+      panels.forEach((el) => io.observe(el));
+      // Whatever the observer missed, show anyway. Content beats choreography.
+      setTimeout(() => panels.forEach(revealPanel), 4000);
+    }
+
+    // --- pager ---------------------------------------------------------------
+    if (!pager || !dotWrap || panels.length < 2) continue;
+
+    panels.forEach(() => {
+      const d = document.createElement('span');
+      d.className = 'dot';
+      dotWrap.appendChild(d);
+    });
+    const dots = Array.from(dotWrap.children) as HTMLElement[];
+    pager.hidden = false;
+
+    const current = () => Math.round(scroller.scrollLeft / (scroller.clientWidth + 20));
+
+    const sync = () => {
+      const i = Math.max(0, Math.min(panels.length - 1, current()));
+      dots.forEach((d, n) => d.classList.toggle('on', n === i));
+      arrows.forEach((a) => {
+        const dir = Number(a.dataset.dir);
+        a.disabled = dir < 0 ? i === 0 : i === panels.length - 1;
+      });
+    };
+
+    const go = (dir: number) => {
+      const i = Math.max(0, Math.min(panels.length - 1, current() + dir));
+      panels[i].scrollIntoView({
+        behavior: reduced ? 'auto' : 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      });
+    };
+
+    arrows.forEach((a) => a.addEventListener('click', () => go(Number(a.dataset.dir))));
+    scroller.addEventListener('scroll', sync, { passive: true });
+    scroller.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+    });
+    sync();
   }
 </script>
 
@@ -211,9 +280,6 @@ const { intro, ceremonies } = data;
     margin: 0 0 var(--gap-sm);
   }
 
-  .block {
-    margin-top: var(--gap-lg);
-  }
   h3 {
     font-family: var(--sans);
     font-weight: 600;
@@ -222,6 +288,131 @@ const { intro, ceremonies } = data;
     text-transform: uppercase;
     color: var(--ink);
     margin: 0 0 var(--gap-sm);
+  }
+
+  /* ---------- the book ----------
+     Scroll-snap does the work. No JavaScript is required for it to function,
+     which matters on a page someone may be reading at the Gurudwara on bad
+     data. The panel headings keep the existing h3 label style. */
+  .pages {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    /* Without this a swipe past the last panel triggers iOS back-navigation
+       and drops the guest out of the page entirely. */
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    gap: var(--gap);
+    margin-inline: calc(var(--gap) * -1);
+    padding-inline: var(--gap);
+  }
+  .pages::-webkit-scrollbar {
+    display: none;
+  }
+  .pages:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 4px;
+    border-radius: var(--radius);
+  }
+  .panel {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    min-width: 0;
+    /* One panel of eight is taller than a phone screen — Vivaah's eight-step
+       order. It scrolls inside itself rather than shrinking type on a page
+       whose whole job is being read. */
+    max-height: 78vh;
+    overflow-y: auto;
+    padding: var(--gap-lg) var(--gap);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .cover-mark {
+    margin-bottom: var(--gap-lg);
+  }
+  .tradition {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: var(--t-xs);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--line);
+    margin: 0 0 var(--gap-sm);
+  }
+  .panel-cover h2 {
+    font-size: var(--t-xl);
+  }
+  .panel-cover {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+  .sub {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: var(--t-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: var(--gap-lg) 0 var(--gap-sm);
+  }
+
+  .pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap);
+    margin-top: var(--gap);
+  }
+  .pager-arrow {
+    font-family: var(--sans);
+    font-size: var(--t-lg);
+    line-height: 1;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+  }
+  .pager-arrow[disabled] {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .dots {
+    display: flex;
+    gap: var(--gap-xs);
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--line);
+    opacity: 0.35;
+  }
+  .dot.on {
+    opacity: 1;
+    background: var(--ink);
+  }
+
+  /* On paper a horizontal scroller is one page and three invisible ones. */
+  @media print {
+    .pages {
+      display: block;
+      overflow: visible;
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+    .panel {
+      max-height: none;
+      overflow: visible;
+      border: 0;
+      padding-inline: 0;
+      break-inside: avoid;
+    }
   }
 
   .etiquette {

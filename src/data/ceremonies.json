@@ -4,6 +4,7 @@
     {
       "id": "anand-karaj",
       "name": "Anand Karaj",
+      "tradition": "The Sikh ceremony",
       "gloss": "the joyful union",
       "about": [
         "Anand Karaj is the Sikh marriage ceremony. It takes place in the presence of the Guru Granth Sahib, the Sikh scripture, which is treated as the living Guru and presides over the marriage.",
@@ -84,6 +85,7 @@
     {
       "id": "vivaah",
       "name": "Vivaah",
+      "tradition": "The Hindu ceremony",
       "gloss": "the sacred union",
       "about": [
         "The Hindu ceremony takes place beneath a mandap, around a sacred fire. Agni, the fire, is the witness — every vow is made in its presence, and it is what makes the marriage binding.",

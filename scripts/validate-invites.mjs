@@ -204,7 +204,7 @@ if (!Array.isArray(cer.ceremonies) || cer.ceremonies.length !== 2) {
 } else {
   for (const c of cer.ceremonies) {
     const at = `ceremonies.json ${c.id ?? '?'}`;
-    require(c, ['id', 'name', 'gloss', 'about', 'etiquette', 'sequence', 'meaning'], at);
+    require(c, ['id', 'name', 'tradition', 'gloss', 'about', 'etiquette', 'sequence', 'meaning'], at);
 
     for (const [key, min] of [['about', 1], ['etiquette', 1], ['sequence', 1]]) {
       if (!Array.isArray(c[key]) || c[key].length < min) {
