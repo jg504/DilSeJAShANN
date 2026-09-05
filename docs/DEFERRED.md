@@ -99,24 +99,18 @@ three days whatever their selfie returns.
    would rather not — several of the older guests will not want to, and nobody should
    have to opt in to see their own photographs.
 
-### Build the gated photo gallery — January 2027
-Decided 2026-09-05, recorded in DECISIONS.md. **One page per day, gated like the
-invitation** — `/i/<slug>/photos/<day>`, showing only the days that guest was there,
-driven off the same `functions` array so it cannot drift.
+### Build the photo gallery — January 2027
+**A single shared `/photos`**, settled 2026-09-05. Not per-day, not per-slug: Turtlepic's
+selfie search shows a guest only their own pictures, and nobody appears in photographs of
+a day they did not attend, so the face filter does the tier filtering by itself.
 
-Not built yet, deliberately: there are no photographs, and the layout depends on how
-many there are per day. This is a structural change and wants a plan first.
+Not built yet: there are no photographs, and the layout depends on how many there are.
 
-Shape when it is built:
-- Day pages per slug, from `invite.functions` — never from tier or side.
-- `/photos` becomes a fallback like `/` — "please use your personal invitation link".
-  It must not list the days, or it is the leak by itself.
-- Turtlepic selfie search only on a guest's own day pages.
-- Extend `verify-build.mjs`: no photo page may carry another slug, another tier's day,
-  a tier label or a side name.
+- The page must **never list the days** — no album names, no dates, no counts. That is
+  the whole reason a single page is safe. See the Turtlepic entry above for the browse-all
+  question that has to be answered first.
 - Put the link back in the "Our story" block of `src/pages/i/[slug].astro`, where a
-  comment marks the spot. Nothing needs re-sending — guests reopen their invitation
-  link, which is the durable thing.
+  comment marks the spot. Nothing needs re-sending; guests reopen their invitation link.
 
 ### Before distribution
 - Switch the Cloudflare build command from `npm run build:draft` to `npm run build`, so
