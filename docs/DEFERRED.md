@@ -49,11 +49,11 @@ the place older relatives will actually look, and that one is not mine to change
 
 **Needs:** ask the designer to add it. The wording, so both match:
 
-> We already have a home, and it's full of everything we need. So please, no boxed
-> gifts — you being there is the only thing we're actually asking for.
+> No boxed gifts please.
 
-Jaskaran said it can be dropped later if it reads as too much. It lives in one field,
-`giftNote` in `src/data/invites.json`, and removing it there removes it everywhere.
+A longer version giving the reason was written first and cut — Jaskaran wanted the
+phrase alone. It lives in one field, `giftNote` in `src/data/invites.json`, and removing
+it there removes it everywhere.
 
 ### Before distribution
 - Switch the Cloudflare build command from `npm run build:draft` to `npm run build`, so
