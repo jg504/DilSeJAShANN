@@ -1,0 +1,115 @@
+---
+// The card's ornaments, redrawn.
+//
+// These are not cropped from the artwork — they are geometry, generated below.
+// A few hundred bytes each, no image request, crisp at any size, and they take
+// --line and --ink so a palette change carries through instead of leaving three
+// baked-in oranges behind.
+//
+// Read off DilSeJAShANN_ceremony_cards_v2.pdf at 8x:
+//   rosette  16 pointed petals, gold, small maroon centre
+//   divider  hollow gold oval — rule — maroon diamond — rule — hollow gold oval
+//   sparkle  8 rays of uneven length, dots on the short tips, centre dot
+//
+// All decorative: aria-hidden throughout. A screen reader announcing "image"
+// nine times down the invitation would be pure noise.
+
+interface Props {
+  kind: 'rosette' | 'divider' | 'sparkle';
+  /** Width in px. Height follows the shape. */
+  size?: number;
+  class?: string;
+}
+
+const { kind, size, class: className } = Astro.props;
+
+// Two rings, not one. The card's flower is eight broad petals on the axes and
+// diagonals with eight shorter, narrower ones tucked between them at 22.5° —
+// that alternation is what makes it read as a flower rather than a sunburst.
+// Sixteen identical thin petals was the first attempt and looked like a star.
+const LONG = Array.from({ length: 8 }, (_, i) => i * 45);
+const SHORT = Array.from({ length: 8 }, (_, i) => i * 45 + 22.5);
+---
+
+{
+  kind === 'rosette' && (
+    <svg
+      class:list={['orn', 'orn-rosette', className]}
+      width={size ?? 22}
+      height={size ?? 22}
+      viewBox="-50 -50 100 100"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {SHORT.map((deg) => (
+        <path d="M0,-8 Q7.5,-20 0,-31 Q-7.5,-20 0,-8 Z" transform={`rotate(${deg})`} fill="var(--line)" />
+      ))}
+      {LONG.map((deg) => (
+        <path d="M0,-9 Q13,-26 0,-46 Q-13,-26 0,-9 Z" transform={`rotate(${deg})`} fill="var(--line)" />
+      ))}
+      <circle r="9" fill="var(--line)" />
+      <circle r="4" fill="var(--ink)" />
+    </svg>
+  )
+}
+
+{
+  kind === 'divider' && (
+    <svg
+      class:list={['orn', 'orn-divider', className]}
+      width={size ?? 132}
+      height={(size ?? 132) / 11}
+      viewBox="0 0 220 20"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <ellipse cx="14" cy="10" rx="11" ry="6.5" fill="none" stroke="var(--line)" stroke-width="2.4" />
+      <line x1="27" y1="10" x2="96" y2="10" stroke="var(--line)" stroke-width="2.4" stroke-linecap="round" />
+      <path d="M110 3 L117 10 L110 17 L103 10 Z" fill="var(--ink)" />
+      <line x1="124" y1="10" x2="193" y2="10" stroke="var(--line)" stroke-width="2.4" stroke-linecap="round" />
+      <ellipse cx="206" cy="10" rx="11" ry="6.5" fill="none" stroke="var(--line)" stroke-width="2.4" />
+    </svg>
+  )
+}
+
+{
+  kind === 'sparkle' && (
+    <svg
+      class:list={['orn', 'orn-sparkle', className]}
+      width={size ?? 26}
+      height={size ?? 26}
+      viewBox="-50 -50 100 100"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {/* Four long rays on the axes, four short ones between, each short ray
+          tipped with a dot — the card's asymmetry, which is what stops it
+          looking like a generic star. */}
+      {[0, 90, 180, 270].map((deg) => (
+        <line
+          x1="0" y1="-11" x2="0" y2="-42"
+          transform={`rotate(${deg})`}
+          stroke="var(--line)" stroke-width="4" stroke-linecap="round"
+        />
+      ))}
+      {[45, 135, 225, 315].map((deg) => (
+        <g transform={`rotate(${deg})`}>
+          <line x1="0" y1="-11" x2="0" y2="-28" stroke="var(--line)" stroke-width="4" stroke-linecap="round" />
+          <circle cx="0" cy="-33" r="3.4" fill="var(--line)" />
+        </g>
+      ))}
+      <circle r="5.5" fill="var(--line)" />
+    </svg>
+  )
+}
+
+<style>
+  .orn {
+    display: block;
+    /* Decoration must never widen a line box or shift a neighbour. */
+    flex: none;
+  }
+  .orn-divider {
+    margin-inline: auto;
+  }
+</style>

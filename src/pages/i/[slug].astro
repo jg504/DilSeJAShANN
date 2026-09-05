@@ -9,6 +9,7 @@
 import Base from '../../layouts/Base.astro';
 import Arch from '../../components/Arch.astro';
 import Monogram from '../../components/Monogram.astro';
+import Ornament from '../../components/Ornament.astro';
 import LiveBanner from '../../components/LiveBanner.astro';
 import data from '../../data/invites.json';
 
@@ -100,6 +101,9 @@ const swatches = (raw: unknown[]): Swatch[] =>
       <p class="wordmark">#DilSeJAShANN</p>
 
       <div class="hero-arch">
+        <span class="spark spark-a"><Ornament kind="sparkle" size={22} /></span>
+        <span class="spark spark-b"><Ornament kind="sparkle" size={14} /></span>
+        <span class="spark spark-c"><Ornament kind="sparkle" size={17} /></span>
         <Arch />
         <div class="hero-inner">
           {/* Mirrors page 1 of the printed cards: the mark inside the arch,
@@ -115,6 +119,8 @@ const swatches = (raw: unknown[]): Swatch[] =>
         </div>
       </div>
 
+      <span class="hero-divider"><Ornament kind="divider" /></span>
+
       <p class="greeting">{side.greeting}</p>
 
       <a class="cta" href="rsvp">RSVP</a>
@@ -124,6 +130,7 @@ const swatches = (raw: unknown[]): Swatch[] =>
       {
         functions.map((f) => (
           <section class="fn reveal">
+            <span class="fn-mark"><Ornament kind="rosette" /></span>
             <h2>{f.name}</h2>
             <p class="fn-date">{fmtFull(f.date)}</p>
 
@@ -334,6 +341,7 @@ const swatches = (raw: unknown[]): Swatch[] =>
       {/* No arch here — it is hero-only, deliberately. Everything else stays
           quiet. See docs/DECISIONS.md. */}
       <section class="closing reveal">
+        <span class="closing-divider"><Ornament kind="divider" /></span>
         <Monogram size="xs" class="closing-mark" />
         <p class="closing-line">We would love to have you there.</p>
         <a class="cta" href="rsvp">RSVP</a>
@@ -632,6 +640,41 @@ const swatches = (raw: unknown[]): Swatch[] =>
     margin: 0;
     line-height: 1.15;
   }
+  /* Sparkles sit OUTSIDE the arch, at its shoulders — the positions the card
+     uses. Absolute against .hero-arch so they never affect layout, and
+     pointer-events off so they cannot swallow a tap meant for the RSVP. */
+  .spark {
+    position: absolute;
+    pointer-events: none;
+  }
+  .spark-a {
+    top: 12%;
+    left: -13%;
+  }
+  .spark-b {
+    top: 4%;
+    right: -9%;
+  }
+  .spark-c {
+    top: 46%;
+    right: -15%;
+  }
+  .hero-divider {
+    margin: var(--gap-lg) auto 0;
+  }
+  .closing-divider {
+    margin: 0 auto var(--gap);
+  }
+
+  .fn-mark,
+  .hero-divider,
+  .closing-divider {
+    display: block;
+  }
+  .fn-mark {
+    margin: 0 0 var(--gap-sm);
+  }
+
   .fn-date {
     font-family: var(--sans);
     font-size: var(--t-sm);
@@ -856,7 +899,8 @@ const swatches = (raw: unknown[]): Swatch[] =>
        so no markup change. The label is always two short lines, so it can
        never outrun the detail column and escape the section. */
     .fn > h2,
-    .fn > .fn-date {
+    .fn > .fn-date,
+    .fn > .fn-mark {
       float: left;
       clear: left;
       width: 15rem;
