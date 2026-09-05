@@ -35,8 +35,12 @@ Both sequences come from the printed cards, which CLAUDE.md records as drafted a
 yet confirmed. The cards print first and cannot be recalled, so a correction after
 printing means re-issuing the card rather than quietly changing the site.
 
-### Story copy — deferred 2026-09-05
-`src/data/story.json` is lorem. Must stay function-neutral — it is shared by all seven
+### Story copy — briefed 2026-09-05, waiting on you
+`src/data/story.json` now has real headings and eight `<<FILL>>` gaps — the lorem is
+gone. **`docs/STORY-BRIEF.md` is the fill-in sheet**: eight numbered questions with the
+length each slot wants, and the two rules the page has to obey.
+
+This is the last thing blocking `npm run build`. Must stay function-neutral — it is shared by all seven
 links and two of them end a day before everyone else. Validation enforces that.
 
 Also: the invitation's story teaser reads *"A little about how the two of them got
