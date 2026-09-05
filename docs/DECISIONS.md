@@ -83,6 +83,47 @@ them.** If something here looks wrong, raise it — do not quietly reverse it.
 - **A build cannot verify dashboard state**, so the flag is an explicit human
   assertion. Confirm the challenge in a private window before setting it.
 
+## Desktop — settled 2026-09-05
+
+- **`--bg` is now used.** At `min-width: 60rem` the body becomes `--bg` and the content
+  sits on it as a `--panel` card with a `--line` hairline. Below that nothing changes:
+  the panel fills the phone screen, which is what the 2026-08-21 entry decided.
+- **Opt-in via a `framed` prop on `Base.astro`**, not a global rule. `/admin/*` is a data
+  tool and must stay plain; the invitation, RSVP, story and ceremonies pages pass it.
+- **The invitation goes wide, the reading pages do not.** The invitation's panel is 62rem
+  with function blocks laid out label-and-detail. Story and ceremonies stay near
+  `--measure` in a 44rem card — a 43rem line of body text is worse, not better.
+- **The label column is floated, not a grid track.** Grid put `.fn-date` in a shared row
+  whose height came from column 2, so on the Wedding "SUNDAY 27 DECEMBER" dropped level
+  with the phere rather than sitting under its own heading. Floats give the label its own
+  flow and need no wrapper markup.
+- **The hero arch grows to 26rem.** It is the signature element and read as a badge at
+  19rem on a wide screen.
+
+## Buttons — settled 2026-09-05
+
+- **`min-height` on a content-box `inline-block` does not centre a label.** `.cta` and
+  `.cta-link` set `min-height` on `inline-block`, which made the content box that tall and
+  left the single line of text sitting at the *top* of it — the word rode 12.3px high in a
+  78px pill. Both are now `inline-flex` with `align-items: center`, matching `.btn`, which
+  never had the fault. Native `<button>` elements centre on their own, which is why the
+  RSVP form's own buttons were unaffected.
+- **`letter-spacing` puts a trailing space after the last glyph**, dragging the ink half a
+  space off centre. `text-indent` equal to the letter-spacing cancels it.
+- **A Range rect is not the ink.** Measuring one and asserting it is centred reports a
+  correctly centred button as broken. Ink centre = range centre − letterSpacing/2.
+
+## Content — settled 2026-09-05
+
+- **Lorem ipsum fails the strict build exactly like `<<FILL>>`.** It is more dangerous,
+  not less: right length, right shape, reads as finished text at a glance. It sits in the
+  travel, ceremony and story copy so the layout could be judged before the words exist.
+- **The accommodation block renders the note alone when there is no `mapsUrl`.** The hotel
+  is not fixed; an empty venue line and a Get Directions button pointing nowhere is worse
+  than saying details will follow. Filling `mapsUrl` brings the venue back.
+- **Validation fails on the word "room" in a hotel block.** CLAUDE.md bans it; rooms are
+  shared and paired by phone, and a guest who reads "a room" believes he has one.
+
 ## Open questions
 
 - **`Phere` or `Vivaah`** — `invites.json` uses `Phere` per the CLAUDE.md template; the

@@ -26,7 +26,7 @@ import data from '../data/ceremonies.json';
 const { intro, ceremonies } = data;
 ---
 
-<Base title="The ceremonies — #DilSeJAShANN">
+<Base title="The ceremonies — #DilSeJAShANN" framed>
   <div class="page">
     <header>
       <p class="wordmark">#DilSeJAShANN</p>
@@ -231,6 +231,19 @@ const { intro, ceremonies } = data;
     line-height: 1.6;
     color: var(--body);
     margin: 0.15rem 0 0;
+  }
+
+
+  /* ---------- desktop ----------
+     Prose wants a narrow measure, so this page does NOT take the invitation's
+     wide two-column treatment. It gets the surround from Base.astro and enough
+     padding to read as a card rather than a strip; the text stays at roughly
+     --measure. */
+  @media (min-width: 60rem) {
+    .page {
+      max-width: 44rem;
+      padding: var(--gap-xl);
+    }
   }
 
   .steps {

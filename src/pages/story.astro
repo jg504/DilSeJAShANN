@@ -15,7 +15,7 @@ import Base from '../layouts/Base.astro';
 import story from '../data/story.json';
 ---
 
-<Base title="Our story — #DilSeJAShANN">
+<Base title="Our story — #DilSeJAShANN" framed>
   <div class="page">
     <header>
       <p class="wordmark">#DilSeJAShANN</p>
@@ -124,6 +124,19 @@ import story from '../data/story.json';
     color: var(--body);
     margin: 0 0 var(--gap-sm);
   }
+
+  /* ---------- desktop ----------
+     Prose wants a narrow measure, so this page does NOT take the invitation's
+     wide two-column treatment. It gets the surround from Base.astro and enough
+     padding to read as a card rather than a strip; the text stays at roughly
+     --measure. */
+  @media (min-width: 60rem) {
+    .page {
+      max-width: 44rem;
+      padding: var(--gap-xl);
+    }
+  }
+
   .closing {
     font-family: var(--display);
     font-size: var(--t-md);

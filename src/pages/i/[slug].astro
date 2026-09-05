@@ -77,7 +77,7 @@ const swatches = (raw: unknown[]): Swatch[] =>
   );
 ---
 
-<Base title="#DilSeJAShANN">
+<Base title="#DilSeJAShANN" framed>
   <div class="page">
     {/* Pinned above everything during the wedding days. Hidden otherwise. */}
     <LiveBanner functions={functions} contact={side.contacts[0]} />
@@ -528,11 +528,21 @@ const swatches = (raw: unknown[]): Swatch[] =>
 
   /* ---------- calls to action ---------- */
   .cta {
-    display: inline-block;
+    /* inline-flex, not inline-block. min-height applies to the CONTENT box, so
+       an inline-block pill got a 48px-tall content box with the single line of
+       text sitting at the TOP of it — the word rode 12.3px high inside a 78px
+       pill. .btn never had the fault because it was already inline-flex with
+       align-items: center. Measured, not guessed. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-family: var(--sans);
     font-weight: 600;
     font-size: var(--t-base);
     letter-spacing: 0.1em;
+    /* letter-spacing adds a trailing space after the final letter, which drags
+       the glyphs half a space left of true centre. This cancels it. */
+    text-indent: 0.1em;
     text-transform: uppercase;
     text-decoration: none;
     padding: 0.95rem 3rem;
@@ -761,6 +771,67 @@ const swatches = (raw: unknown[]): Swatch[] =>
     font-family: var(--display);
     font-size: var(--t-base);
     color: var(--ink);
+  }
+
+  /* ---------- desktop ----------------------------------------------------
+     Everything below 60rem is untouched: the panel fills the phone screen,
+     exactly as docs/DECISIONS.md records. Above it the page stops being a
+     phone column centred on cream and gets a composition of its own.
+
+     The frame itself — --bg behind a --panel card — lives in Base.astro,
+     because the story and ceremonies pages need the same surround. */
+  @media (min-width: 60rem) {
+    .page {
+      /* Wider than --measure so the label column below has somewhere to live.
+         Prose inside is capped separately; nothing here sets a long line. */
+      max-width: 62rem;
+      padding: var(--gap-xl);
+    }
+
+    /* The arch is the signature element. At 19rem on a wide screen it reads as
+       a small badge; this lets it actually frame the hero. */
+    .hero-arch {
+      max-width: 26rem;
+    }
+
+    /* Label and detail, rather than one tall stack against a wall of empty
+       space. The heading and its date sit left; times, venue, actions and
+       dress run down the right.
+
+       Floats, not grid. Grid was tried first and put the date in row 2 of a
+       shared row track, so on the Wedding — whose row 1 is the two-ceremony
+       list — "SUNDAY 27 DECEMBER" dropped level with the phere, a hundred
+       pixels below its own heading. Floats give the label column its own flow,
+       which is the actual relationship here, and it needs no wrapper div and
+       so no markup change. The label is always two short lines, so it can
+       never outrun the detail column and escape the section. */
+    .fn > h2,
+    .fn > .fn-date {
+      float: left;
+      clear: left;
+      width: 15rem;
+    }
+    /* Sections with no .fn-date — "Getting here", "Any questions" — need no
+       special case; the heading floats and the content flows beside it. */
+    .fn > :not(h2):not(.fn-date) {
+      margin-left: calc(15rem + var(--gap-xl));
+    }
+    .fn::after {
+      content: '';
+      display: block;
+      clear: both;
+    }
+
+    /* A 62rem panel would otherwise give prose a 43rem line. */
+    .fn > .lead,
+    .fn > .note,
+    .travel dd,
+    .greeting {
+      max-width: var(--measure);
+    }
+
+    /* The closing keeps its own class and stays centred across the full width,
+       so the page still ends on the RSVP button rather than in a column. */
   }
 
   /* ---------- closing ---------- */

@@ -16,9 +16,15 @@ interface Props {
   description?: string;
   /** Suppress the preview card on pages that must never be shareable. */
   noPreview?: boolean;
+  /**
+   * Desktop only: sit the content on --bg as a --panel card. Opt-in rather than
+   * global because /admin/* is deliberately plain — it is a data tool, not a
+   * wedding page, and must not pick up the frame.
+   */
+  framed?: boolean;
 }
 
-const { title, description, noPreview = false } = Astro.props;
+const { title, description, noPreview = false, framed = false } = Astro.props;
 
 // Absolute URLs — WhatsApp will not resolve a relative og:image.
 const ogUrl = new URL(Astro.url.pathname, Astro.site).href;
@@ -98,7 +104,7 @@ const ogImage = new URL(OG_IMAGE, Astro.site).href;
       )
     }
   </head>
-  <body>
+  <body class={framed ? 'framed' : undefined}>
     <slot />
   </body>
 </html>
@@ -108,6 +114,25 @@ const ogImage = new URL(OG_IMAGE, Astro.site).href;
     margin: 0;
     background: var(--panel);
     color: var(--body);
+  }
+
+  /* The surround --bg was reserved for. Desktop only: on a phone the panel is
+     the whole screen, which is the decision recorded in docs/DECISIONS.md.
+     .page is a direct child of body on the invitation, story and ceremonies
+     pages; the RSVP page uses a bare <main>. No page has both, so nothing is
+     framed twice. */
+  @media (min-width: 60rem) {
+    body.framed {
+      background: var(--bg);
+    }
+    body.framed > .page,
+    body.framed > main {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin-top: var(--gap-xl);
+      margin-bottom: var(--gap-xl);
+    }
   }
 
   /* Keyboard users could not previously see where they were. :focus-visible
@@ -136,6 +161,16 @@ const ogImage = new URL(OG_IMAGE, Astro.site).href;
   /* A guest who prints the invitation should get the details, not the
      furniture. */
   @media print {
+    /* The frame is screen furniture. On paper it is a box drawn round the page
+       for no reason, and printers charge for the ink. */
+    body.framed {
+      background: #fff;
+    }
+    body.framed > .page,
+    body.framed > main {
+      border: 0;
+      margin: 0;
+    }
     a[href^='http']::after {
       content: ' (' attr(href) ')';
       font-size: 0.85em;

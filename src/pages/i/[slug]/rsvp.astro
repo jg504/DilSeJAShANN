@@ -43,7 +43,7 @@ const { slug, index, side, accom, functions } = Astro.props;
 const TOTAL_STEPS = 3;
 ---
 
-<Base title="RSVP — #DilSeJAShANN">
+<Base title="RSVP — #DilSeJAShANN" framed>
   <main>
     <p class="wordmark">#DilSeJAShANN</p>
     <h1 class="sr-only">RSVP</h1>
@@ -767,6 +767,17 @@ const TOTAL_STEPS = 3;
     padding: 1.5rem 1.25rem 4rem;
     font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   }
+
+  /* ---------- desktop ----------
+     Only the surface changes. The field column stays where it is; widening a
+     form does not help anyone fill it in. */
+  @media (min-width: 60rem) {
+    main {
+      max-width: 34rem;
+      padding: var(--gap-xl);
+    }
+  }
+
   .wordmark {
     color: var(--ink);
     font-weight: 600;
@@ -827,7 +838,13 @@ const TOTAL_STEPS = 3;
     margin: 0 0 var(--gap-sm);
   }
   .cta-link {
-    display: inline-block;
+    /* Same fault as .cta on the invitation: min-height on a content-box
+       inline-block leaves the label sitting at the top of the box instead of
+       in the middle. Native <button> elements centre on their own, which is
+       why the form's own buttons were never affected. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-weight: 600;
     padding: 0.75rem 1.25rem;
     min-height: 44px;
