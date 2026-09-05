@@ -101,6 +101,33 @@ and the gain is small.
 confirmation summary now delivers most of the value without a lookup, an edit
 token, or a second write path.
 
+### `REJECTED` OTP to a phone number before showing the invitation
+Raised 2026-09-05. Technically possible — the site is already a Cloudflare Worker,
+so a Worker route plus KV could issue and verify codes. Rejected on cost, not
+feasibility.
+
+- **The friction lands before the RSVP.** Tap link, type number, wait, find the
+  code, type it, and only then see the invitation. CLAUDE.md: anything between
+  landing and submitting is a bug. Every step sheds a percentage of two hundred
+  guests, and the ones who fail are the hardest to chase — elderly relatives,
+  guests abroad on a foreign SIM.
+- **It inverts where the phone number comes from.** The RSVP form collects it
+  today. OTP needs all two hundred correct up front, and a wrong or changed
+  number locks a guest out of their own invitation with a phone call as the only
+  recovery.
+- **Indian SMS needs DLT registration** — entity, header and template approval
+  under TRAI. Weeks of paperwork; WhatsApp Business API is comparable.
+- **It adds state to a static site**: a code store, expiry, and rate limiting,
+  without which it is an SMS-bomb vector aimed at the guest list. And it creates
+  a failure mode on 27 December that cannot be fixed while it is running.
+- **What it buys is bounded.** No page carries a tier label and every invitation
+  reads as complete in itself, so a forwarded link shows *an* invitation, not a
+  hierarchy. The trade is a bounded embarrassment against a systematic loss of
+  RSVPs and beds.
+
+Only tier 1's page reveals a function the others do not have. If forwarding is a
+real worry, a quiet word to that group costs nothing and breaks nothing.
+
 ### `REJECTED` Guest login or per-guest links
 Seven shared links is the whole design. Two hundred personal links means two
 hundred chances to send the wrong one.
