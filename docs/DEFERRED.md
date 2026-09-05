@@ -112,19 +112,6 @@ Not built yet: there are no photographs, and the layout depends on how many ther
 - Put the link back in the "Our story" block of `src/pages/i/[slug].astro`, where a
   comment marks the spot. Nothing needs re-sending; guests reopen their invitation link.
 
-### Save-the-date videos — four needed, none final
-`public/std/` holds four files, all copies of `Save the Date Draft 1.mp4`, all named
-`*-DRAFT.mp4`. **A filename containing DRAFT fails the strict build**, the same way lorem
-does, so none of this can ship by accident.
-
-**Needs:** four exports — `26-28`, `27-28`, `27`, `28` — at **1206x1713 or larger**. The
-draft is 804x1142, which on a 390px phone at 3x upscales about 1.5x; that is the softness,
-and no re-encode fixes it because the detail was never captured. The content is flat
-colour and type, so a 2x export will not be twice the size. The draft's audio is 254 kbps
-on a ten-second title card and is probably worth dropping.
-
-Then rename them in `src/data/savethedate.json` and the DRAFT check stops failing.
-
 ### Before distribution
 - Switch the Cloudflare build command from `npm run build:draft` to `npm run build`, so
   validation gates the live deploy and lorem cannot ship.
@@ -133,6 +120,14 @@ Then rename them in `src/data/savethedate.json` and the DRAFT check stops failin
   message.
 
 ## Done
+
+### Save-the-date videos — done 2026-09-06
+Four masters supplied at 2416x3432 / 8.9 Mbps, 12MB each. Transcoded to
+1208x1716 / ~1.24 Mbps, 1.8MB each — indistinguishable from the masters at 2x on
+both static type and mid-animation, compared frame by frame, at a seventh of the
+weight. Each carries its own date line, verified: 26-28, 27-28, 27, 28.
+
+The masters are not in the repo. They are the source; keep them somewhere safe.
 
 ### The Wedding's second ceremony — settled 2026-09-05
 Renamed `Phere` to `Vivaah` on the invitation, to match the printed card. Jaskaran's

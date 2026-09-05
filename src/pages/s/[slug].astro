@@ -134,7 +134,9 @@ const BACKS = {
   let done = 0;
   const fill = $('bar-fill');
   const ready = () => {
-    $('loading').hidden = true;
+    // Not `hidden`: removing it from flow shifts the skip link up and shows as
+    // layout shift. It keeps its box and just stops being visible.
+    $('loading').classList.add('done');
     $('start').disabled = false;
   };
   const tick = () => {
@@ -290,6 +292,11 @@ const BACKS = {
     max-width: 320px;
     margin-top: var(--gap);
     text-align: center;
+    transition: opacity 0.3s ease;
+  }
+  .loading.done {
+    opacity: 0;
+    pointer-events: none;
   }
   .bar {
     height: 3px;
