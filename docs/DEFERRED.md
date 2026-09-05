@@ -71,6 +71,20 @@ A longer version giving the reason was written first and cut — Jaskaran wanted
 phrase alone, as the heading rather than a heading plus a line. It lives in one field, `giftNote` in `src/data/invites.json`, and removing
 it there removes it everywhere.
 
+### Turtlepic selfie search — January 2027, with the gallery
+Jaskaran uses Turtlepic and asked whether it can be linked. It can, from `/photos`.
+
+**Link, not embed.** This site has no third parties at all — no analytics, no cookies,
+no accounts, no external scripts — which is a property worth keeping and part of why the
+invitation paints in 0.5s on Slow 4G. A plain `<a>` out costs nothing. An embedded widget
+would be the first third-party script here and needs the dependency conversation
+CLAUDE.md asks for, with its gzipped size.
+
+**Needs:** the share URL, and a decision on the disclosure line. Selfie search means a
+guest uploads a photo of their face to a vendor. Say in one line what it does, and make
+sure the plain gallery works for anyone who would rather not — several of the older
+guests will not want to, and nobody should have to opt in to see their own photographs.
+
 ### Restore the Photographs link — January 2027
 `/photos` is built and live so the URL never 404s, but **nothing links to it**. The
 button was removed from the invitation on 2026-09-05: the gallery is of the wedding
