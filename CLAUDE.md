@@ -233,7 +233,7 @@ details drift and a guest ends up at the wrong address.
       "name": "Wedding", "date": "2026-12-27",
       "ceremonies": [
         { "name": "Anand Karaj", "startTime": "<<FILL>>" },
-        { "name": "Phere",       "startTime": "<<FILL>>" }
+        { "name": "Vivaah",      "startTime": "<<FILL>>" }
       ],
       "venue": "<<FILL>>", "address": "<<FILL>>", "mapsUrl": "<<FILL>>",
       "dressCode": "<<FILL>>", "dressColors": [],

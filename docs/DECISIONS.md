@@ -140,8 +140,9 @@ them.** If something here looks wrong, raise it — do not quietly reverse it.
 - **Copy comes from the printed card**, `DilSeJAShANN_ceremony_cards_v2.pdf`, word for
   word. The cards print first and cannot be recalled, so the site matches them; a
   correction after printing means re-issuing the card, not quietly diverging here.
-- **The card is titled `Vivaah`**, not `Phere` — that CLAUDE.md open question is closed.
-  `Mangal Phere` is one step inside Vivaah, not the name of the ceremony.
+- **The card is titled `Vivaah`**, not `Phere` — that CLAUDE.md open question is closed,
+  and the invitation's 2 pm slot was renamed to match. `Mangal Phere` is one step inside
+  Vivaah, not the name of the ceremony.
 - **The Anand Karaj runs four Laavan**, confirmed by the artwork. The seven are the
   Saptapadi, inside Vivaah. The four-versus-seven question was conflating the two.
 - **`meaning` carries a `lead` and a `closing`.** The card sets the Laavan and the seven
@@ -150,7 +151,4 @@ them.** If something here looks wrong, raise it — do not quietly reverse it.
 
 ## Open questions
 
-- **The invitation still labels the 2 pm slot `Phere`** while the card calls the ceremony
-  `Vivaah`. The site now says both, in different places. Raised with Jaskaran; see
-  `docs/DEFERRED.md`.
 - **Family-elder confirmation** of both ritual sequences is still outstanding.

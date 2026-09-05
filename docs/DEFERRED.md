@@ -30,16 +30,10 @@ brings the venue line and Get Directions back automatically.
 **Never write "room" on the site** — rooms are shared and paired by phone; validation
 fails the build on the word.
 
-### The Wedding's second ceremony is called "Phere" on the invitation — open 2026-09-05
-The printed card titles the Hindu ceremony **Vivaah**, with **Mangal Phere** as one step
-inside it. `invites.json` still labels the 2 pm slot `Phere`, so the invitation and the
-card disagree about the name of the same thing.
-
-**Needs:** a decision. Rename the slot to `Vivaah` to match the card, or keep `Phere`
-because that is what the family actually says. **Asked him.**
-
-Family-elder confirmation of the ritual sequences is still outstanding — the cards print
-first and cannot be recalled.
+### Ritual sequences — awaiting family elders
+Both sequences come from the printed cards, which CLAUDE.md records as drafted and not
+yet confirmed. The cards print first and cannot be recalled, so a correction after
+printing means re-issuing the card rather than quietly changing the site.
 
 ### Story copy — deferred 2026-09-05
 `src/data/story.json` is lorem. Must stay function-neutral — it is shared by all seven
@@ -57,6 +51,11 @@ here"* — third person, on their own site. Worth a rewrite in the same pass.
   message.
 
 ## Done
+
+### The Wedding's second ceremony — settled 2026-09-05
+Renamed `Phere` to `Vivaah` on the invitation, to match the printed card. Jaskaran's
+call. `Mangal Phere` stays as one step inside Vivaah on `/ceremonies`, which is what the
+card says.
 
 ### Ceremony copy — done 2026-09-05
 Taken word for word from `DilSeJAShANN_ceremony_cards_v2.pdf`, the A6 card artwork.
