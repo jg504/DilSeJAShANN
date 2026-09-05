@@ -98,6 +98,31 @@ export function activeSegment(e: Planned, now: number): Time | null {
   return active.t;
 }
 
+export type Segment = Time & { venue: string; mapsUrl: string; active: boolean };
+
+/**
+ * Every ceremony in this function, in time order, each bound to its OWN venue.
+ *
+ * The banner used to print "Anand Karaj 11:00 am · Vivaah 2:00 pm" on one line
+ * and a single venue underneath it. Both times, one place — so at 11:30 it read
+ * as though the 2 pm Vivaah were also at the Gurudwara. Jaskaran read it that
+ * way himself, and he knows the answer; a guest would drive to the wrong
+ * building. A time is never shown apart from its venue again.
+ */
+export function segments(e: Planned, now: number): Segment[] {
+  const active = activeSegment(e, now);
+  return e.times
+    .map((t) => ({ t, mins: minutes(t.at) }))
+    .filter((x): x is { t: Time; mins: number } => x.mins !== null)
+    .sort((a, b) => a.mins - b.mins)
+    .map(({ t }) => ({
+      ...t,
+      venue: t.venue ?? e.venue,
+      mapsUrl: t.mapsUrl ?? e.mapsUrl,
+      active: t === active,
+    }));
+}
+
 /** Venue and pin for where to go now, falling back to the function's own. */
 export function whereNow(e: Planned, now: number): { venue: string; mapsUrl: string } {
   const seg = activeSegment(e, now);

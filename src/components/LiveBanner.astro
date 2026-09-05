@@ -57,7 +57,7 @@ const events = functions.map((f) => ({
 <div id="live" class="live" hidden></div>
 
 <script>
-  import { plan, stateAt, timeLine, dayLabel, whereNow } from '../lib/live.ts';
+  import { plan, stateAt, timeLine, dayLabel, whereNow, segments } from '../lib/live.ts';
   import { fakedNow } from '../lib/time.ts';
 
   const el = document.getElementById('live');
@@ -71,29 +71,68 @@ const events = functions.map((f) => ({
     const esc = (s: unknown) =>
       String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
-    const actions = (fn: any) =>
-      `<div class="live-actions">` +
-      `<a class="live-btn" href="${esc(whereNow(fn, now).mapsUrl)}" target="_blank" rel="noopener noreferrer">Get Directions</a>` +
-      `<a class="live-btn quiet" href="tel:${esc(contact.phone.replace(/\s+/g, ''))}">Call ${esc(contact.name)}</a>` +
-      `</div>`;
+    // A time is never printed apart from its venue. Where a function runs across
+    // two buildings, each ceremony gets its own row with its own pin; the one
+    // happening now is marked. Printing both times over a single venue line is
+    // what sent a reader to the wrong building.
+    const where = (fn: any) => {
+      const segs = segments(fn, now);
+      if (segs.length < 2) {
+        const w = whereNow(fn, now);
+        return `<p class="live-venue">${esc(w.venue)}</p>`;
+      }
+      return (
+        `<ul class="live-segs">` +
+        segs
+          .map(
+            (s: any) =>
+              `<li class="live-seg${s.active ? ' is-now' : ''}">` +
+              `<span class="live-seg-when">${esc(s.label ? `${s.label} · ${s.at}` : s.at)}</span>` +
+              `<span class="live-seg-where">${esc(s.venue)}</span>` +
+              `<a class="live-seg-map" href="${esc(s.mapsUrl)}" target="_blank" rel="noopener noreferrer">` +
+              `Directions<span class="sr-only"> to ${esc(s.venue)}</span></a>` +
+              `</li>`
+          )
+          .join('') +
+        `</ul>`
+      );
+    };
+
+    // With per-ceremony rows the venue is already on each row, so the single
+    // Get Directions button would be a second, ambiguous answer to the same
+    // question. It stays only when there is one place to go.
+    const actions = (fn: any) => {
+      const one = segments(fn, now).length < 2;
+      return (
+        `<div class="live-actions">` +
+        (one
+          ? `<a class="live-btn" href="${esc(whereNow(fn, now).mapsUrl)}" target="_blank" rel="noopener noreferrer">Get Directions</a>`
+          : '') +
+        `<a class="live-btn quiet" href="tel:${esc(contact.phone.replace(/\s+/g, ''))}">Call ${esc(contact.name)}</a>` +
+        `</div>`
+      );
+    };
 
     let html = '';
 
     if (state.kind === 'now') {
-      const t = timeLine(state.fn);
+      // The single time line stays only for a one-ceremony function; where
+      // there are several, where() prints them with their venues.
+      const t = segments(state.fn, now).length < 2 ? timeLine(state.fn) : '';
       html =
         `<p class="live-label">Happening now</p>` +
         `<p class="live-name">${esc(state.fn.name)}</p>` +
         (t ? `<p class="live-time">${esc(t)}</p>` : '') +
-        `<p class="live-venue">${esc(whereNow(state.fn, now).venue)}</p>` +
+        where(state.fn) +
         actions(state.fn);
     } else if (state.kind === 'next') {
-      const t = timeLine(state.fn);
+      const many = segments(state.fn, now).length >= 2;
+      const t = many ? '' : timeLine(state.fn);
       html =
         `<p class="live-label">Up next</p>` +
         `<p class="live-name">${esc(state.fn.name)}</p>` +
         `<p class="live-time">${esc(dayLabel(state.fn, now))}${t ? ' · ' + esc(t) : ''}</p>` +
-        `<p class="live-venue">${esc(whereNow(state.fn, now).venue)}</p>` +
+        where(state.fn) +
         actions(state.fn);
     } else if (state.kind === 'after') {
       // Nowhere left to go, so no venue and no directions.
@@ -148,6 +187,55 @@ const events = functions.map((f) => ({
     line-height: 1.55;
     color: var(--body);
     margin: var(--gap-xs) 0 0;
+  }
+  .live :global(.live-segs) {
+    list-style: none;
+    margin: var(--gap-sm) 0 0;
+    padding: 0;
+  }
+  .live :global(.live-seg) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--gap-xs) var(--gap-sm);
+    padding: var(--gap-xs) 0;
+    border-bottom: 1px dotted var(--line);
+  }
+  .live :global(.live-seg:last-child) {
+    border-bottom: 0;
+  }
+  .live :global(.live-seg-when) {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: var(--t-base);
+    color: var(--body);
+  }
+  /* The ceremony under way is the one a guest needs to act on. Weight and
+     colour only — never a colour alone, since that is invisible to some
+     readers and to anyone glancing at a phone in December sunlight. */
+  .live :global(.live-seg.is-now .live-seg-when) {
+    color: var(--ink);
+  }
+  .live :global(.live-seg.is-now .live-seg-when)::before {
+    content: 'Now · ';
+    font-size: var(--t-xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .live :global(.live-seg-where) {
+    font-family: var(--sans);
+    font-size: var(--t-sm);
+    color: var(--body);
+    opacity: 0.85;
+  }
+  .live :global(.live-seg-map) {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: var(--t-xs);
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
   .live :global(.live-actions) {
     display: flex;

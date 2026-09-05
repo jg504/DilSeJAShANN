@@ -191,6 +191,71 @@ const PARTIAL = [fn('Wedding', '2026-12-27', [
 eq('a ceremony without its own venue inherits',
   L.whereNow(L.plan(PARTIAL)[0], at('2026-12-27T11:30')).venue, 'Main Hall');
 
+// --- segments: every time bound to its own venue ---------------------------------
+//
+// The banner used to print "Anand Karaj 11:00 am · Vivaah 2:00 pm" on one line
+// with a single venue under it, so at 11:30 the 2 pm Vivaah read as though it
+// were at the Gurudwara too. Jaskaran read it that way himself. These assert
+// the property that makes that impossible: a time never travels without its
+// place.
+const TWO_VENUES = [fn('Wedding', '2026-12-27', [
+  { label: 'Anand Karaj', at: '11:00 am', venue: 'Gurudwara Sadh Sangat', mapsUrl: 'G' },
+  { label: 'Vivaah', at: '2:00 pm', venue: 'Club Patio', mapsUrl: 'C' },
+], 'Club Patio')];
+
+const segsAt = (t) => L.segments(L.plan(TWO_VENUES)[0], at(t));
+
+eq('both ceremonies are returned', segsAt('2026-12-27T11:30').length, 2);
+eq('Vivaah is at Club Patio, never the Gurudwara',
+  segsAt('2026-12-27T11:30')[1].venue, 'Club Patio');
+eq('Vivaah keeps its own pin',
+  segsAt('2026-12-27T11:30')[1].mapsUrl, 'C');
+eq('the Anand Karaj is at the Gurudwara',
+  segsAt('2026-12-27T11:30')[0].venue, 'Gurudwara Sadh Sangat');
+
+// No two rows may ever claim the same place when the data says otherwise.
+eq('the two ceremonies never share a venue',
+  segsAt('2026-12-27T11:30')[0].venue === segsAt('2026-12-27T11:30')[1].venue, false);
+
+// Exactly one row is marked "now", and it moves at the right moment.
+const activeLabel = (t) => (segsAt(t).find((s) => s.active) ?? {}).label;
+eq('before the day, the first is marked', activeLabel('2026-12-26T09:00'), 'Anand Karaj');
+eq('at 11:30 the Anand Karaj is now', activeLabel('2026-12-27T11:30'), 'Anand Karaj');
+eq('at 13:59 it is still the Anand Karaj', activeLabel('2026-12-27T13:59'), 'Anand Karaj');
+eq('at 14:00 it hands over to Vivaah', activeLabel('2026-12-27T14:00'), 'Vivaah');
+eq('at 20:00 Vivaah is still the one', activeLabel('2026-12-27T20:00'), 'Vivaah');
+eq('exactly one row is ever active',
+  segsAt('2026-12-27T14:00').filter((s) => s.active).length, 1);
+
+// Order is by clock, not by however the JSON happened to be written.
+const SEG_REVERSED = [fn('Wedding', '2026-12-27', [
+  { label: 'Vivaah', at: '2:00 pm', venue: 'Club Patio', mapsUrl: 'C' },
+  { label: 'Anand Karaj', at: '11:00 am', venue: 'Gurudwara Sadh Sangat', mapsUrl: 'G' },
+], 'Club Patio')];
+eq('segments sort by time regardless of source order',
+  L.segments(L.plan(SEG_REVERSED)[0], at('2026-12-27T11:30')).map((s) => s.label).join(','),
+  'Anand Karaj,Vivaah');
+
+// A ceremony with no venue of its own still gets one, never an empty line.
+eq('a venueless ceremony inherits the function venue',
+  L.segments(L.plan(PARTIAL)[0], at('2026-12-27T11:30'))[0].venue, 'Main Hall');
+eq('and inherits the function pin',
+  L.segments(L.plan(PARTIAL)[0], at('2026-12-27T11:30'))[0].mapsUrl,
+  L.plan(PARTIAL)[0].mapsUrl);
+
+// An unparseable time cannot produce a row with a time nobody can read.
+const BROKEN = [fn('Wedding', '2026-12-27', [
+  { label: 'Anand Karaj', at: '11:00 am', venue: 'Gurudwara Sadh Sangat', mapsUrl: 'G' },
+  { label: 'Vivaah', at: '<<FILL>>', venue: 'Club Patio', mapsUrl: 'C' },
+], 'Club Patio')];
+eq('an unparseable time is dropped, not rendered blank',
+  L.segments(L.plan(BROKEN)[0], at('2026-12-27T11:30')).length, 1);
+
+// A single-ceremony function returns one row, so the banner keeps its compact
+// form rather than growing a one-item list.
+eq('a single-ceremony function has one segment',
+  L.segments(L.plan(ONE_VENUE)[0], at('2026-12-28T21:00')).length, 1);
+
 // --- report ---------------------------------------------------------------------
 if (failures.length) {
   console.error(`\nLIVE MODE TESTS FAILED — ${failures.length} of ${passed + failures.length}:\n`);
