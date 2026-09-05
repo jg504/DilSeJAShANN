@@ -44,6 +44,19 @@ the code that ships.
 
 ## Proposed — worth discussing
 
+### `PROPOSED` A desktop composition, and the surround `--bg` was reserved for
+`--bg` (`#F5E4D3`) is defined in `src/styles/tokens.css` and used by nothing.
+DECISIONS.md settled it as "the outer surround, desktop only" and settled that
+"desktop gets its own composition" — neither shipped. At 1280px the page is the
+phone column centred on flat cream, so the surround has no surface to sit
+against and the arch loses its frame.
+
+Not a rendering bug: it looks fine, it just isn't the design that was agreed.
+Most guests are on a phone, so this is not urgent — but it is the largest gap
+between what DECISIONS.md records and what the build does, and the decision
+should either be implemented or struck from the doc so the token stops reading
+as an oversight. Structural, so it needs a plan first.
+
 ### `PROPOSED` Real photographs
 The single largest visual upgrade available, and the site's stated advantage
 over the card. Everything is built to receive them: `src/assets/` is wired for

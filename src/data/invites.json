@@ -39,10 +39,10 @@
     "f3": {
       "name": "Reception",
       "date": "2026-12-28",
-      "startTime": "<<FILL>>",
-      "venue": "<<FILL>>",
-      "address": "<<FILL>>",
-      "mapsUrl": "<<FILL>>",
+      "startTime": "7:00 pm",
+      "venue": "Club Patio",
+      "address": "South City I, Sector 41, Gurgaon",
+      "mapsUrl": "https://maps.app.goo.gl/5LuenHLkHbxannWM8",
       "dressCode": "<<FILL>>",
       "dressColors": [],
       "dressNote": ""
