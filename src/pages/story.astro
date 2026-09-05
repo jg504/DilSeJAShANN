@@ -12,6 +12,7 @@
 // Class B: no meaningful weight cap once photographs arrive. They belong in
 // src/assets/ so Astro processes them, never in public/.
 import Base from '../layouts/Base.astro';
+import Monogram from '../components/Monogram.astro';
 import story from '../data/story.json';
 ---
 
@@ -19,6 +20,7 @@ import story from '../data/story.json';
   <div class="page">
     <header>
       <p class="wordmark">#DilSeJAShANN</p>
+      <Monogram size="sm" eager />
       <h1>{story.title}</h1>
       <p class="intro">{story.intro}</p>
     </header>

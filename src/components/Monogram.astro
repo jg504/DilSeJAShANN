@@ -1,0 +1,51 @@
+---
+// The A&J monogram, carried from the printed cards — it sits inside the arch on
+// page 1 of both ceremony cards, so it is the mark guests will be holding.
+//
+// One component so the size ramp and the alt text are decided once. CLAUDE.md
+// warns that the couple figures read as clipart "at hero scale"; the answer is
+// that this is never rendered at hero scale. The largest size here is 88px,
+// which is roughly what the card uses on a 105mm page.
+//
+// Astro's <Image> rather than a raw <img>: it emits width and height so nothing
+// shifts as it loads, and serves a modern format at the size actually requested
+// instead of the full 414px source.
+import { Image } from 'astro:assets';
+import monogram from '../assets/monogram.webp';
+
+interface Props {
+  /** lg for the hero, sm for a page header, xs for a footer sign-off. */
+  size?: 'lg' | 'sm' | 'xs';
+  /** Set on the one instance above the fold so it is not lazy-loaded. */
+  eager?: boolean;
+  class?: string;
+}
+
+const { size = 'sm', eager = false, class: className } = Astro.props;
+
+const WIDTHS = { lg: 88, sm: 64, xs: 48 } as const;
+const width = WIDTHS[size];
+// The source is 414 × 235.
+const height = Math.round((width * 235) / 414);
+---
+
+<Image
+  src={monogram}
+  width={width}
+  height={height}
+  densities={[1, 2]}
+  loading={eager ? 'eager' : 'lazy'}
+  decoding={eager ? 'sync' : 'async'}
+  class:list={['monogram', className]}
+  alt=""
+/>
+
+<style>
+  /* Decorative. The couple's names are the heading and are read out either way,
+     so alt="" keeps a screen reader from announcing "A and J" twice. */
+  .monogram {
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
+</style>

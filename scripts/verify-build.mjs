@@ -313,6 +313,43 @@ if (existsSync(cssDir)) {
 const KB = (n) => `${(n / 1024).toFixed(1)}KB`;
 const gz = (rel) => (existsSync(join(dist, rel)) ? gzipSync(readFileSync(join(dist, rel)), { level: 9 }).length : 0);
 
+const raw = (rel) => (existsSync(join(dist, rel)) ? statSync(join(dist, rel)).size : 0);
+
+/**
+ * Images, counted at their RAW size — they are already compressed, and gzipping
+ * a webp again measures nothing anyone will ever download.
+ *
+ * Only eagerly-loaded images count against the above-the-fold budget; a lazy
+ * one costs nothing until the guest scrolls to it. Where an image offers a
+ * srcset, the LARGEST candidate is counted, because that is what a 2x or 3x
+ * phone actually fetches — and every guest is on a phone.
+ *
+ * This existed as a hole until 2026-09-05: the weight check matched only .js
+ * and .css, so the monogram was invisible to it. Harmless at 6KB. Not harmless
+ * when the photographs land, which is the exact case CLAUDE.md calls "the
+ * entire performance story".
+ */
+function images(html) {
+  let eagerBytes = 0;
+  let eager = 0;
+  let lazy = 0;
+  for (const tag of html.matchAll(/<img\b[^>]*>/g)) {
+    const t = tag[0];
+    const isLazy = /loading="lazy"/.test(t);
+    const candidates = [...t.matchAll(/\/_astro\/[^\s"',]+\.(?:webp|avif|png|jpe?g|gif|svg)/g)].map((m) =>
+      m[0].replace(/^\//, '')
+    );
+    if (!candidates.length) continue;
+    if (isLazy) {
+      lazy++;
+      continue;
+    }
+    eager++;
+    eagerBytes += Math.max(...candidates.map(raw));
+  }
+  return { eagerBytes, eager, lazy };
+}
+
 function pageWeight(page) {
   const html = read(page);
   let bytes = gz(page);
@@ -321,7 +358,8 @@ function pageWeight(page) {
     bytes += gz(m[1].replace(/^\//, ''));
     requests++;
   }
-  return { bytes, requests };
+  const img = images(html);
+  return { bytes: bytes + img.eagerBytes, requests: requests + img.eager, ...img };
 }
 
 const fontBytes = ['fonts/playfair-display-latin.woff2', 'fonts/source-sans-3-latin.woff2'].reduce(
@@ -334,7 +372,8 @@ const rsvp = pageWeight(`i/${slugs[0]}/rsvp/index.html`);
 const aboveFold = invite.bytes + fontBytes;
 
 notes.push(
-  `invitation: ${KB(invite.bytes)} gz + ${KB(fontBytes)} fonts = ${KB(aboveFold)} in ${invite.requests + 2} requests`
+  `invitation: ${KB(invite.bytes)} gz + ${KB(fontBytes)} fonts = ${KB(aboveFold)} in ${invite.requests + 2} requests` +
+    ` (${invite.eager} eager image${invite.eager === 1 ? '' : 's'}, ${invite.lazy} lazy)`
 );
 notes.push(`rsvp page:  ${KB(rsvp.bytes)} gz in ${rsvp.requests} requests`);
 

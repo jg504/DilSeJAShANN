@@ -8,6 +8,7 @@
 // from this link's own functions rather than the full 26–28 span.
 import Base from '../../layouts/Base.astro';
 import Arch from '../../components/Arch.astro';
+import Monogram from '../../components/Monogram.astro';
 import LiveBanner from '../../components/LiveBanner.astro';
 import data from '../../data/invites.json';
 
@@ -100,6 +101,9 @@ const swatches = (raw: unknown[]): Swatch[] =>
       <div class="hero-arch">
         <Arch />
         <div class="hero-inner">
+          {/* Mirrors page 1 of the printed cards: the mark inside the arch,
+              above the names. eager because it sits above the fold. */}
+          <Monogram size="lg" eager class="hero-mark" />
           {/* The names are the page's heading. Previously the document started
               at h2, which leaves a screen reader with no title for the page. */}
           <h1 class="couple">{couple}</h1>
@@ -307,6 +311,7 @@ const swatches = (raw: unknown[]): Swatch[] =>
       {/* No arch here — it is hero-only, deliberately. Everything else stays
           quiet. See docs/DECISIONS.md. */}
       <section class="closing reveal">
+        <Monogram size="xs" class="closing-mark" />
         <p class="closing-line">We would love to have you there.</p>
         <a class="cta" href="rsvp">RSVP</a>
       </section>
@@ -843,6 +848,14 @@ const swatches = (raw: unknown[]): Swatch[] =>
 
     /* The closing keeps its own class and stays centred across the full width,
        so the page still ends on the RSVP button rather than in a column. */
+  }
+
+  .hero-mark {
+    margin-bottom: var(--gap);
+  }
+  .closing-mark {
+    margin-bottom: var(--gap);
+    opacity: 0.9;
   }
 
   /* ---------- closing ---------- */

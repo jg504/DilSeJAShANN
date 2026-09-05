@@ -21,6 +21,7 @@
 // particular the card title "Vivaah", whether it runs four pheras or seven, and
 // whether the gurdwara adds anything. Structure only until that lands.
 import Base from '../layouts/Base.astro';
+import Monogram from '../components/Monogram.astro';
 import data from '../data/ceremonies.json';
 
 const { intro, ceremonies } = data;
@@ -30,6 +31,7 @@ const { intro, ceremonies } = data;
   <div class="page">
     <header>
       <p class="wordmark">#DilSeJAShANN</p>
+      <Monogram size="sm" eager />
       <h1>The ceremonies</h1>
       <p class="intro">{intro}</p>
     </header>
