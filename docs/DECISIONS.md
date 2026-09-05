@@ -149,6 +149,21 @@ them.** If something here looks wrong, raise it — do not quietly reverse it.
   steps between two lines — "Composed by Guru Ram Das…" and "When the fourth Laav ends,
   they are married." Dropping them would have been a divergence from the print.
 
+## Performance — measured 2026-09-05
+
+- **Slow 4G with a 4x CPU throttle: LCP 0.50s against the 2.5s budget**, CLS 0.
+  Invitation 82.7KB over the wire in 8 requests; RSVP and ceremonies 0.3s each.
+- **The LCP element is `h1.couple` — text, not the monogram.** Fonts are
+  `font-display: swap`, so the names paint immediately in the fallback and the
+  image never gates the largest paint.
+- **The throttling was proven live, not assumed.** Unthrottled 0.02s, Slow 4G
+  0.51s, a deliberate 50 Kbps / 20x crawl 3.80s and correctly failed. If a future
+  run shows all three modes agreeing, the emulation is not being applied.
+- **`npm run perf` re-runs it.** Not part of `npm run check` — it needs a preview
+  server and a debuggable Chrome, both documented at the top of the script.
+- **This is simulated throttling on a fast Mac.** A real low-end Android and iOS
+  Safari are still on the pre-launch checklist and are not covered by this.
+
 ## Open questions
 
 - **Family-elder confirmation** of both ritual sequences is still outstanding.
