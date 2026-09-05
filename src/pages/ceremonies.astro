@@ -22,7 +22,6 @@
 // whether the gurdwara adds anything. Structure only until that lands.
 import Base from '../layouts/Base.astro';
 import Monogram from '../components/Monogram.astro';
-import Ornament from '../components/Ornament.astro';
 import data from '../data/ceremonies.json';
 
 const { intro, ceremonies } = data;
@@ -40,7 +39,6 @@ const { intro, ceremonies } = data;
     {
       ceremonies.map((c) => (
         <article class="ceremony">
-          <span class="cer-mark"><Ornament kind="rosette" /></span>
           <h2>{c.name}</h2>
           <p class="gloss">{c.gloss}</p>
 
@@ -182,11 +180,6 @@ const { intro, ceremonies } = data;
     margin: var(--gap) auto 0;
     text-align: center;
     max-width: 30rem;
-  }
-
-  .cer-mark {
-    display: block;
-    margin: 0 0 var(--gap-sm);
   }
 
   .ceremony {

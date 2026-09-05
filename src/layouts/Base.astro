@@ -3,7 +3,6 @@
 // place. This site publishes venue addresses and a family schedule.
 import '../styles/tokens.css';
 import '../styles/type.css';
-import damask from '../assets/damask.webp';
 import {
   OG_TITLE,
   OG_DESCRIPTION,
@@ -105,10 +104,7 @@ const ogImage = new URL(OG_IMAGE, Astro.site).href;
       )
     }
   </head>
-  <body
-    class={framed ? 'framed' : undefined}
-    style={framed ? `--damask:url(${damask.src})` : undefined}
-  >
+  <body class={framed ? 'framed' : undefined}>
     <slot />
   </body>
 </html>
@@ -128,43 +124,6 @@ const ogImage = new URL(OG_IMAGE, Astro.site).href;
   @media (min-width: 60rem) {
     body.framed {
       background: var(--bg);
-    }
-    /* The damask, in the margins only. CLAUDE.md is blunt that at full scale it
-       is noise and fights the photography — the card runs it as a band down the
-       edges and nowhere else, so that is what this does. Desktop only: on a
-       phone the panel fills the screen and there are no margins to put it in.
-       Fixed, so it does not scroll and cannot cost a repaint. */
-    body.framed::before,
-    body.framed::after {
-      content: '';
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      width: 150px;
-      background-image: var(--damask);
-      background-size: 300px;
-      background-repeat: repeat;
-      opacity: 0.55;
-      pointer-events: none;
-      z-index: 0;
-    }
-    body.framed::before {
-      left: 0;
-      /* Fades out toward the panel so the texture never crowds the reading
-         surface — it belongs at the edge of vision, not next to the text. */
-      mask-image: linear-gradient(to right, #000 40%, transparent);
-      -webkit-mask-image: linear-gradient(to right, #000 40%, transparent);
-    }
-    body.framed::after {
-      right: 0;
-      mask-image: linear-gradient(to left, #000 40%, transparent);
-      -webkit-mask-image: linear-gradient(to left, #000 40%, transparent);
-    }
-    /* Above the texture, always. */
-    body.framed > .page,
-    body.framed > main {
-      position: relative;
-      z-index: 1;
     }
     body.framed > .page,
     body.framed > main {
