@@ -255,6 +255,9 @@ const events = functions.map((f) => ({
     font-weight: 600;
     font-size: var(--t-sm);
     text-decoration: none;
+    /* Anchors today, but the same shared-class trap as .btn on the invitation:
+       a <button> here would silently lose its pointer. */
+    cursor: pointer;
     padding: 0.7rem 1.1rem;
     min-height: 44px;
     display: inline-flex;

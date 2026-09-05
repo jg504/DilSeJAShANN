@@ -723,6 +723,12 @@ const swatches = (raw: unknown[]): Swatch[] =>
     font-weight: 600;
     font-size: var(--t-sm);
     text-decoration: none;
+    /* This class is worn by both <a> and <button>. An anchor gets a pointer
+       from the UA stylesheet and a button does not, so without this the Copy
+       address button looked identical to Get Directions beside it and then
+       showed an arrow on hover — the one control on the page that did not look
+       clickable. */
+    cursor: pointer;
     padding: 0.7rem 1.1rem;
     min-height: 44px;
     display: inline-flex;
