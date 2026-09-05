@@ -164,6 +164,17 @@ them.** If something here looks wrong, raise it — do not quietly reverse it.
 - **This is simulated throttling on a fast Mac.** A real low-end Android and iOS
   Safari are still on the pre-launch checklist and are not covered by this.
 
+## Tone — settled 2026-09-05
+
+- **The site does not spell out what "fully covered" means.** It was proposed that
+  "Indian Formals" and "head and body must be fully covered" be expanded into no
+  sleeveless, no short hemlines, so nobody is turned away at the Gurudwara door.
+  Rejected by Jaskaran: *"We can't order people. They should understand themselves.
+  They're Indians."*
+- **The guest list knows these conventions.** Writing instructions for them reads as
+  either fussy or condescending, and that costs more than the rare guest who guesses
+  wrong. Do not reopen this by adding clarifying parentheticals to dress copy.
+
 ## Open questions
 
 - **Family-elder confirmation** of both ritual sequences is still outstanding.

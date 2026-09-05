@@ -42,11 +42,6 @@ that cannot be recalled once printed.
 the card's "Before you enter" panel, or tell me the site is overstating it and I will
 match the card.
 
-Worth considering separately: **"fully covered" may not be actionable for a guest who
-has not been to a Gurudwara.** It means shoulders and legs covered — no sleeveless, no
-short hemlines. Saying so plainly would prevent someone being turned away at the door,
-which is the failure this note exists to avoid.
-
 ### Ritual sequences — awaiting family elders
 Both sequences come from the printed cards, which CLAUDE.md records as drafted and not
 yet confirmed. The cards print first and cannot be recalled, so a correction after
