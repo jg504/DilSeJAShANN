@@ -1,21 +1,27 @@
 {
   "title": "<<FILL>>",
   "intro": "<<FILL>>",
-
   "chapters": [
     {
       "heading": "How we met",
-      "body": ["<<FILL>>", "<<FILL>>"]
+      "body": [
+        "<<FILL>>",
+        "<<FILL>>"
+      ]
     },
     {
       "heading": "What happened next",
-      "body": ["<<FILL>>", "<<FILL>>"]
+      "body": [
+        "<<FILL>>",
+        "<<FILL>>"
+      ]
     },
     {
       "heading": "Deciding on this",
-      "body": ["<<FILL>>"]
+      "body": [
+        "<<FILL>>"
+      ]
     }
   ],
-
   "closing": "<<FILL>>"
 }

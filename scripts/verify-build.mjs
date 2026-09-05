@@ -369,6 +369,10 @@ const fontBytes = ['fonts/playfair-display-latin.woff2', 'fonts/source-sans-3-la
 
 const invite = pageWeight(`i/${slugs[0]}/index.html`);
 const rsvp = pageWeight(`i/${slugs[0]}/rsvp/index.html`);
+// Class B: no meaningful weight cap below the fold, but the first screen still
+// has to arrive. This is the page the photographs land on, so it is the one
+// worth watching once they do.
+const story = pageWeight('story/index.html');
 const aboveFold = invite.bytes + fontBytes;
 
 notes.push(
@@ -376,10 +380,21 @@ notes.push(
     ` (${invite.eager} eager image${invite.eager === 1 ? '' : 's'}, ${invite.lazy} lazy)`
 );
 notes.push(`rsvp page:  ${KB(rsvp.bytes)} gz in ${rsvp.requests} requests`);
+notes.push(
+  `story page: ${KB(story.bytes + fontBytes)} first screen in ${story.requests + 2} requests` +
+    ` (${story.eager} eager image${story.eager === 1 ? '' : 's'}, ${story.lazy} lazy)`
+);
 
 // Class A budget: above the fold under ~800KB, LCP under 2.5s on Slow 4G.
 if (aboveFold > 800 * 1024) fail(`above-the-fold payload ${KB(aboveFold)} exceeds the 800KB budget`);
 if (size('og.png') > 300 * 1024) fail(`og.png ${KB(size('og.png'))} exceeds 300KB`);
+
+// Class B first screen, per CLAUDE.md. Only eager images count — everything
+// below the fold is lazy and costs nothing until the guest scrolls.
+const storyFirstScreen = story.bytes + fontBytes;
+if (storyFirstScreen > 1024 * 1024) {
+  fail(`story page first screen ${KB(storyFirstScreen)} exceeds the 1MB budget`);
+}
 
 // What actually costs LCP is render-BLOCKING work, not request count. A
 // type="module" script is deferred and cannot delay first paint, so counting

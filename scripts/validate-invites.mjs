@@ -8,8 +8,9 @@
 // Every problem is collected and printed at once rather than failing on the
 // first — whoever is filling the file in should see the whole list.
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
 const FILE = fileURLToPath(new URL('../src/data/invites.json', import.meta.url));
 const CEREMONIES = fileURLToPath(new URL('../src/data/ceremonies.json', import.meta.url));
@@ -234,6 +235,42 @@ if (!Array.isArray(cer.ceremonies) || cer.ceremonies.length !== 2) {
 const story = JSON.parse(readFileSync(STORY, 'utf8'));
 scanFill(story, 'story.json');
 scanLorem(story, 'story.json');
+
+// --- story photographs -------------------------------------------------------
+// Captions and alt text sit inside story.json, so they already inherit the
+// <<FILL>>, lorem and function-neutral scans above — a caption naming a function
+// only some guests are invited to fails the build for free.
+//
+// What those scans cannot catch is a filename that points at nothing. Astro
+// resolves the glob at build time and silently renders no figure for a miss, so
+// a typo would ship as a chapter that quietly lost its photograph.
+const STORY_DIR = fileURLToPath(new URL('../src/assets/story/', import.meta.url));
+
+const checkImage = (img, at) => {
+  require(img, ['src', 'alt'], at);
+  if (typeof img?.src === 'string' && img.src.trim()) {
+    if (!existsSync(join(STORY_DIR, img.src))) {
+      fail(`${at}.src "${img.src}" is not in src/assets/story/`);
+    }
+  }
+  // A photograph on this page carries meaning; it is not decoration like the
+  // monogram, so an empty alt is wrong rather than merely unhelpful.
+  if (typeof img?.alt === 'string' && !img.alt.trim()) {
+    fail(`${at}.alt is empty — describe what is in the photograph`);
+  }
+};
+
+if (story.lead) checkImage(story.lead, 'story.json.lead');
+(story.chapters ?? []).forEach((c, i) => {
+  if (c.images !== undefined && !Array.isArray(c.images)) {
+    // Return, not fall through: forEach on an object throws, and this script's
+    // contract is to print every problem at once rather than hand whoever is
+    // editing the file a stack trace.
+    fail(`story.json.chapters[${i}].images must be an array`);
+    return;
+  }
+  (c.images ?? []).forEach((img, j) => checkImage(img, `story.json.chapters[${i}].images[${j}]`));
+});
 require(story, ['title', 'intro', 'chapters', 'closing'], 'story.json');
 
 if (!Array.isArray(story.chapters) || story.chapters.length === 0) {
