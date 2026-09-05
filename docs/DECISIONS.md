@@ -175,6 +175,26 @@ them.** If something here looks wrong, raise it — do not quietly reverse it.
   either fussy or condescending, and that costs more than the rare guest who guesses
   wrong. Do not reopen this by adding clarifying parentheticals to dress copy.
 
+## Photo gallery — settled 2026-09-05, built in January
+
+- **One page per day, gated exactly like the invitation.** A guest sees only the days
+  they were there, driven off the same `functions` array as everything else so it cannot
+  drift out of step with the invitation.
+- **Every day excludes someone**, which is why this is not a shared page: 26 December is
+  Cocktails and only tier 1 was there, so six of seven tiers would otherwise learn of a
+  party they missed. 27 December excludes tiers 4 and 7; 28 December excludes 3 and 6.
+- **URLs become `/i/<slug>/photos/<day>`**, not a shared `/photos/<day>`. The tier rule
+  does not lapse because the wedding has happened.
+- **`/photos` becomes a fallback**, the way `/` already is — "please use your personal
+  invitation link". It must not list the days, or it becomes the leak by itself.
+- **Turtlepic selfie search sits only on a guest's own day pages**, never on a shared
+  one, for the same reason.
+- **`verify-build.mjs` must cover the new routes**: no photo page may contain another
+  slug, another tier's day, a tier label or a side name. The existing per-invitation
+  checks extend to them rather than being rewritten.
+- Nothing links to `/photos` today, so **no URL is in circulation** and the structure was
+  still free to change when this was decided.
+
 ## Open questions
 
 - **Family-elder confirmation** of both ritual sequences is still outstanding.

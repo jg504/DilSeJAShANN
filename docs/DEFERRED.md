@@ -85,15 +85,24 @@ guest uploads a photo of their face to a vendor. Say in one line what it does, a
 sure the plain gallery works for anyone who would rather not — several of the older
 guests will not want to, and nobody should have to opt in to see their own photographs.
 
-### Restore the Photographs link — January 2027
-`/photos` is built and live so the URL never 404s, but **nothing links to it**. The
-button was removed from the invitation on 2026-09-05: the gallery is of the wedding
-itself, and sitting under "Our story" it read as pictures of the two of them, which is
-what Jaskaran assumed when he saw it.
+### Build the gated photo gallery — January 2027
+Decided 2026-09-05, recorded in DECISIONS.md. **One page per day, gated like the
+invitation** — `/i/<slug>/photos/<day>`, showing only the days that guest was there,
+driven off the same `functions` array so it cannot drift.
 
-**When the gallery is ready**, put the link back in the "Our story" block in
-`src/pages/i/[slug].astro` — the comment marking the spot says so. Nothing needs
-re-sending; guests reopen their own invitation link, which is the durable thing.
+Not built yet, deliberately: there are no photographs, and the layout depends on how
+many there are per day. This is a structural change and wants a plan first.
+
+Shape when it is built:
+- Day pages per slug, from `invite.functions` — never from tier or side.
+- `/photos` becomes a fallback like `/` — "please use your personal invitation link".
+  It must not list the days, or it is the leak by itself.
+- Turtlepic selfie search only on a guest's own day pages.
+- Extend `verify-build.mjs`: no photo page may carry another slug, another tier's day,
+  a tier label or a side name.
+- Put the link back in the "Our story" block of `src/pages/i/[slug].astro`, where a
+  comment marks the spot. Nothing needs re-sending — guests reopen their invitation
+  link, which is the durable thing.
 
 ### Before distribution
 - Switch the Cloudflare build command from `npm run build:draft` to `npm run build`, so
