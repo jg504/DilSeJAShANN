@@ -49,10 +49,10 @@ the place older relatives will actually look, and that one is not mine to change
 
 **Needs:** ask the designer to add it. The wording, so both match:
 
-> No boxed gifts please.
+> A small request — no boxed gifts please
 
 A longer version giving the reason was written first and cut — Jaskaran wanted the
-phrase alone. It lives in one field, `giftNote` in `src/data/invites.json`, and removing
+phrase alone, as the heading rather than a heading plus a line. It lives in one field, `giftNote` in `src/data/invites.json`, and removing
 it there removes it everywhere.
 
 ### Before distribution

@@ -302,9 +302,8 @@ const swatches = (raw: unknown[]): Swatch[] =>
           left to stand on its own — Jaskaran's call, 2026-09-05. Deliberately
           low on the page: a guest has had two chances to RSVP before reaching
           it. */}
-      <section class="fn reveal">
-        <h2>A small request</h2>
-        <p class="lead">{giftNote}</p>
+      <section class="fn solo reveal">
+        <h2>{giftNote}</h2>
       </section>
 
       {/* Shared by all seven links and function-neutral, so it is safe to link
@@ -842,6 +841,12 @@ const swatches = (raw: unknown[]): Swatch[] =>
        special case; the heading floats and the content flows beside it. */
     .fn > :not(h2):not(.fn-date) {
       margin-left: calc(15rem + var(--gap-xl));
+    }
+    /* A section that is nothing but its heading has no second column to sit
+       beside, so it opts out of the label split and runs the full width. */
+    .fn.solo > h2 {
+      float: none;
+      width: auto;
     }
     .fn::after {
       content: '';
