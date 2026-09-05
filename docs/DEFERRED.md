@@ -116,7 +116,6 @@ Not built yet: there are no photographs, and the layout depends on how many ther
 - Switch the Cloudflare build command from `npm run build:draft` to `npm run build`, so
   validation gates the live deploy and lorem cannot ship.
 - Delete `public/_rsvp-test.html`, and clear every test row from both sheet tabs.
-- Sign in to `/share` once to confirm the Cloudflare Access flow works.
 - Verify the WhatsApp preview on a real device: PNG card first, link as a separate
   message.
 

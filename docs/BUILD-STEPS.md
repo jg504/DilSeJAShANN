@@ -96,7 +96,7 @@ Do this before any form UI. It is the least predictable part of the build.
 
 ## Phase 6 — the tools
 
-- [ ] **6.1** Cloudflare Access on `/admin/*` and `/share`, two email groups
+- [x] **6.1** Cloudflare Access on `/admin/*` and `/share` — signed in end to end 2026-09-05
 - [ ] **6.2** Session duration set to maximum
 - [x] **6.3** `/admin/groom` and `/admin/bride` — headcounts, bed-nights, kitchen list,
       buried accommodation requests, duplicate flags

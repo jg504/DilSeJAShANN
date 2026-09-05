@@ -150,9 +150,15 @@ does not work on `*.pages.dev`. Session duration set to maximum.
 which was stale — the app had been pointed at `/shared`, the old test page, a one-letter
 miss from `/share`, and the correct destinations were added on 2026-08-26.
 
-**Still outstanding:** nobody has actually signed in. The challenge appearing proves the
-destinations are right; it does not prove the policy lets Jaskaran through, and that is
-only knowable by trying it.
+**Signed in end to end 2026-09-05.** Email, one-time code, through to the page. The whole
+chain is confirmed working, not merely configured:
+
+| | Confirmed by |
+|---|---|
+| Destinations | `/share` and `/admin/*` challenge; `/` and the invitations stay open |
+| Policy | Jaskaran's email is admitted |
+| `ACCESS_READY` | `/share` renders the seven links rather than the disabled notice |
+| `ADMIN_KEY` | The dashboard renders data. A bad key produces a red "Could not load the sheet" box naming the cause, so a working dashboard is proof of the key, not just of the page |
 
 ---
 
