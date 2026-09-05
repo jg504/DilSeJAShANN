@@ -1,59 +1,139 @@
 {
-  "intro": "<<FILL>>",
-
+  "intro": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
   "ceremonies": [
     {
       "id": "anand-karaj",
       "name": "Anand Karaj",
-      "gloss": "<<FILL>>",
-      "about": ["<<FILL>>", "<<FILL>>"],
+      "gloss": "Lorem Ipsum",
+      "about": [
+        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+        "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+      ],
       "etiquette": [
-        { "title": "Covering your head", "note": "<<FILL>>" },
-        { "title": "Shoes", "note": "<<FILL>>" },
-        { "title": "Seating", "note": "<<FILL>>" },
-        { "title": "At the venue", "note": "<<FILL>>" }
+        {
+          "title": "Covering your head",
+          "note": "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+          "title": "Shoes",
+          "note": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, consectetur totam rem."
+        },
+        {
+          "title": "Seating",
+          "note": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur adipiscing magni."
+        },
+        {
+          "title": "At the venue",
+          "note": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        }
       ],
       "sequence": [
-        { "name": "<<FILL>>", "note": "<<FILL>>" },
-        { "name": "<<FILL>>", "note": "<<FILL>>" },
-        { "name": "<<FILL>>", "note": "<<FILL>>" },
-        { "name": "<<FILL>>", "note": "<<FILL>>" }
+        {
+          "name": "Consectetur Adipiscing",
+          "note": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        },
+        {
+          "name": "Eiusmod Tempor",
+          "note": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+        },
+        {
+          "name": "Incididunt Labore",
+          "note": "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+          "name": "Voluptate Velit",
+          "note": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, consectetur totam rem."
+        }
       ],
       "meaning": {
         "title": "The four Laavan",
         "items": [
-          { "name": "<<FILL>>", "note": "<<FILL>>" },
-          { "name": "<<FILL>>", "note": "<<FILL>>" },
-          { "name": "<<FILL>>", "note": "<<FILL>>" },
-          { "name": "<<FILL>>", "note": "<<FILL>>" }
+          {
+            "name": "Cillum Dolore",
+            "note": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur adipiscing magni."
+          },
+          {
+            "name": "Occaecat Cupidatat",
+            "note": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+          },
+          {
+            "name": "Proident Sunt",
+            "note": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+          },
+          {
+            "name": "Excepteur Sint",
+            "note": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+          }
         ]
       }
     },
     {
       "id": "vivaah",
       "name": "Vivaah",
-      "gloss": "<<FILL>>",
-      "about": ["<<FILL>>", "<<FILL>>"],
+      "gloss": "Reprehenderit Esse",
+      "about": [
+        "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, consectetur totam rem."
+      ],
       "etiquette": [
-        { "title": "Seating", "note": "<<FILL>>" },
-        { "title": "At the venue", "note": "<<FILL>>" }
+        {
+          "title": "Seating",
+          "note": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur adipiscing magni."
+        },
+        {
+          "title": "At the venue",
+          "note": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        }
       ],
       "sequence": [
-        { "name": "<<FILL>>", "note": "<<FILL>>" },
-        { "name": "<<FILL>>", "note": "<<FILL>>" },
-        { "name": "<<FILL>>", "note": "<<FILL>>" },
-        { "name": "<<FILL>>", "note": "<<FILL>>" }
+        {
+          "name": "Exercitation Ullamco",
+          "note": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        },
+        {
+          "name": "Pariatur Officia",
+          "note": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+        },
+        {
+          "name": "Lorem Ipsum",
+          "note": "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+          "name": "Consectetur Adipiscing",
+          "note": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, consectetur totam rem."
+        }
       ],
       "meaning": {
-        "title": "<<FILL>>",
+        "title": "Eiusmod Tempor",
         "items": [
-          { "name": "<<FILL>>", "note": "<<FILL>>" },
-          { "name": "<<FILL>>", "note": "<<FILL>>" },
-          { "name": "<<FILL>>", "note": "<<FILL>>" },
-          { "name": "<<FILL>>", "note": "<<FILL>>" },
-          { "name": "<<FILL>>", "note": "<<FILL>>" },
-          { "name": "<<FILL>>", "note": "<<FILL>>" },
-          { "name": "<<FILL>>", "note": "<<FILL>>" }
+          {
+            "name": "Incididunt Labore",
+            "note": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur adipiscing magni."
+          },
+          {
+            "name": "Voluptate Velit",
+            "note": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+          },
+          {
+            "name": "Cillum Dolore",
+            "note": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+          },
+          {
+            "name": "Occaecat Cupidatat",
+            "note": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+          },
+          {
+            "name": "Proident Sunt",
+            "note": "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+          },
+          {
+            "name": "Excepteur Sint",
+            "note": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, consectetur totam rem."
+          },
+          {
+            "name": "Reprehenderit Esse",
+            "note": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur adipiscing magni."
+          }
         ]
       }
     }

@@ -223,15 +223,23 @@ const swatches = (raw: unknown[]): Swatch[] =>
         accom && (
           <section class="fn reveal">
             <h2>Staying with us</h2>
-            <div class="venue">
-              <p class="venue-name">{side.hotel.name}</p>
-              <p class="address">{side.hotel.address}</p>
-            </div>
-            <div class="actions">
-              <a class="btn" href={side.hotel.mapsUrl} target="_blank" rel="noopener noreferrer">
-                Get Directions
-              </a>
-            </div>
+            {/* The hotel is not fixed yet. Until it is, the block is the note
+                alone — an empty venue line and a Get Directions button pointing
+                at nothing is worse than saying plainly that details will
+                follow. Filling in mapsUrl brings the venue back. */}
+            {side.hotel.mapsUrl && (
+              <>
+                <div class="venue">
+                  <p class="venue-name">{side.hotel.name}</p>
+                  <p class="address">{side.hotel.address}</p>
+                </div>
+                <div class="actions">
+                  <a class="btn" href={side.hotel.mapsUrl} target="_blank" rel="noopener noreferrer">
+                    Get Directions
+                  </a>
+                </div>
+              </>
+            )}
             <p class="note">{side.hotel.note}</p>
           </section>
         )
@@ -256,7 +264,7 @@ const swatches = (raw: unknown[]): Swatch[] =>
             side.contacts.map((c) => (
               <li>
                 <span class="contact-name">{c.name}</span>
-                <a class="btn quiet" href={`tel:${c.phone}`}>
+                <a class="btn quiet" href={`tel:${c.phone.replace(/\s+/g, '')}`}>
                   {c.phone}
                 </a>
               </li>

@@ -74,7 +74,7 @@ const events = functions.map((f) => ({
     const actions = (fn: any) =>
       `<div class="live-actions">` +
       `<a class="live-btn" href="${esc(whereNow(fn, now).mapsUrl)}" target="_blank" rel="noopener noreferrer">Get Directions</a>` +
-      `<a class="live-btn quiet" href="tel:${esc(contact.phone)}">Call ${esc(contact.name)}</a>` +
+      `<a class="live-btn quiet" href="tel:${esc(contact.phone.replace(/\s+/g, ''))}">Call ${esc(contact.name)}</a>` +
       `</div>`;
 
     let html = '';

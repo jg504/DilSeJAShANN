@@ -46,6 +46,25 @@ const scanFill = (node, path) => {
 };
 scanFill(data, 'invites.json');
 
+// --- placeholder prose -------------------------------------------------------
+// Lorem ipsum was added deliberately so the layout could be judged before the
+// real copy exists. It is far more dangerous than <<FILL>>: it is the right
+// length, the right shape, and reads as finished text at a glance, so nobody
+// skim-reading the page would catch it. The strict build treats it exactly like
+// a <<FILL>> — the pre-launch grep looks for "<<FILL", and this looks for this.
+const LOREM = /\b(lorem ipsum|dolor sit amet|consectetur|adipiscing|eiusmod|incididunt|exercitation|reprehenderit|voluptate|cillum|pariatur|excepteur|occaecat|cupidatat|proident)\b/i;
+const scanLorem = (node, path) => {
+  if (typeof node === 'string') {
+    const m = node.match(LOREM);
+    if (m) fail(`${path} is placeholder prose ("${m[0]}")`);
+  } else if (Array.isArray(node)) {
+    node.forEach((v, i) => scanLorem(v, `${path}[${i}]`));
+  } else if (node && typeof node === 'object') {
+    for (const [k, v] of Object.entries(node)) scanLorem(v, `${path}.${k}`);
+  }
+};
+scanLorem(data, 'invites.json');
+
 // --- required shape ----------------------------------------------------------
 const require = (obj, keys, path) => {
   for (const k of keys) {
@@ -89,6 +108,18 @@ for (const [id, fn] of Object.entries(data.functions ?? {})) {
 for (const [name, side] of Object.entries(data.sides ?? {})) {
   require(side, ['greeting', 'contacts', 'hotel', 'travel'], `sides.${name}`);
   require(side.hotel, ['name', 'address', 'mapsUrl', 'note'], `sides.${name}.hotel`);
+  // The venue half of the block renders only when there is a pin to point at.
+  // With no pin, the note is the entire block, so an empty note would ship a
+  // bare "Staying with us" heading to exactly the guests who need it most.
+  if (!side.hotel?.mapsUrl?.trim() && !side.hotel?.note?.trim()) {
+    fail(`sides.${name}.hotel has no mapsUrl, so note must say what happens instead`);
+  }
+  // "Never use the word room on the site" — CLAUDE.md. Rooms are shared and
+  // paired up by phone; a guest who reads "a room" believes he has been
+  // promised one, and that conversation happens in December.
+  if (/\brooms?\b/i.test(JSON.stringify(side.hotel))) {
+    fail(`sides.${name}.hotel uses the word "room" — allocation is by phone, never promised on the site`);
+  }
   require(side.travel, ['airport', 'station', 'cabNote'], `sides.${name}.travel`);
   if (!Array.isArray(side.contacts) || side.contacts.length === 0) {
     fail(`sides.${name}.contacts must have at least one contact`);
@@ -158,6 +189,7 @@ for (const inv of invites) {
 // same words, and the cards cannot be recalled once printed.
 const cer = JSON.parse(readFileSync(CEREMONIES, 'utf8'));
 scanFill(cer, 'ceremonies.json');
+scanLorem(cer, 'ceremonies.json');
 
 if (typeof cer.intro !== 'string') fail('ceremonies.json: intro must be a string');
 
@@ -196,6 +228,7 @@ if (!Array.isArray(cer.ceremonies) || cer.ceremonies.length !== 2) {
 // name, no date, no side. Two of the seven end a day before everyone else.
 const story = JSON.parse(readFileSync(STORY, 'utf8'));
 scanFill(story, 'story.json');
+scanLorem(story, 'story.json');
 require(story, ['title', 'intro', 'chapters', 'closing'], 'story.json');
 
 if (!Array.isArray(story.chapters) || story.chapters.length === 0) {

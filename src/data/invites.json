@@ -43,58 +43,50 @@
       "venue": "Club Patio",
       "address": "South City I, Sector 41, Gurgaon",
       "mapsUrl": "https://maps.app.goo.gl/5LuenHLkHbxannWM8",
-      "dressCode": "<<FILL>>",
+      "dressCode": "Dress as you like",
       "dressColors": [],
       "dressNote": ""
     }
   },
   "sides": {
     "groom": {
-      "greeting": "<<FILL>>",
+      "greeting": "Sat Sri Akal",
       "contacts": [
         {
-          "name": "<<FILL>>",
-          "phone": "<<FILL>>"
-        },
-        {
-          "name": "<<FILL>>",
-          "phone": "<<FILL>>"
+          "name": "Jaskaran Gujral",
+          "phone": "+91 95213 93039"
         }
       ],
       "hotel": {
-        "name": "<<FILL>>",
-        "address": "<<FILL>>",
-        "mapsUrl": "<<FILL>>",
-        "note": "<<FILL>>"
+        "name": "",
+        "address": "",
+        "mapsUrl": "",
+        "note": "Where everyone is staying is still being sorted out. We'll send you the details on WhatsApp closer to the date."
       },
       "travel": {
-        "airport": "<<FILL>>",
-        "station": "<<FILL>>",
-        "cabNote": "<<FILL>>"
+        "airport": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
+        "station": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.",
+        "cabNote": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
       }
     },
     "bride": {
-      "greeting": "<<FILL>>",
+      "greeting": "Namaste",
       "contacts": [
         {
-          "name": "<<FILL>>",
-          "phone": "<<FILL>>"
-        },
-        {
-          "name": "<<FILL>>",
-          "phone": "<<FILL>>"
+          "name": "Anusha Dixit",
+          "phone": "+91 98998 85733"
         }
       ],
       "hotel": {
-        "name": "<<FILL>>",
-        "address": "<<FILL>>",
-        "mapsUrl": "<<FILL>>",
-        "note": "<<FILL>>"
+        "name": "",
+        "address": "",
+        "mapsUrl": "",
+        "note": "Where everyone is staying is still being sorted out. We'll send you the details on WhatsApp closer to the date."
       },
       "travel": {
-        "airport": "<<FILL>>",
-        "station": "<<FILL>>",
-        "cabNote": "<<FILL>>"
+        "airport": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
+        "station": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.",
+        "cabNote": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
       }
     }
   },
