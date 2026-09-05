@@ -293,7 +293,7 @@ after distribution, a schema change means phoning two hundred people.
 | `/i/[slug]/rsvp` | RSVP form. Accommodation block only when `accom: true`. |
 | `/story` | Shared story and photos. Reachable from all seven links. |
 | `/ceremonies` | Anand Karaj and Vivaah explainers. **Only linked from invites containing `f2`.** |
-| `/photos` | "Coming soon" placeholder from day one. Becomes the January gallery link. |
+| `/photos` | "Coming soon" placeholder from day one, so the URL never 404s. Becomes the January gallery link. **Built but not linked from anywhere** until the gallery exists — beside "Read our story" it read as pictures of the couple rather than of the wedding. |
 | `/` | Plain fallback. No content, no links. |
 | `/admin/groom` | Groom-side operations. Cloudflare Access. |
 | `/admin/bride` | Bride-side operations. Cloudflare Access. |

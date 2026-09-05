@@ -318,7 +318,16 @@ const swatches = (raw: unknown[]): Swatch[] =>
         <p class="lead">A little about how we got here.</p>
         <div class="actions">
           <a class="btn quiet" href="/story">Read our story</a>
-          <a class="btn quiet" href="/photos">Photographs</a>
+          {/* The Photographs button is deliberately absent until January.
+              /photos is the gallery of the wedding itself, not pictures of the
+              two of them — but sitting here beside "Read our story", under a
+              heading that says "Our story", it read as exactly that. Jaskaran
+              read it that way himself. Until the gallery exists it is also a
+              tap that leads to "come back later".
+
+              THE ROUTE STAYS LIVE so the URL never 404s. In January, restore
+              this link; nothing has to be re-sent, because the invitation link
+              is the durable thing and guests reopen that. */}
         </div>
       </section>
 

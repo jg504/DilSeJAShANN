@@ -71,6 +71,16 @@ A longer version giving the reason was written first and cut — Jaskaran wanted
 phrase alone, as the heading rather than a heading plus a line. It lives in one field, `giftNote` in `src/data/invites.json`, and removing
 it there removes it everywhere.
 
+### Restore the Photographs link — January 2027
+`/photos` is built and live so the URL never 404s, but **nothing links to it**. The
+button was removed from the invitation on 2026-09-05: the gallery is of the wedding
+itself, and sitting under "Our story" it read as pictures of the two of them, which is
+what Jaskaran assumed when he saw it.
+
+**When the gallery is ready**, put the link back in the "Our story" block in
+`src/pages/i/[slug].astro` — the comment marking the spot says so. Nothing needs
+re-sending; guests reopen their own invitation link, which is the durable thing.
+
 ### Before distribution
 - Switch the Cloudflare build command from `npm run build:draft` to `npm run build`, so
   validation gates the live deploy and lorem cannot ship.
