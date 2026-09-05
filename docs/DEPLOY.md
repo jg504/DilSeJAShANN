@@ -142,7 +142,17 @@ until someone runs it on a real device.
 ## Access
 
 Cloudflare Access protects `/admin/*` and `/share`. It requires the custom domain and
-does not work on `*.pages.dev`. Session duration set to maximum. **Not yet configured.**
+does not work on `*.pages.dev`. Session duration set to maximum.
+
+**Configured and confirmed live 2026-09-05.** Both paths 302 to
+`dilsejashann.cloudflareaccess.com` for an unauthenticated request; `/` and the seven
+`/i/<slug>/` pages stay open at 200. This section previously said "not yet configured",
+which was stale — the app had been pointed at `/shared`, the old test page, a one-letter
+miss from `/share`, and the correct destinations were added on 2026-08-26.
+
+**Still outstanding:** nobody has actually signed in. The challenge appearing proves the
+destinations are right; it does not prove the policy lets Jaskaran through, and that is
+only knowable by trying it.
 
 ---
 
