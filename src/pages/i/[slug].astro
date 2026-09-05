@@ -198,7 +198,12 @@ const swatches = (raw: unknown[]): Swatch[] =>
             </div>
 
             <div class="dress">
-              <p class="dress-code">{f.dressCode}</p>
+              {/* Labelled, not bare. On its own, "Indian Formals" sitting under
+                  a row of buttons reads as an orphaned word — a guest has to
+                  work out what it is telling them. */}
+              <p class="dress-code">
+                <span class="dress-label">Dress code:</span> {f.dressCode}
+              </p>
               {swatches(f.dressColors).length > 0 && (
                 <ul class="swatches">
                   {swatches(f.dressColors).map((c) => (
@@ -751,6 +756,10 @@ const swatches = (raw: unknown[]): Swatch[] =>
     font-size: var(--t-base);
     color: var(--body);
     margin: 0;
+  }
+  .dress-label {
+    font-weight: 600;
+    color: var(--ink);
   }
   .swatches {
     list-style: none;
