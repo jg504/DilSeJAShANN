@@ -83,7 +83,11 @@ const BACKS = {
     </section>
 
     <section id="game" class="screen hidden" style={`background-image:url('${BACKS.game}')`}>
-      <p class="banner">MATCH THE PAIRS</p>
+      {/* The background image already carries a "MATCH THE PAIRS" pill. This
+          used to be a styled element drawn on top of it, slightly offset, which
+          read as a doubled or crooked banner. The text stays for screen
+          readers; the pill is the artwork's. */}
+      <p class="sr-only">Match the pairs</p>
       {/* The sixteen cards are rendered here, not built by script.
           Astro's scoped styles compile to `.card[data-astro-cid-…]`, and an
           element created by innerHTML never carries that attribute — so when
@@ -114,7 +118,16 @@ const BACKS = {
       {/* preload="none" so the welcome screen never pays for it; the script
           upgrades it to metadata once the game starts, so the reveal is ready
           the moment it is needed. */}
-      <video id="reveal" src={`/std/${video}`} preload="none" muted playsinline loop controls></video>
+      {/* NO autoplay attribute: it overrides preload="none" and the welcome
+          screen starts pulling 1.8MB before the guest has touched anything. The
+          script plays it instead, once the game has been won — muted and
+          playsinline, which is the combination iOS allows without a gesture.
+
+          No controls either: their chrome and dimming scrim sit straight on top
+          of the card and make it look broken. If play is refused — low power
+          mode, data saver — the script turns controls on so there is still a
+          way to start it. */}
+      <video id="reveal" src={`/std/${video}`} preload="none" muted playsinline loop></video>
     </section>
   </main>
 </Base>
@@ -171,7 +184,11 @@ const BACKS = {
     show('win');
     const v = $('reveal');
     v.preload = 'auto';
-    v.play().catch(() => {});
+    // If the browser refuses to autoplay, give the guest controls rather than a
+    // still frame they cannot start.
+    v.play().catch(() => {
+      v.controls = true;
+    });
   };
 
   const click = (card) => {
@@ -204,8 +221,11 @@ const BACKS = {
 
   const start = () => {
     show('game');
-    // The reveal is two taps away at most; begin fetching it now.
-    $('reveal').preload = 'metadata';
+    // Buffer the reveal while they play. "auto", not "metadata": by the time
+    // eight pairs are matched it should be ready to run instantly, and a guest
+    // staring at a still frame waiting for it to load is what made this look
+    // broken on a real phone.
+    $('reveal').preload = 'auto';
     const dealt = shuffle([...deck]);
     cards.forEach((card, i) => {
       card.classList.remove('flipped');
@@ -341,23 +361,11 @@ const BACKS = {
   /* ---------- game ---------- */
   #game {
     justify-content: flex-start;
-    padding-top: 5vh;
-  }
-  .banner {
-    width: 65%;
-    max-width: 250px;
-    min-height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 0 4vh;
-    font-family: var(--sans);
-    font-size: 1.05rem;
-    letter-spacing: 1px;
-    color: var(--ink);
-    background: #faf3e8;
-    border: 2px solid var(--line);
-    border-radius: 20px;
+    /* Clears the banner painted into the background. That image is 900x1278
+       with the pill ending about 12% down; under background-size:cover on a
+       portrait screen the scale is height-driven, so ~12vh lands just under it
+       across phone aspect ratios. 14 leaves a little air. */
+    padding-top: 14vh;
   }
   .grid {
     width: 90%;
