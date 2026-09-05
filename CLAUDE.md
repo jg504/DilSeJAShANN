@@ -221,6 +221,8 @@ details drift and a guest ends up at the wrong address.
 
 ```json
 {
+  "venueNote": "<<FILL>>",
+
   "functions": {
     "f1": {
       "name": "Cocktails", "date": "2026-12-26", "startTime": "<<FILL>>",
@@ -251,8 +253,7 @@ details drift and a guest ends up at the wrong address.
         { "name": "<<FILL>>", "phone": "<<FILL>>" },
         { "name": "<<FILL>>", "phone": "<<FILL>>" }
       ],
-      "hotel": { "name": "<<FILL>>", "address": "<<FILL>>", "mapsUrl": "<<FILL>>", "note": "<<FILL>>" },
-      "travel": { "airport": "<<FILL>>", "station": "<<FILL>>", "cabNote": "<<FILL>>" }
+      "hotel": { "name": "<<FILL>>", "address": "<<FILL>>", "mapsUrl": "<<FILL>>", "note": "<<FILL>>" }
     },
     "bride": { "…same shape, different values…" }
   },
@@ -309,7 +310,10 @@ after distribution, a schema change means phoning two hundred people.
    Never an embedded Maps iframe; slow and unusable.
 5. Dress code per function with rendered colour swatches and `dressNote`
 6. Add-to-calendar `.ics` per function
-7. Hotel and travel — from the side block
+7. Hotel — from the side block. `venueNote` is one shared practical line about
+   the venue (parking), not an airport-and-station guide: almost everyone invited
+   is local to Gurgaon or Delhi. It is top-level, not per-side, because it
+   describes the venue rather than the family.
 8. Contacts — from the side block, side-specific. A bride-side guest must never be
    routed to a groom-side number.
 9. **RSVP call to action**, repeated

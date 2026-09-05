@@ -30,19 +30,16 @@ brings the venue line and Get Directions back automatically.
 **Never write "room" on the site** — rooms are shared and paired by phone; validation
 fails the build on the word.
 
-### Travel copy — deferred 2026-09-05
-`sides.*.travel.airport`, `.station` and `.cabNote` on both sides are lorem ipsum.
+### The Wedding's second ceremony is called "Phere" on the invitation — open 2026-09-05
+The printed card titles the Hindu ceremony **Vivaah**, with **Mangal Phere** as one step
+inside it. `invites.json` still labels the 2 pm slot `Phere`, so the invitation and the
+card disagree about the name of the same thing.
 
-**Needs:** real lines. Which airport and how far, which station, and what to do about
-cabs in Gurgaon in December.
+**Needs:** a decision. Rename the slot to `Vivaah` to match the card, or keep `Phere`
+because that is what the family actually says. **Asked him.**
 
-### Ceremony copy — blocked 2026-09-05
-`src/data/ceremonies.json` is entirely lorem. Jaskaran said to use "the details I shared
-earlier as part of the draft copy"; that draft is not in either session transcript, not
-in the repo, and not in this file's git history. **Asked him where it is.**
-
-Still open from CLAUDE.md, pending family elders: whether the card is titled `Phere` or
-`Vivaah`, and whether it runs four pheras or seven.
+Family-elder confirmation of the ritual sequences is still outstanding — the cards print
+first and cannot be recalled.
 
 ### Story copy — deferred 2026-09-05
 `src/data/story.json` is lorem. Must stay function-neutral — it is shared by all seven
@@ -61,4 +58,16 @@ here"* — third person, on their own site. Worth a rewrite in the same pass.
 
 ## Done
 
-Nothing yet.
+### Ceremony copy — done 2026-09-05
+Taken word for word from `DilSeJAShANN_ceremony_cards_v2.pdf`, the A6 card artwork.
+Both ceremonies complete: about, etiquette, sequence, and the four Laavan and seven
+steps with the card's own lead and closing lines. The only line not from the card is the
+page intro, which the card has no equivalent of.
+
+Also settled two of CLAUDE.md's open questions: the card is titled **Vivaah**, and the
+Anand Karaj runs **four** Laavan.
+
+### Travel copy — dropped 2026-09-05
+The three-line air/train/cab block is gone. Jaskaran's call: "It's Gurgaon, I think
+everyone will be able to manage." Replaced by one shared `venueNote` — *"Parking is
+limited — a cab is easier than driving."* Six lorem fields removed with it.

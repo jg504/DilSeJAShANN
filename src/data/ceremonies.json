@@ -1,140 +1,180 @@
 {
-  "intro": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+  "intro": "Two ceremonies on the wedding day. Here is what happens in each, and what to expect.",
   "ceremonies": [
     {
       "id": "anand-karaj",
       "name": "Anand Karaj",
-      "gloss": "Lorem Ipsum",
+      "gloss": "the joyful union",
       "about": [
-        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-        "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+        "Anand Karaj is the Sikh marriage ceremony. It takes place in the presence of the Guru Granth Sahib, the Sikh scripture, which is treated as the living Guru and presides over the marriage.",
+        "There are no vows spoken between the couple and no exchange of rings. The marriage is carried entirely in four hymns — the Laavan — which are read aloud and then sung as the couple walks around the Guru Granth Sahib."
       ],
       "etiquette": [
         {
           "title": "Covering your head",
-          "note": "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+          "note": "Cover your head. Scarves are available at the entrance."
         },
         {
           "title": "Shoes",
-          "note": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, consectetur totam rem."
+          "note": "Remove your shoes."
+        },
+        {
+          "title": "Tobacco and alcohol",
+          "note": "Please carry no tobacco or alcohol."
         },
         {
           "title": "Seating",
-          "note": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur adipiscing magni."
+          "note": "Seating is on the floor. Try not to point your feet toward the Guru Granth Sahib."
         },
         {
-          "title": "At the venue",
-          "note": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+          "title": "During the hymns",
+          "note": "Please stay seated while the hymns are being sung."
         }
       ],
       "sequence": [
         {
-          "name": "Consectetur Adipiscing",
-          "note": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+          "name": "Ardas",
+          "note": "The opening prayer. The congregation stands."
         },
         {
-          "name": "Eiusmod Tempor",
-          "note": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+          "name": "Hukamnama",
+          "note": "A passage is read at random from the Guru Granth Sahib — the Guru's word for the day."
         },
         {
-          "name": "Incididunt Labore",
-          "note": "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+          "name": "Palla",
+          "note": "The bride's father places one end of the groom's scarf into her hand. From here they are joined."
         },
         {
-          "name": "Voluptate Velit",
-          "note": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, consectetur totam rem."
+          "name": "The four Laavan",
+          "note": "Each hymn is read, then sung. During the singing the couple walks slowly, clockwise, around the Guru Granth Sahib."
+        },
+        {
+          "name": "Anand Sahib",
+          "note": "A hymn of bliss, and the closing Ardas."
+        },
+        {
+          "name": "Karah Prasad",
+          "note": "A sweet offering shared with everyone present. Please receive it with both hands."
         }
       ],
       "meaning": {
         "title": "The four Laavan",
+        "lead": "Composed by Guru Ram Das. Each round is a stage of union.",
         "items": [
           {
-            "name": "Cillum Dolore",
-            "note": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur adipiscing magni."
+            "name": "First",
+            "note": "A commitment to a righteous life together, and to the duties that come with it."
           },
           {
-            "name": "Occaecat Cupidatat",
-            "note": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+            "name": "Second",
+            "note": "The meeting with the true Guru. The self begins to dissolve."
           },
           {
-            "name": "Proident Sunt",
-            "note": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+            "name": "Third",
+            "note": "Detachment from what does not matter. Love for the divine grows."
           },
           {
-            "name": "Excepteur Sint",
-            "note": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+            "name": "Fourth",
+            "note": "Harmony. The union is complete — of two people, and of the soul with the divine."
           }
-        ]
+        ],
+        "closing": "When the fourth Laav ends, they are married."
       }
     },
     {
       "id": "vivaah",
       "name": "Vivaah",
-      "gloss": "Reprehenderit Esse",
+      "gloss": "the sacred union",
       "about": [
-        "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-        "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, consectetur totam rem."
+        "The Hindu ceremony takes place beneath a mandap, around a sacred fire. Agni, the fire, is the witness — every vow is made in its presence, and it is what makes the marriage binding.",
+        "A priest guides the couple through a sequence of rites in Sanskrit. The heart of it is the phere, when the couple circles the fire together, and the saptapadi, the seven steps."
       ],
       "etiquette": [
         {
-          "title": "Seating",
-          "note": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur adipiscing magni."
+          "title": "Coming and going",
+          "note": "The ceremony runs long. Please come and go quietly as you need to."
         },
         {
-          "title": "At the venue",
-          "note": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+          "title": "Shoes",
+          "note": "Remove your shoes before entering the mandap area."
+        },
+        {
+          "title": "Seating",
+          "note": "Seating is close to the floor."
+        },
+        {
+          "title": "The aisle",
+          "note": "Please keep the aisle clear for the families."
         }
       ],
       "sequence": [
         {
-          "name": "Exercitation Ullamco",
-          "note": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+          "name": "Milni",
+          "note": "The two families meet formally for the first time and greet one another."
         },
         {
-          "name": "Pariatur Officia",
-          "note": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+          "name": "Varmala",
+          "note": "The couple exchange garlands. The first thing they do as a couple, in front of everyone."
         },
         {
-          "name": "Lorem Ipsum",
-          "note": "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+          "name": "Kanyadaan",
+          "note": "The bride's parents give her hand to the groom — the most emotional moment of the day for her family."
         },
         {
-          "name": "Consectetur Adipiscing",
-          "note": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, consectetur totam rem."
+          "name": "Havan",
+          "note": "The sacred fire is lit. From here, Agni is the witness."
+        },
+        {
+          "name": "Mangal Phere",
+          "note": "The couple circles the fire together, the groom leading, then the bride."
+        },
+        {
+          "name": "Saptapadi",
+          "note": "Seven steps, seven promises — for food, strength, prosperity, happiness, family, the seasons, and lifelong friendship."
+        },
+        {
+          "name": "Sindoor & Mangalsutra",
+          "note": "The groom marks her hair with sindoor and ties the mangalsutra. The marriage is complete."
+        },
+        {
+          "name": "Ashirvad",
+          "note": "The elders bless the couple."
         }
       ],
       "meaning": {
-        "title": "Eiusmod Tempor",
+        "title": "The seven steps",
+        "lead": "Saptapadi. One promise with each step.",
         "items": [
           {
-            "name": "Incididunt Labore",
-            "note": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur adipiscing magni."
+            "name": "One",
+            "note": "To provide for one another."
           },
           {
-            "name": "Voluptate Velit",
-            "note": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+            "name": "Two",
+            "note": "To grow strong together, in body and mind."
           },
           {
-            "name": "Cillum Dolore",
-            "note": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+            "name": "Three",
+            "note": "To prosper, and to share what they have."
           },
           {
-            "name": "Occaecat Cupidatat",
-            "note": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
+            "name": "Four",
+            "note": "To bring happiness and harmony to each other's families."
           },
           {
-            "name": "Proident Sunt",
-            "note": "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+            "name": "Five",
+            "note": "To raise a family with care."
           },
           {
-            "name": "Excepteur Sint",
-            "note": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, consectetur totam rem."
+            "name": "Six",
+            "note": "To stay together through every season."
           },
           {
-            "name": "Reprehenderit Esse",
-            "note": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur adipiscing magni."
+            "name": "Seven",
+            "note": "To remain friends, above all else."
           }
-        ]
+        ],
+        "closing": "With the seventh step, they are married."
       }
     }
   ]

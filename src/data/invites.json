@@ -1,5 +1,6 @@
 {
   "couple": "Anusha & Jaskaran",
+  "venueNote": "Parking is limited — a cab is easier than driving.",
   "functions": {
     "f1": {
       "name": "Cocktails",
@@ -62,11 +63,6 @@
         "address": "",
         "mapsUrl": "",
         "note": "Where everyone is staying is still being sorted out. We'll send you the details on WhatsApp closer to the date."
-      },
-      "travel": {
-        "airport": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
-        "station": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.",
-        "cabNote": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
       }
     },
     "bride": {
@@ -82,11 +78,6 @@
         "address": "",
         "mapsUrl": "",
         "note": "Where everyone is staying is still being sorted out. We'll send you the details on WhatsApp closer to the date."
-      },
-      "travel": {
-        "airport": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
-        "station": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo.",
-        "cabNote": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
       }
     }
   },

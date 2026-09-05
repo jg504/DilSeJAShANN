@@ -22,6 +22,7 @@ export function getStaticPaths() {
       params: { slug: invite.slug },
       props: {
         couple: data.couple,
+        venueNote: data.venueNote,
         functions,
         side: data.sides[invite.side as keyof typeof data.sides],
         accom: invite.accom,
@@ -30,7 +31,7 @@ export function getStaticPaths() {
   });
 }
 
-const { couple, functions, side, accom } = Astro.props;
+const { couple, venueNote, functions, side, accom } = Astro.props;
 
 const fmtFull = (iso: string) =>
   new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', {
@@ -245,16 +246,13 @@ const swatches = (raw: unknown[]): Swatch[] =>
         )
       }
 
+      {/* One practical line, not an airport-and-station guide. Nearly everyone
+          invited is local to Gurgaon or Delhi and does not need telling which
+          airport; what they cannot know is the parking. Shared across both
+          sides deliberately — it describes the venue, not the family. */}
       <section class="fn reveal">
         <h2>Getting here</h2>
-        <dl class="travel">
-          <dt>By air</dt>
-          <dd>{side.travel.airport}</dd>
-          <dt>By train</dt>
-          <dd>{side.travel.station}</dd>
-          <dt>Getting around</dt>
-          <dd>{side.travel.cabNote}</dd>
-        </dl>
+        <p class="lead">{venueNote}</p>
       </section>
 
       <section class="fn reveal">
@@ -734,26 +732,6 @@ const swatches = (raw: unknown[]): Swatch[] =>
     margin: var(--gap-sm) 0 0;
   }
 
-  .travel {
-    margin: 0;
-  }
-  .travel dt {
-    font-family: var(--sans);
-    font-weight: 600;
-    font-size: var(--t-xs);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink);
-    margin-top: var(--gap);
-  }
-  .travel dd {
-    font-family: var(--sans);
-    font-size: var(--t-base);
-    line-height: 1.6;
-    color: var(--body);
-    margin: var(--gap-xs) 0 0;
-  }
-
   .contacts {
     list-style: none;
     margin: var(--gap) 0 0;
@@ -825,7 +803,6 @@ const swatches = (raw: unknown[]): Swatch[] =>
     /* A 62rem panel would otherwise give prose a 43rem line. */
     .fn > .lead,
     .fn > .note,
-    .travel dd,
     .greeting {
       max-width: var(--measure);
     }

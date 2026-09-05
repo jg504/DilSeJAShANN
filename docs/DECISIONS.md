@@ -124,8 +124,33 @@ them.** If something here looks wrong, raise it — do not quietly reverse it.
 - **Validation fails on the word "room" in a hotel block.** CLAUDE.md bans it; rooms are
   shared and paired by phone, and a guest who reads "a room" believes he has one.
 
+## Travel — settled 2026-09-05
+
+- **No air/train/cab guide.** The three-field `sides.*.travel` block is removed. Almost
+  everyone invited is local to Gurgaon or Delhi and does not need telling which airport;
+  the outstation guests are the ones with accommodation, and that block already says
+  details follow on WhatsApp.
+- **Replaced by one top-level `venueNote`** — parking is limited, prefer a cab. **Not
+  per-side.** It describes the venue, which both sides share, and two copies of one
+  sentence is precisely how a detail drifts until one side is told something the other
+  is not.
+
+## Ceremonies — settled 2026-09-05
+
+- **Copy comes from the printed card**, `DilSeJAShANN_ceremony_cards_v2.pdf`, word for
+  word. The cards print first and cannot be recalled, so the site matches them; a
+  correction after printing means re-issuing the card, not quietly diverging here.
+- **The card is titled `Vivaah`**, not `Phere` — that CLAUDE.md open question is closed.
+  `Mangal Phere` is one step inside Vivaah, not the name of the ceremony.
+- **The Anand Karaj runs four Laavan**, confirmed by the artwork. The seven are the
+  Saptapadi, inside Vivaah. The four-versus-seven question was conflating the two.
+- **`meaning` carries a `lead` and a `closing`.** The card sets the Laavan and the seven
+  steps between two lines — "Composed by Guru Ram Das…" and "When the fourth Laav ends,
+  they are married." Dropping them would have been a divergence from the print.
+
 ## Open questions
 
-- **`Phere` or `Vivaah`** — `invites.json` uses `Phere` per the CLAUDE.md template; the
-  `/ceremonies` brief says the printed card may be titled `Vivaah`. Awaiting family
-  confirmation, along with the four-vs-seven pheras question.
+- **The invitation still labels the 2 pm slot `Phere`** while the card calls the ceremony
+  `Vivaah`. The site now says both, in different places. Raised with Jaskaran; see
+  `docs/DEFERRED.md`.
+- **Family-elder confirmation** of both ritual sequences is still outstanding.

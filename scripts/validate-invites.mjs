@@ -79,6 +79,10 @@ if (typeof data.couple !== 'string' || !data.couple.trim()) {
   fail('couple must be a non-empty display string');
 }
 
+if (typeof data.venueNote !== 'string' || !data.venueNote.trim()) {
+  fail('venueNote must be a non-empty string');
+}
+
 const FUNCTION_KEYS = ['name', 'date', 'venue', 'address', 'mapsUrl', 'dressCode', 'dressColors'];
 
 for (const [id, fn] of Object.entries(data.functions ?? {})) {
@@ -106,7 +110,7 @@ for (const [id, fn] of Object.entries(data.functions ?? {})) {
 }
 
 for (const [name, side] of Object.entries(data.sides ?? {})) {
-  require(side, ['greeting', 'contacts', 'hotel', 'travel'], `sides.${name}`);
+  require(side, ['greeting', 'contacts', 'hotel'], `sides.${name}`);
   require(side.hotel, ['name', 'address', 'mapsUrl', 'note'], `sides.${name}.hotel`);
   // The venue half of the block renders only when there is a pin to point at.
   // With no pin, the note is the entire block, so an empty note would ship a
@@ -120,7 +124,6 @@ for (const [name, side] of Object.entries(data.sides ?? {})) {
   if (/\brooms?\b/i.test(JSON.stringify(side.hotel))) {
     fail(`sides.${name}.hotel uses the word "room" — allocation is by phone, never promised on the site`);
   }
-  require(side.travel, ['airport', 'station', 'cabNote'], `sides.${name}.travel`);
   if (!Array.isArray(side.contacts) || side.contacts.length === 0) {
     fail(`sides.${name}.contacts must have at least one contact`);
   } else {

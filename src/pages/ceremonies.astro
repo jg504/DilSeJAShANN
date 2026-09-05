@@ -70,6 +70,11 @@ const { intro, ceremonies } = data;
 
           <section class="block">
             <h3>{c.meaning.title}</h3>
+            {/* The card sets this block between a lead and a closing line —
+                "Composed by Guru Ram Das…" and "When the fourth Laav ends, they
+                are married." The cards print first and cannot be recalled, so
+                the site carries the same words. */}
+            {c.meaning.lead && <p class="meaning-lead">{c.meaning.lead}</p>}
             <ol class="steps meaning">
               {c.meaning.items.map((s) => (
                 <li class="step">
@@ -78,6 +83,7 @@ const { intro, ceremonies } = data;
                 </li>
               ))}
             </ol>
+            {c.meaning.closing && <p class="meaning-closing">{c.meaning.closing}</p>}
           </section>
         </article>
       ))
@@ -246,6 +252,22 @@ const { intro, ceremonies } = data;
     }
   }
 
+  .meaning-lead {
+    font-family: var(--sans);
+    font-size: var(--t-sm);
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--body);
+    opacity: 0.85;
+    margin: 0 0 var(--gap);
+  }
+  .meaning-closing {
+    font-family: var(--display);
+    font-size: var(--t-base);
+    font-style: italic;
+    color: var(--ink);
+    margin: var(--gap) 0 0;
+  }
   .steps {
     list-style: none;
     counter-reset: step;
