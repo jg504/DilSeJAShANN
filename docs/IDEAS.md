@@ -101,6 +101,21 @@ and the gain is small.
 confirmation summary now delivers most of the value without a lookup, an edit
 token, or a second write path.
 
+### `REJECTED` Ornament pass — rosette, divider, sparkles, damask
+Built 2026-09-05 and reverted the same hour. Jaskaran: *"Horrible."*
+
+The ornaments were taken from the printed cards rather than invented — a gold
+rosette above section headings, the card's oval-diamond divider, sparkles at the
+arch's shoulders, and the damask as a fading band in the desktop margins. The
+reasoning was continuity with the card. It did not work on screen.
+
+Do not re-attempt this as-is. If the page needs more, the untried lever is the
+hero-only rule on the arch, recorded in DECISIONS.md — the signature element
+appears once and is never reprised, which is a different problem from a shortage
+of decoration.
+
+Reverted in full: `git revert 7f928d0`.
+
 ### `REJECTED` OTP to a phone number before showing the invitation
 Raised 2026-09-05. Technically possible — the site is already a Cloudflare Worker,
 so a Worker route plus KV could issue and verify codes. Rejected on cost, not
