@@ -137,6 +137,9 @@ const ogImage = new URL(OG_IMAGE, Astro.site).href;
       border-radius: var(--radius);
       margin-top: var(--gap-xl);
       margin-bottom: var(--gap-xl);
+      /* Full-bleed bands inside run to the card's edges, so they have to be
+         clipped to its corners or they square them off. */
+      overflow: hidden;
     }
   }
 

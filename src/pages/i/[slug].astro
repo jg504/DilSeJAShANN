@@ -96,11 +96,11 @@ const swatches = (raw: unknown[]): Swatch[] =>
     {/* Pinned above everything during the wedding days. Hidden otherwise. */}
     <LiveBanner functions={functions} contact={side.contacts[0]} />
 
-    <header class="hero" id="hero">
+    <header class="hero dark" id="hero">
       <p class="wordmark">#DilSeJAShANN</p>
 
       <div class="hero-arch">
-        <Arch />
+        <Arch filled />
         <div class="hero-inner">
           {/* Mirrors page 1 of the printed cards: the mark inside the arch,
               above the names. eager because it sits above the fold. */}
@@ -115,15 +115,20 @@ const swatches = (raw: unknown[]): Swatch[] =>
         </div>
       </div>
 
-      <p class="greeting">{side.greeting}</p>
-
-      <a class="cta" href="rsvp">RSVP</a>
     </header>
+
+    {/* Cream, deliberately. The maroon hero states who and when; this is where
+        the guest is asked to do the one thing the site exists for, and the
+        change of ground is what marks it as a different kind of moment. */}
+    <section class="intro">
+      <p class="greeting">{side.greeting}</p>
+      <a class="cta" href="rsvp">RSVP</a>
+    </section>
 
     <main>
       {
         functions.map((f) => (
-          <section class="fn reveal">
+          <section class="fn dark reveal">
             <h2>{f.name}</h2>
             <p class="fn-date">{fmtFull(f.date)}</p>
 
@@ -470,10 +475,100 @@ const swatches = (raw: unknown[]): Swatch[] =>
     padding: 0 var(--gap) var(--gap-xl);
   }
 
+  /* ---------- dark bands ----------
+     The red carries the page instead of appearing as 1px rules. Cream on maroon
+     is 7.36:1 (docs/DECISIONS.md), so this is a contrast improvement, not a
+     compromise — but gold stays decorative here as everywhere else, because
+     gold on maroon does not clear AA.
+
+     Full width of the panel, not the viewport: on desktop the page sits inside
+     a bordered card and a 100vw band would break straight out of it. */
+  .dark {
+    background: var(--ink);
+    color: var(--panel);
+    margin-inline: calc(var(--gap) * -1);
+    padding-inline: var(--gap);
+  }
+  /* The change of ground is the separator. A gold hairline on top of it is one
+     device too many. */
+  .fn.dark {
+    border-top: 0;
+    padding-top: var(--gap-lg);
+    padding-bottom: var(--gap-lg);
+    margin-top: 0;
+  }
+  /* Consecutive functions need separating from each other, or the three days
+     read as one undifferentiated red block. A cream hairline rather than the
+     gold one — gold on maroon is close to invisible at 1px. */
+  .fn.dark + .fn.dark {
+    border-top: 1px solid rgba(255, 243, 231, 0.28);
+  }
+  /* The first and last of the run carry the band's own breathing room. */
+  .fn.dark:first-of-type {
+    padding-top: var(--gap-xl);
+  }
+  .fn.dark:last-of-type {
+    padding-bottom: var(--gap-xl);
+  }
+  .dark h2,
+  .dark .fn-date,
+  .dark .time,
+  .dark .venue-name,
+  .dark .address,
+  .dark .note,
+  .dark .lead,
+  .dark .ceremony,
+  .dark .ceremony-venue,
+  .dark .dress-code,
+  .dark .dress-note,
+  .dark .contact-name {
+    color: var(--panel);
+  }
+  /* 0.7 of cream over maroon lands near 3:1 — under AA for a date line this
+     size. Raised until it clears. */
+  .dark .fn-date,
+  .dark .ceremony-venue,
+  .dark .dress-note {
+    opacity: 0.88;
+  }
+  .dark .dress-label {
+    color: var(--panel);
+  }
+  /* Buttons invert. A maroon fill on maroon is invisible, and a gold outline
+     with maroon text is barely better. */
+  .dark .btn {
+    background: var(--panel);
+    color: var(--ink);
+  }
+  .dark .btn.quiet {
+    background: transparent;
+    color: var(--panel);
+    border-color: var(--panel);
+  }
+  .dark .ceremony-map {
+    color: var(--panel);
+  }
+  .dark .times li {
+    border-bottom-color: rgba(255, 243, 231, 0.35);
+  }
+
+  /* ---------- intro ---------- */
+  .intro {
+    text-align: center;
+    padding: var(--gap-lg) 0;
+  }
+  .intro .greeting {
+    margin: 0 auto var(--gap);
+  }
+
   /* ---------- hero ---------- */
   .hero {
     text-align: center;
     padding-top: var(--gap-lg);
+    padding-bottom: var(--gap-xl);
+  }
+  .hero .wordmark {
+    color: var(--panel);
   }
   .wordmark {
     font-family: var(--display);
@@ -831,6 +926,16 @@ const swatches = (raw: unknown[]): Swatch[] =>
      The frame itself — --bg behind a --panel card — lives in Base.astro,
      because the story and ceremonies pages need the same surround. */
   @media (min-width: 60rem) {
+    .dark {
+      margin-inline: calc(var(--gap-xl) * -1);
+      padding-inline: var(--gap-xl);
+    }
+    /* The panel's own top padding showed as a cream strip above the hero band.
+       The hero starts flush with the card instead. */
+    .hero.dark {
+      margin-top: calc(var(--gap-xl) * -1);
+      padding-top: var(--gap-xl);
+    }
     .page {
       /* Wider than --measure so the label column below has somewhere to live.
          Prose inside is capped separately; nothing here sets a long line. */

@@ -11,8 +11,14 @@
 // explicitly asks for the arch to stroke itself in.
 interface Props {
   class?: string;
+  /**
+   * Fill the arch with --panel. On a maroon ground the monogram's maroon "A"
+   * would disappear and the names would fight the background, so the hero puts
+   * a light field inside the arch and keeps its contents as they were.
+   */
+  filled?: boolean;
 }
-const { class: className } = Astro.props;
+const { class: className, filled = false } = Astro.props;
 ---
 
 <svg
@@ -22,6 +28,8 @@ const { class: className } = Astro.props;
   aria-hidden="true"
   focusable="false"
 >
+  {/* Behind the strokes, so the gold outline still reads as the outline. */}
+  {filled && <path d="M6 346 L6 186 A174 174 0 0 1 354 186 L354 346 Z" fill="var(--panel)" />}
   <path
     class="arch-outer"
     d="M6 346 L6 186 A174 174 0 0 1 354 186 L354 346"
